@@ -1,0 +1,270 @@
+/* ==========================================================================
+   INTERACTIVE ALGERIA SVG MAP — CRISP & MATHEMATICALLY SOUND
+   Strictly Light Theme · Non-Scaling 1.5px Borders · Saudi-Gov Green Hover
+   ========================================================================== */
+
+.map-card-wrapper {
+  position: relative;
+  width: 100%;
+  height: 640px;
+  min-height: 640px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: box-shadow var(--transition-fast);
+}
+
+.map-card-wrapper:hover {
+  box-shadow: var(--shadow-xl);
+}
+
+/* ── SVG ROOT CANVAS ── */
+.map-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  user-select: none;
+  touch-action: none;
+  cursor: grab;
+  outline: none;
+  background: transparent;
+}
+
+.map-svg.is-dragging {
+  cursor: grabbing !important;
+}
+
+/* ── MAP ROOT TRANSFORM GROUP ── */
+#map-group {
+  transform-origin: 0 0;
+  will-change: transform;
+}
+
+/* Animation class enabled ONLY during click-to-center / reset */
+#map-group.animating {
+  transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── WILAYA SVG PATHS (CRISP 1.5px BORDERS) ── */
+.wilaya-group {
+  cursor: pointer;
+  outline: none;
+}
+
+.wilaya-path {
+  fill: #F4F5F7;
+  stroke: #d1d5db;
+  stroke-width: 1.5px;
+  vector-effect: non-scaling-stroke;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  transition: fill 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+              stroke 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.3s ease;
+}
+
+.wilaya-group:hover .wilaya-path {
+  fill: var(--color-accent) !important; /* #00875A */
+  stroke: var(--color-accent) !important;
+  stroke-width: 2px;
+}
+
+.wilaya-group.active .wilaya-path,
+.wilaya-path.active {
+  fill: var(--color-accent) !important;
+  stroke: #FFFFFF !important;
+  stroke-width: 2.5px;
+}
+
+.wilaya-path.faded {
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+/* ── DYNAMIC TYPOGRAPHY LABELS ── */
+.wilaya-label {
+  fill: #4b5563;
+  font-family: var(--font-primary);
+  font-weight: 700;
+  pointer-events: none;
+  text-anchor: middle;
+  dominant-baseline: central;
+  user-select: none;
+  opacity: 0;
+  transition: opacity 0.22s ease, fill 0.18s ease;
+}
+
+.wilaya-group:hover .wilaya-label {
+  fill: #FFFFFF !important;
+  font-weight: 800;
+  opacity: 1 !important;
+}
+
+.wilaya-label.visible {
+  opacity: 0.92;
+}
+
+.wilaya-label.faded {
+  opacity: 0 !important;
+}
+
+/* ── FAST-FOLLOWING CURSOR TOOLTIP ── */
+.map-tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(0, 0, 0, 0.09);
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+  opacity: 0;
+  transform: translate(-50%, -130%) scale(0.94);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  z-index: 50;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.map-tooltip.visible {
+  opacity: 1;
+  transform: translate(-50%, -130%) scale(1);
+}
+
+.map-tooltip-badge {
+  background: var(--color-accent-light);
+  color: var(--color-accent);
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+}
+
+.map-tooltip-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--color-text);
+  font-family: var(--font-primary);
+}
+
+.map-tooltip-sub {
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+/* ── FLOATING LUXURY MAP CONTROLS ── */
+.map-controls {
+  position: absolute;
+  bottom: 24px;
+  inset-inline-end: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 40;
+}
+
+.map-ctrl-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text);
+  transition: all var(--transition-fast);
+}
+
+.map-ctrl-btn:hover {
+  background: var(--color-accent-light);
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  transform: scale(1.08);
+  box-shadow: var(--shadow-lg);
+}
+
+.map-ctrl-btn:active {
+  transform: scale(0.96);
+}
+
+/* ── MAP STATUS HINT ── */
+.map-nav-hint {
+  position: absolute;
+  top: 20px;
+  inset-inline-start: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: 6px 16px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  pointer-events: none;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.map-nav-hint-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+
+/* ── FADE OVERLAY DURING TRANSITION ── */
+.map-fade-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(250, 250, 250, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 350ms ease;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.map-fade-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (max-width: 768px) {
+  .map-card-wrapper {
+    height: 480px;
+    min-height: 480px;
+  }
+
+  .map-controls {
+    bottom: 16px;
+    inset-inline-end: 16px;
+  }
+
+  .map-ctrl-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  .map-nav-hint {
+    display: none;
+  }
+}
