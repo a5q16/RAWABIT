@@ -1,0 +1,116 @@
+/* ==========================================================================
+   MAP
+   ========================================================================== */
+
+.map-container {
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  transition: box-shadow var(--transition-fast);
+}
+
+.map-container:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.map-body {
+  padding: var(--space-lg);
+  position: relative;
+}
+
+.map-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.wilaya-path {
+  fill: transparent;
+  stroke: var(--color-border);
+  stroke-width: 0.03;
+  stroke-linejoin: round;
+  cursor: pointer;
+  transition: fill 0.25s ease, stroke 0.25s ease, filter 0.25s ease;
+}
+
+.wilaya-path:hover {
+  fill: var(--color-accent-light);
+  stroke: var(--color-accent);
+  filter: drop-shadow(0 0 8px var(--color-accent-glow));
+}
+
+.wilaya-path.active {
+  fill: var(--color-accent);
+  stroke: white;
+  stroke-width: 0.05;
+}
+
+.wilaya-path.faded {
+  opacity: 0.08;
+  pointer-events: none;
+  transition: opacity var(--transition-smooth);
+}
+
+.wilaya-label {
+  fill: var(--color-text);
+  font-family: var(--font-primary);
+  font-weight: 500;
+  pointer-events: none;
+  text-anchor: middle;
+  dominant-baseline: central;
+  opacity: 0.7;
+  transition: opacity 0.25s ease, fill 0.25s ease;
+}
+
+.wilaya-group:hover .wilaya-label {
+  fill: var(--color-accent);
+  opacity: 1;
+  font-weight: 700;
+}
+
+.wilaya-label.faded {
+  opacity: 0;
+}
+
+.map-svg.zooming {
+  transition: transform var(--transition-luxe);
+}
+
+.map-tooltip {
+  position: absolute;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  transform: translateY(8px);
+  z-index: 10;
+}
+
+.map-tooltip.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.map-tooltip-name {
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: var(--color-text);
+}
+
+.map-tooltip-name-ar {
+  font-weight: 500;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+}
+
+.map-tooltip-count {
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: var(--color-accent);
+  margin-top: var(--space-xs);
+}

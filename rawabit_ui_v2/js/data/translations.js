@@ -1,0 +1,68 @@
+/**
+ * Translations data for English, French, and Arabic
+ */
+export const TRANSLATIONS = {
+    en: {
+        'nav.home': 'Home',
+        'nav.about': 'About Rawabit',
+        'nav.why': 'Why Rawabit?',
+        'hero.badge': "Algeria's Digital Competencies Platform",
+        'hero.title': 'Discover Algerian Talents',
+        'hero.subtitle': 'Discover, explore, and connect with verified Algerian professionals across every wilaya and discipline.',
+        'map.title': 'Explore by Wilaya',
+        'map.subtitle': 'Click a wilaya to discover its talents',
+        'map.badge': '58 Wilayas',
+        'lang.title': 'Choose Your Language',
+        'lang.subtitle': 'Select your preferred language',
+        'lang.en.name': 'English',
+        'lang.en.sample': "Discover Algeria's brightest minds and connect with verified professionals across every discipline.",
+        'lang.fr.name': 'Français',
+        'lang.fr.sample': "Découvrez les esprits les plus brillants d'Algérie et connectez-vous avec des professionnels vérifiés.",
+        'lang.ar.name': 'العربية',
+        'lang.ar.sample': 'اكتشف ألمع العقول الجزائرية وتواصل مع الكفاءات الموثّقة عبر كل التخصصات.',
+        'footer.copy': "© 2025 Rawabit — Algeria's Digital Competencies Platform",
+        'loader.brand': 'روابط'
+    },
+    fr: {
+        'nav.home': 'Accueil',
+        'nav.about': 'À propos de Rawabit',
+        'nav.why': 'Pourquoi Rawabit ?',
+        'hero.badge': 'Plateforme des Compétences Algériennes',
+        'hero.title': 'Découvrez les talents algériens',
+        'hero.subtitle': 'Découvrez, explorez et connectez-vous avec des professionnels algériens vérifiés à travers chaque wilaya et discipline.',
+        'map.title': 'Explorer par Wilaya',
+        'map.subtitle': 'Cliquez sur une wilaya pour découvrir ses talents',
+        'map.badge': '58 Wilayas',
+        'lang.title': 'Choisissez votre langue',
+        'lang.subtitle': 'Sélectionnez votre langue préférée',
+        'lang.en.name': 'English',
+        'lang.en.sample': "Discover Algeria's brightest minds and connect with verified professionals across every discipline.",
+        'lang.fr.name': 'Français',
+        'lang.fr.sample': "Découvrez les esprits les plus brillants d'Algérie et connectez-vous avec des professionnels vérifiés.",
+        'lang.ar.name': 'العربية',
+        'lang.ar.sample': 'اكتشف ألمع العقول الجزائرية وتواصل مع الكفاءات الموثّقة عبر كل التخصصات.',
+        'footer.copy': '© 2025 Rawabit — Plateforme des Compétences Algériennes',
+        'loader.brand': 'روابط'
+    },
+    ar: {
+        'nav.home': 'الرئيسية',
+        'nav.about': 'عن روابط',
+        'nav.why': 'لماذا روابط؟',
+        'hero.badge': 'المنصة الرقمية للكفاءات الجزائرية',
+        'hero.title': 'اكتشف الكفاءات الجزائرية',
+        'hero.subtitle': 'اكتشف واستكشف وتواصل مع الكفاءات الجزائرية الموثّقة عبر كل الولايات والتخصصات.',
+        'map.title': 'استكشف حسب الولاية',
+        'map.subtitle': 'انقر على ولاية لاكتشاف كفاءاتها',
+        'map.badge': '58 ولاية',
+        'lang.title': 'اختر لغتك',
+        'lang.subtitle': 'اختر لغتك المفضلة',
+        'lang.en.name': 'English',
+        'lang.en.sample': "Discover Algeria's brightest minds and connect with verified professionals across every discipline.",
+        'lang.fr.name': 'Français',
+        'lang.fr.sample': "Découvrez les esprits les plus brillants d'Algérie et connectez-vous avec des professionnels vérifiés.",
+        'lang.ar.name': 'العربية',
+        'lang.ar.sample': 'اكتشف ألمع العقول الجزائرية وتواصل مع الكفاءات الموثّقة عبر كل التخصصات.',
+        'footer.copy': '© 2025 روابط — المنصة الرقمية للكفاءات الجزائرية',
+        'loader.brand': 'روابط'
+    }
+};

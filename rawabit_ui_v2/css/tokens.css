@@ -1,0 +1,48 @@
+/* ==========================================================================
+   TOKENS
+   ========================================================================== */
+
+:root {
+  /* Colors */
+  --color-bg: #FAFAFA;
+  --color-surface: #FFFFFF;
+  --color-text: #1A1B2F;
+  --color-text-secondary: #6B7280;
+  --color-accent: #00875A;
+  --color-accent-light: #E6F4ED;
+  --color-accent-hover: #006B47;
+  --color-accent-glow: rgba(0, 135, 90, 0.12);
+  --color-border: #E5E7EB;
+
+  /* Typography */
+  --font-primary: 'Tajawal', sans-serif;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 12px 48px rgba(0, 0, 0, 0.08);
+  --shadow-xl: 0 24px 80px rgba(0, 0, 0, 0.10);
+
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+
+  /* Transitions */
+  --transition-fast: 160ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-luxe: 600ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 48px;
+  --space-2xl: 80px;
+  --space-3xl: 120px;
+
+  /* Layout */
+  --nav-height: 72px;
+}
