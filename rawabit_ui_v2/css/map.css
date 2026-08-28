@@ -1,6 +1,6 @@
 /* ==========================================================================
-   INTERACTIVE ALGERIA SVG MAP — CRISP & MATHEMATICALLY SOUND
-   Strictly Light Theme · Non-Scaling 1.5px Borders · Saudi-Gov Green Hover
+   HIGH-PERFORMANCE ALGERIA SVG MAP — 60FPS GPU ACCELERATED
+   Strictly Light Theme · Zero Lag · Tethered Tooltip · Saudi-Gov-Tech
    ========================================================================== */
 
 .map-card-wrapper {
@@ -39,18 +39,19 @@
   cursor: grabbing !important;
 }
 
-/* ── MAP ROOT TRANSFORM GROUP ── */
+/* ── MAP ROOT TRANSFORM GROUP (GPU ACCELERATED) ── */
 #map-group {
   transform-origin: 0 0;
   will-change: transform;
+  /* ZERO CSS transition by default for 60fps pan/zoom */
 }
 
-/* Animation class enabled ONLY during click-to-center / reset */
-#map-group.animating {
-  transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+/* Added ONLY during click-to-center / programmatic zoom */
+#map-group.smooth-zoom {
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-/* ── WILAYA SVG PATHS (CRISP 1.5px BORDERS) ── */
+/* ── WILAYA SVG PATHS (CRISP BORDERS & CLEAN EMPTY LOOK) ── */
 .wilaya-group {
   cursor: pointer;
   outline: none;
@@ -63,9 +64,7 @@
   vector-effect: non-scaling-stroke;
   stroke-linejoin: round;
   stroke-linecap: round;
-  transition: fill 0.18s cubic-bezier(0.4, 0, 0.2, 1),
-              stroke 0.18s cubic-bezier(0.4, 0, 0.2, 1),
-              opacity 0.3s ease;
+  transition: fill 0.16s ease, stroke 0.16s ease, opacity 0.3s ease;
 }
 
 .wilaya-group:hover .wilaya-path {
@@ -86,79 +85,71 @@
   pointer-events: none;
 }
 
-/* ── DYNAMIC TYPOGRAPHY LABELS ── */
-.wilaya-label {
-  fill: #4b5563;
-  font-family: var(--font-primary);
-  font-weight: 700;
-  pointer-events: none;
-  text-anchor: middle;
-  dominant-baseline: central;
-  user-select: none;
-  opacity: 0;
-  transition: opacity 0.22s ease, fill 0.18s ease;
+/* ── 2-SECOND FLASHING BORDER ON CLICK (.is-selected-flash) ── */
+@keyframes pulseSelectedBorder {
+  0% {
+    stroke: #00875A;
+    stroke-width: 2px;
+    fill: rgba(0, 135, 90, 0.12);
+    filter: drop-shadow(0 0 4px rgba(0, 135, 90, 0.3));
+  }
+  100% {
+    stroke: #34d399;
+    stroke-width: 4px;
+    fill: rgba(0, 135, 90, 0.24);
+    filter: drop-shadow(0 0 10px rgba(0, 135, 90, 0.65));
+  }
 }
 
-.wilaya-group:hover .wilaya-label {
-  fill: #FFFFFF !important;
-  font-weight: 800;
-  opacity: 1 !important;
+.is-selected-flash {
+  animation: pulseSelectedBorder 0.8s ease-in-out infinite alternate !important;
 }
 
-.wilaya-label.visible {
-  opacity: 0.92;
-}
-
-.wilaya-label.faded {
-  opacity: 0 !important;
-}
-
-/* ── FAST-FOLLOWING CURSOR TOOLTIP ── */
-.map-tooltip {
+/* ── TETHERED SMART TOOLTIP LAYER & CARD (SOLID WHITE LINE & WHITE DOT) ── */
+#tether-layer {
   position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
   pointer-events: none;
-  background: rgba(255, 255, 255, 0.97);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(0, 0, 0, 0.09);
-  border-radius: var(--radius-md);
-  padding: 8px 14px;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.08);
+  overflow: visible;
   opacity: 0;
-  transform: translate(-50%, -130%) scale(0.94);
-  transition: opacity 0.12s ease, transform 0.12s ease;
-  z-index: 50;
+  transition: opacity 0.2s ease;
+}
+
+#tether-line {
+  stroke: #FFFFFF;
+  stroke-width: 2;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4));
+}
+
+#tether-dot {
+  fill: #FFFFFF;
+  stroke: #00875A;
+  stroke-width: 1.5;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4));
+}
+
+#wilaya-tooltip {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 10000;
+  background: #FFFFFF;
+  padding: 10px 20px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  font-weight: bold;
+  font-family: var(--font-primary), 'Tajawal', sans-serif;
+  color: #111111;
+  border: 1px solid rgba(0, 135, 90, 0.2);
+  transition: opacity 0.2s ease;
   white-space: nowrap;
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.map-tooltip.visible {
-  opacity: 1;
-  transform: translate(-50%, -130%) scale(1);
-}
-
-.map-tooltip-badge {
-  background: var(--color-accent-light);
-  color: var(--color-accent);
-  font-size: 0.75rem;
-  font-weight: 800;
-  padding: 3px 8px;
-  border-radius: var(--radius-full);
-}
-
-.map-tooltip-title {
-  font-size: 0.95rem;
-  font-weight: 800;
-  color: var(--color-text);
-  font-family: var(--font-primary);
-}
-
-.map-tooltip-sub {
-  font-size: 0.82rem;
-  color: var(--color-text-secondary);
-  font-weight: 600;
 }
 
 /* ── FLOATING LUXURY MAP CONTROLS ── */
@@ -204,7 +195,7 @@
   position: absolute;
   top: 20px;
   inset-inline-start: 20px;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid var(--color-border);

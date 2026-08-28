@@ -1,7 +1,7 @@
 /**
- * Rawabit v2 — Interactive Algeria SVG Map
- * Mathematically Sound Pan/Zoom Engine · Smart Typography Fitting · Click-to-Center
- * Strictly Vanilla JS · Zero External Dependencies
+ * Rawabit v2 — High-Performance 60FPS Interactive Algeria SVG Map
+ * Tethered Smart Tooltip (Solid White Line + White Dot + Card)
+ * 2-Second Cinematic Flash Zoom · Strictly Vanilla JS
  */
 
 import { MAP_VIEWBOX, WILAYAS } from './map-paths.js';
@@ -33,26 +33,31 @@ export function renderMap(container) {
   svg.setAttribute('role', 'region');
   svg.setAttribute('aria-label', t('map.title'));
 
-  // ── 2. Create the Root Transform Group ──
+  // ── 2. Create the Root Transform Group (GPU Accelerated) ──
   const mapGroup = document.createElementNS(SVG_NS, 'g');
   mapGroup.setAttribute('id', 'map-group');
   svg.appendChild(mapGroup);
 
-  // ── 3. Create Tooltip Element ──
-  const tooltip = document.createElement('div');
-  tooltip.className = 'map-tooltip';
-  tooltip.innerHTML = `
-    <span class="map-tooltip-badge" id="tooltip-code">16</span>
-    <span class="map-tooltip-title" id="tooltip-title">Alger</span>
-    <span class="map-tooltip-sub" id="tooltip-sub">الجزائر</span>
+  // ── 3. Dynamic Solid White Tether Line SVG Layer (z-index: 9999, overflow: visible) ──
+  const tetherLayer = document.createElementNS(SVG_NS, 'svg');
+  tetherLayer.setAttribute('id', 'tether-layer');
+  tetherLayer.setAttribute('style', 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; overflow: visible; opacity: 0; transition: opacity 0.2s ease;');
+  tetherLayer.innerHTML = `
+    <line id="tether-line" stroke="#FFFFFF" stroke-width="2"/>
+    <circle id="tether-dot" r="5" fill="#FFFFFF" stroke="#00875A" stroke-width="1.5"/>
   `;
-  container.appendChild(tooltip);
+  container.appendChild(tetherLayer);
 
-  const tooltipCode = tooltip.querySelector('#tooltip-code');
-  const tooltipTitle = tooltip.querySelector('#tooltip-title');
-  const tooltipSub = tooltip.querySelector('#tooltip-sub');
+  const tetherLine = tetherLayer.querySelector('#tether-line');
+  const tetherDot = tetherLayer.querySelector('#tether-dot');
 
-  // ── 4. Create Floating Controls ──
+  // ── 4. Floating Wilaya Tooltip Card ──
+  const wilayaTooltip = document.createElement('div');
+  wilayaTooltip.setAttribute('id', 'wilaya-tooltip');
+  wilayaTooltip.setAttribute('style', 'position: absolute; opacity: 0; pointer-events: none; z-index: 10000; background: #fff; padding: 10px 20px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); font-weight: bold; font-family: "Tajawal", sans-serif; color: #111; border: 1px solid rgba(0,135,90,0.2); transition: opacity 0.2s ease; white-space: nowrap;');
+  container.appendChild(wilayaTooltip);
+
+  // ── 5. Create Floating Controls ──
   const controls = document.createElement('div');
   controls.className = 'map-controls';
   controls.innerHTML = `
@@ -76,7 +81,7 @@ export function renderMap(container) {
   `;
   container.appendChild(controls);
 
-  // ── 5. Status / Nav Hint Badge ──
+  // ── 6. Status / Nav Hint Badge ──
   const navHint = document.createElement('div');
   navHint.className = 'map-nav-hint';
   navHint.innerHTML = `
@@ -85,7 +90,7 @@ export function renderMap(container) {
   `;
   container.appendChild(navHint);
 
-  // ── 6. Fade-out Overlay for Route Transition ──
+  // ── 7. Fade Overlay for Route Transition ──
   const fadeOverlay = document.createElement('div');
   fadeOverlay.className = 'map-fade-overlay';
   fadeOverlay.innerHTML = `
@@ -97,87 +102,103 @@ export function renderMap(container) {
   `;
   container.appendChild(fadeOverlay);
 
-  // ── 7. Render All Wilaya Paths & Labels ──
-  const wilayaItems = [];
+  // ── 8. State variables for interactions ──
+  const wilayaPaths = [];
+  let isTransitioning = false;
+  let isHoveringState = false;
 
+  // ── 9. Tooltip Coordinate Calculation (Continuous connection & 60 FPS RAF) ──
+  function updateTooltipCoords(clientX, clientY) {
+    if (!isHoveringState || isTransitioning) return;
+    const rect = container.getBoundingClientRect();
+    const mouseX = clientX - rect.left;
+    const mouseY = clientY - rect.top;
+
+    const tipWidth = wilayaTooltip.offsetWidth || 140;
+    const tipHeight = wilayaTooltip.offsetHeight || 44;
+
+    let posX = mouseX + 40;
+    let posY = mouseY - 60;
+
+    // Flip horizontally if near right boundary
+    if (posX + tipWidth > rect.width - 15) {
+      posX = mouseX - tipWidth - 40;
+    }
+
+    // Flip vertically if near top boundary
+    if (posY < 15) {
+      posY = mouseY + 30;
+    }
+
+    // Position tooltip
+    wilayaTooltip.style.left = `${posX}px`;
+    wilayaTooltip.style.top = `${posY}px`;
+
+    // Update white dot at exact cursor tip
+    tetherDot.setAttribute('cx', mouseX);
+    tetherDot.setAttribute('cy', mouseY);
+
+    // Update solid white tether line from cursor tip to closest card edge
+    const anchorX = (posX < mouseX) ? posX + tipWidth : posX;
+    const anchorY = posY + tipHeight / 2;
+    tetherLine.setAttribute('x1', mouseX);
+    tetherLine.setAttribute('y1', mouseY);
+    tetherLine.setAttribute('x2', anchorX);
+    tetherLine.setAttribute('y2', anchorY);
+  }
+
+  // ── 10. Render All Wilaya Paths (Zero Static Text) ──
   WILAYAS.forEach(wilaya => {
     const g = document.createElementNS(SVG_NS, 'g');
     g.classList.add('wilaya-group');
     g.dataset.code = wilaya.code;
     g.dataset.name = wilaya.name;
 
-    // Wilaya boundary path with non-scaling stroke
     const path = document.createElementNS(SVG_NS, 'path');
     path.setAttribute('d', wilaya.d);
     path.setAttribute('vector-effect', 'non-scaling-stroke');
     path.classList.add('wilaya-path');
     g.appendChild(path);
 
-    // Wilaya center text label
-    const label = document.createElementNS(SVG_NS, 'text');
-    label.setAttribute('x', wilaya.cx);
-    label.setAttribute('y', wilaya.cy);
-    label.setAttribute('font-size', wilaya.labelSize);
-    label.classList.add('wilaya-label');
-
-    const currentLang = store.state.lang;
-    label.textContent = (currentLang === 'ar' && wilaya.nameAr) ? wilaya.nameAr : wilaya.name;
-
-    g.appendChild(label);
     mapGroup.appendChild(g);
+    wilayaPaths.push({ g, path, wilaya });
 
-    wilayaItems.push({ g, path, label, wilaya, bbox: null, textWidth: null });
-
-    // ── Hover Micro-interactions ──
-    g.addEventListener('mouseenter', () => {
+    // Hover: display Wilaya name and show solid white tether line with white dot
+    path.addEventListener('mouseenter', (e) => {
+      if (isTransitioning) return;
       const isArabic = store.state.lang === 'ar';
-      tooltipCode.textContent = wilaya.code;
-      tooltipTitle.textContent = isArabic ? wilaya.nameAr : wilaya.name;
-      tooltipSub.textContent = isArabic ? wilaya.name : wilaya.nameAr;
-      tooltip.classList.add('visible');
-      label.style.opacity = '1';
+      const displayName = isArabic ? (wilaya.nameAr || wilaya.name) : wilaya.name;
+      wilayaTooltip.innerHTML = `<span style="color:#00875A; font-weight:800; margin-inline-end:8px;">${wilaya.code}</span><span>${displayName}</span>`;
+      wilayaTooltip.style.opacity = '1';
+      tetherLayer.style.opacity = '1';
+      isHoveringState = true;
+      updateTooltipCoords(e.clientX, e.clientY);
     });
 
-    g.addEventListener('mousemove', (e) => {
-      const rect = container.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      tooltip.style.left = `${x}px`;
-      tooltip.style.top = `${y}px`;
+    path.addEventListener('mouseleave', () => {
+      isHoveringState = false;
+      wilayaTooltip.style.opacity = '0';
+      tetherLayer.style.opacity = '0';
     });
 
-    g.addEventListener('mouseleave', () => {
-      tooltip.classList.remove('visible');
-      updateSingleLabelVisibility(wilayaItems.find(item => item.wilaya.code === wilaya.code));
-    });
-
-    // ── Click to Zoom & Transition ──
-    g.addEventListener('click', (e) => {
-      if (dragDistance > 6) return;
-      zoomToWilayaAndTransition(wilaya, path);
+    // Click handler for 2-Second Cinematic Flash Zoom
+    path.addEventListener('click', () => {
+      if (dragDistance > 6 || isTransitioning) return;
+      handleStateClick(wilaya, path);
     });
   });
 
   container.appendChild(svg);
 
-  // ══════════════════════════════════════════════════════════════
-  // MATHEMATICAL COORDINATE TRANSFORM HELPERS
-  // ══════════════════════════════════════════════════════════════
-
-  /**
-   * Convert Screen Client (X, Y) to exact Root SVG Coordinate Space
-   */
-  function screenToSvgCoords(clientX, clientY) {
-    const pt = svg.createSVGPoint();
-    pt.x = clientX;
-    pt.y = clientY;
-    const ctm = svg.getScreenCTM();
-    if (!ctm) return { x: vbCenterX, y: vbCenterY };
-    return pt.matrixTransform(ctm.inverse());
-  }
+  // Global mousemove tracker on container for 60FPS RAF updating
+  container.addEventListener('mousemove', (e) => {
+    if (isHoveringState && !isTransitioning) {
+      requestAnimationFrame(() => updateTooltipCoords(e.clientX, e.clientY));
+    }
+  });
 
   // ══════════════════════════════════════════════════════════════
-  // STATE MANAGEMENT FOR PAN & ZOOM
+  // MATHEMATICALLY SOUND PAN & ZOOM (GPU translate3d)
   // ══════════════════════════════════════════════════════════════
   let scale = 1.0;
   let translateX = 0;
@@ -190,57 +211,15 @@ export function renderMap(container) {
   let lastScreenY = 0;
   let dragDistance = 0;
 
-  /**
-   * Measure bounding boxes and text lengths once rendered
-   */
-  function measureElements() {
-    wilayaItems.forEach(item => {
-      try {
-        if (!item.bbox) {
-          item.bbox = item.path.getBBox();
-        }
-        if (!item.textWidth) {
-          item.textWidth = item.label.getComputedTextLength() || (item.wilaya.name.length * item.wilaya.labelSize * 0.6);
-        }
-      } catch (e) {
-        item.bbox = { x: item.wilaya.cx - 0.5, y: item.wilaya.cy - 0.5, width: 1, height: 1 };
-        item.textWidth = 1;
-      }
-    });
+  function screenToSvgCoords(clientX, clientY) {
+    const pt = svg.createSVGPoint();
+    pt.x = clientX;
+    pt.y = clientY;
+    const ctm = svg.getScreenCTM();
+    if (!ctm) return { x: vbCenterX, y: vbCenterY };
+    return pt.matrixTransform(ctm.inverse());
   }
 
-  /**
-   * Smart Typography Algorithm
-   * Compares state effective width with text label width at current scale
-   */
-  function updateSingleLabelVisibility(item) {
-    if (!item) return;
-    const { bbox, textWidth, label, wilaya } = item;
-    if (!bbox) return;
-
-    // Effective state width in SVG units when zoomed
-    const effectiveWidth = bbox.width * scale;
-    const requiredWidth = (textWidth || 1) * 0.92;
-
-    // Fit condition: state must be wide enough to contain text without colliding
-    const fits = (effectiveWidth >= requiredWidth) || (wilaya.area >= 6.0 && scale >= 1.0);
-
-    if (fits) {
-      label.classList.add('visible');
-      label.style.opacity = '1';
-    } else {
-      label.classList.remove('visible');
-      label.style.opacity = '0';
-    }
-  }
-
-  function updateTypography() {
-    wilayaItems.forEach(updateSingleLabelVisibility);
-  }
-
-  /**
-   * Constrain Pan translation bounds so map never gets lost outside container
-   */
   function clampBounds() {
     if (scale <= 1.01) {
       scale = 1.0;
@@ -249,8 +228,7 @@ export function renderMap(container) {
       return;
     }
 
-    // Centered zoom bounds
-    const maxOffsetRatio = 0.5;
+    const maxOffsetRatio = 0.55;
     const baseTx = vbCenterX * (1 - scale);
     const baseTy = vbCenterY * (1 - scale);
     const maxDeltaX = (scale - 1) * vbW * maxOffsetRatio;
@@ -260,41 +238,25 @@ export function renderMap(container) {
     translateY = Math.min(Math.max(translateY, baseTy - maxDeltaY), baseTy + maxDeltaY);
   }
 
-  /**
-   * Apply transforms to #map-group
-   */
   function applyTransform() {
-    mapGroup.setAttribute('transform', `translate(${translateX}, ${translateY}) scale(${scale})`);
-    updateTypography();
+    mapGroup.style.transform = `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`;
   }
 
-  // Measure initial elements after layout frame
-  requestAnimationFrame(() => {
-    measureElements();
-    updateTypography();
-  });
-
-  // ══════════════════════════════════════════════════════════════
-  // MOUSE WHEEL ZOOM (Mathematical Invariance under Cursor)
-  // ══════════════════════════════════════════════════════════════
+  // ── Wheel Zoom Anchored to Mouse Cursor ──
   svg.addEventListener('wheel', (e) => {
     e.preventDefault();
-    mapGroup.classList.remove('animating');
+    if (isTransitioning) return;
+    mapGroup.classList.remove('smooth-zoom');
 
-    // 1. Get exact cursor location in Root SVG coordinates
     const cursor = screenToSvgCoords(e.clientX, e.clientY);
-
-    // 2. Map point under cursor before zoom
     const mapPointX = (cursor.x - translateX) / scale;
     const mapPointY = (cursor.y - translateY) / scale;
 
-    // 3. Calculate new scale
     const zoomMultiplier = e.deltaY < 0 ? 1.18 : 0.85;
     const newScale = Math.min(Math.max(scale * zoomMultiplier, minScale), maxScale);
 
     if (newScale === scale) return;
 
-    // 4. Update scale & adjust translations to keep mapPoint stationary under cursor
     scale = newScale;
 
     if (scale <= 1.01) {
@@ -310,31 +272,25 @@ export function renderMap(container) {
     applyTransform();
   }, { passive: false });
 
-  // ══════════════════════════════════════════════════════════════
-  // MOUSE DRAG TO PAN
-  // ══════════════════════════════════════════════════════════════
+  // ── Mouse Drag-to-Pan (Zero CSS transitions for 60fps) ──
   svg.addEventListener('mousedown', (e) => {
-    if (e.button !== 0) return; // Left click only
+    if (e.button !== 0 || isTransitioning) return;
     isDragging = true;
     dragDistance = 0;
     lastScreenX = e.clientX;
     lastScreenY = e.clientY;
     svg.classList.add('is-dragging');
-    mapGroup.classList.remove('animating');
+    mapGroup.classList.remove('smooth-zoom');
   });
 
   window.addEventListener('mousemove', (e) => {
-    if (!isDragging) return;
+    if (!isDragging || isTransitioning) return;
 
-    // Convert screen movement delta to SVG root coordinate delta
     const ptPrev = screenToSvgCoords(lastScreenX, lastScreenY);
     const ptCurr = screenToSvgCoords(e.clientX, e.clientY);
 
-    const deltaX = ptCurr.x - ptPrev.x;
-    const deltaY = ptCurr.y - ptPrev.y;
-
-    translateX += deltaX;
-    translateY += deltaY;
+    translateX += (ptCurr.x - ptPrev.x);
+    translateY += (ptCurr.y - ptPrev.y);
 
     dragDistance += Math.hypot(e.movementX || (e.clientX - lastScreenX), e.movementY || (e.clientY - lastScreenY));
     lastScreenX = e.clientX;
@@ -350,13 +306,11 @@ export function renderMap(container) {
     svg.classList.remove('is-dragging');
   });
 
-  // ══════════════════════════════════════════════════════════════
-  // TOUCH CONTROLS (Mobile / Tablets)
-  // ══════════════════════════════════════════════════════════════
-  let lastTouchPinchDist = 0;
-
+  // ── Touch Support ──
+  let lastTouchDist = 0;
   svg.addEventListener('touchstart', (e) => {
-    mapGroup.classList.remove('animating');
+    if (isTransitioning) return;
+    mapGroup.classList.remove('smooth-zoom');
     if (e.touches.length === 1) {
       isDragging = true;
       dragDistance = 0;
@@ -364,7 +318,7 @@ export function renderMap(container) {
       lastScreenY = e.touches[0].clientY;
     } else if (e.touches.length === 2) {
       isDragging = false;
-      lastTouchPinchDist = Math.hypot(
+      lastTouchDist = Math.hypot(
         e.touches[0].clientX - e.touches[1].clientX,
         e.touches[0].clientY - e.touches[1].clientY
       );
@@ -372,6 +326,7 @@ export function renderMap(container) {
   }, { passive: true });
 
   svg.addEventListener('touchmove', (e) => {
+    if (isTransitioning) return;
     if (e.touches.length === 1 && isDragging) {
       const ptPrev = screenToSvgCoords(lastScreenX, lastScreenY);
       const ptCurr = screenToSvgCoords(e.touches[0].clientX, e.touches[0].clientY);
@@ -386,19 +341,18 @@ export function renderMap(container) {
       clampBounds();
       applyTransform();
     } else if (e.touches.length === 2) {
-      const pinchDist = Math.hypot(
+      const dist = Math.hypot(
         e.touches[0].clientX - e.touches[1].clientX,
         e.touches[0].clientY - e.touches[1].clientY
       );
-
-      if (lastTouchPinchDist > 0) {
+      if (lastTouchDist > 0) {
         const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
         const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
         const cursor = screenToSvgCoords(midX, midY);
         const mapPointX = (cursor.x - translateX) / scale;
         const mapPointY = (cursor.y - translateY) / scale;
 
-        const factor = pinchDist / lastTouchPinchDist;
+        const factor = dist / lastTouchDist;
         const newScale = Math.min(Math.max(scale * factor, minScale), maxScale);
 
         scale = newScale;
@@ -407,24 +361,23 @@ export function renderMap(container) {
         clampBounds();
         applyTransform();
       }
-      lastTouchPinchDist = pinchDist;
+      lastTouchDist = dist;
     }
   }, { passive: true });
 
   svg.addEventListener('touchend', () => {
     isDragging = false;
-    lastTouchPinchDist = 0;
+    lastTouchDist = 0;
   });
 
-  // ══════════════════════════════════════════════════════════════
-  // FLOATING CONTROL BUTTONS
-  // ══════════════════════════════════════════════════════════════
+  // ── Floating Control Buttons ──
   const btnZoomIn = controls.querySelector('#map-zoom-in');
   const btnZoomOut = controls.querySelector('#map-zoom-out');
   const btnReset = controls.querySelector('#map-reset-view');
 
   btnZoomIn.addEventListener('click', () => {
-    mapGroup.classList.add('animating');
+    if (isTransitioning) return;
+    mapGroup.classList.add('smooth-zoom');
     const newScale = Math.min(scale * 1.4, maxScale);
     const mapCenterX = (vbCenterX - translateX) / scale;
     const mapCenterY = (vbCenterY - translateY) / scale;
@@ -434,10 +387,12 @@ export function renderMap(container) {
     translateY = vbCenterY - scale * mapCenterY;
     clampBounds();
     applyTransform();
+    setTimeout(() => mapGroup.classList.remove('smooth-zoom'), 600);
   });
 
   btnZoomOut.addEventListener('click', () => {
-    mapGroup.classList.add('animating');
+    if (isTransitioning) return;
+    mapGroup.classList.add('smooth-zoom');
     const newScale = Math.max(scale / 1.4, minScale);
     if (newScale <= 1.01) {
       scale = 1.0;
@@ -452,72 +407,75 @@ export function renderMap(container) {
       clampBounds();
     }
     applyTransform();
+    setTimeout(() => mapGroup.classList.remove('smooth-zoom'), 600);
   });
 
   btnReset.addEventListener('click', () => {
-    mapGroup.classList.add('animating');
+    if (isTransitioning) return;
+    mapGroup.classList.add('smooth-zoom');
     scale = 1.0;
     translateX = 0;
     translateY = 0;
     applyTransform();
+    setTimeout(() => mapGroup.classList.remove('smooth-zoom'), 600);
   });
 
   // ══════════════════════════════════════════════════════════════
-  // CLICK-TO-CENTER & TRANSITION
+  // 2-SECOND DELAY & FLASHING BORDER ON CLICK
   // ══════════════════════════════════════════════════════════════
-  function zoomToWilayaAndTransition(targetWilaya, pathEl) {
-    tooltip.classList.remove('visible');
+  function handleStateClick(targetWilaya, pathEl) {
+    isTransitioning = true;
+    isHoveringState = false;
+    wilayaTooltip.style.opacity = '0';
+    tetherLayer.style.opacity = '0';
 
-    // Calculate exact visual center of target state using getBBox()
+    // ── Step A: Immediately smoothly zoom / center the clicked state ──
     const bbox = pathEl.getBBox();
     const stateCenterX = bbox.x + bbox.width / 2;
     const stateCenterY = bbox.y + bbox.height / 2;
 
-    // Calculate target scale to frame the wilaya comfortably
-    const targetScale = Math.min(Math.max(vbW / (Math.max(bbox.width, bbox.height) * 2.3), 3.4), 9.5);
+    const fitScaleX = (vbW * 0.80) / bbox.width;
+    const fitScaleY = (vbH * 0.80) / bbox.height;
+    const neededScale = Math.min(fitScaleX, fitScaleY);
+    const targetScale = Math.min(Math.max(neededScale, 1.0), 8.0);
 
-    // Calculate translation so (stateCenterX, stateCenterY) lands precisely at (vbCenterX, vbCenterY)
-    const targetTx = vbCenterX - targetScale * stateCenterX;
-    const targetTy = vbCenterY - targetScale * stateCenterY;
+    const finalScale = (scale >= targetScale) ? scale : targetScale;
+    const targetTx = vbCenterX - finalScale * stateCenterX;
+    const targetTy = vbCenterY - finalScale * stateCenterY;
 
-    // Visual State: isolate selected wilaya and fade siblings
-    wilayaItems.forEach(({ path, label, wilaya }) => {
+    // ── Step B: Immediately apply .is-selected-flash and fade sibling wilayas ──
+    wilayaPaths.forEach(({ path, wilaya }) => {
       if (wilaya.code !== targetWilaya.code) {
         path.classList.add('faded');
-        label.classList.add('faded');
+        path.classList.remove('is-selected-flash');
       } else {
-        path.classList.add('active');
-        label.classList.remove('faded');
-        label.style.opacity = '1';
+        path.classList.add('is-selected-flash');
+        path.classList.remove('faded');
       }
     });
 
-    // Animate smoothly to center
-    mapGroup.classList.add('animating');
-    scale = targetScale;
+    // Execute smooth GPU camera motion to center
+    mapGroup.classList.add('smooth-zoom');
+    scale = finalScale;
     translateX = targetTx;
     translateY = targetTy;
     applyTransform();
 
-    // Trigger fade overlay & navigate
+    // ── Step C: STRICT setTimeout of EXACTLY 2000ms (2 Seconds) ──
     setTimeout(() => {
+      // ── Step D: Inside 2000ms callback, fade out screen & route transition ──
       fadeOverlay.classList.add('active');
 
       setTimeout(() => {
+        mapGroup.classList.remove('smooth-zoom');
         store.setState({ selectedWilaya: targetWilaya });
         navigate(`#/wilaya/${targetWilaya.code}`);
-      }, 250);
-    }, 600);
+      }, 300);
+    }, 2000);
   }
 
-  // ── Reactive Language Subscription ──
-  store.subscribe('lang', (newLang) => {
-    const isArabic = newLang === 'ar';
-    wilayaItems.forEach(({ label, wilaya }) => {
-      label.textContent = (isArabic && wilaya.nameAr) ? wilaya.nameAr : wilaya.name;
-    });
+  // Reactive language change
+  store.subscribe('lang', () => {
     svg.setAttribute('aria-label', t('map.title'));
-    measureElements();
-    updateTypography();
   });
 }

@@ -1,6 +1,6 @@
 /**
  * Rawabit v2 — Main Application Orchestrator
- * Step 1: Clean Onboarding, Sticky Navbar, and Minimalist Saudi-Gov-Tech Layout
+ * Clean Onboarding, Sticky Navbar, Minimalist Layout & Interactive SVG Map
  * Zero Pop-ups · Absolute Minimalism · Massive Whitespace
  */
 
@@ -94,7 +94,7 @@ export function renderHome() {
     </section>
 
     <!-- ══════════════════════════════════════════════════════════════ -->
-    <!-- 3. MAP INTRO SECTION (Ready for SVG Map)                       -->
+    <!-- 3. MAP INTRO SECTION (Interactive Algeria SVG Map)             -->
     <!-- ══════════════════════════════════════════════════════════════ -->
     <section class="section-map" id="map-section">
       <div class="container">
@@ -328,8 +328,11 @@ async function init() {
 
   // Re-render when language changes
   store.subscribe('lang', () => {
-    if (store.state.view === 'home') {
+    if (store.state.view === 'home' || !window.location.hash || window.location.hash === '#/') {
       renderHome();
+    } else if (window.location.hash.startsWith('#/wilaya/')) {
+      const code = window.location.hash.split('/')[2];
+      if (code) renderProfiles(code);
     }
   });
 }

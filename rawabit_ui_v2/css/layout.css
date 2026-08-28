@@ -201,7 +201,6 @@
   color: var(--color-accent);
 }
 
-
 /* ── HERO SECTION (Massive Whitespace, Absolute Minimalism) ── */
 .hero {
   padding-top: calc(var(--nav-height) + var(--space-4xl));
@@ -286,7 +285,6 @@
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
-
 
 /* ── AI SEARCH SECTION ── */
 .section-ai-search {
@@ -390,51 +388,11 @@
   transform: translateY(-1px);
 }
 
-
 /* ── MAP INTRO SECTION ── */
 .section-map {
   padding: var(--space-3xl) var(--space-lg);
   background: linear-gradient(180deg, rgba(250, 250, 250, 1) 0%, rgba(243, 244, 246, 0.5) 100%);
 }
-
-.map-card-wrapper {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
-  padding: var(--space-xl);
-  min-height: 540px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  transition: box-shadow var(--transition-fast);
-}
-
-.map-card-wrapper:hover {
-  box-shadow: var(--shadow-xl);
-}
-
-.map-placeholder-hint {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-md);
-  color: var(--color-text-secondary);
-}
-
-.map-placeholder-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 50%;
-  background: var(--color-accent-light);
-  color: var(--color-accent);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 
 /* ── FEATURES SECTION ("WHAT MAKES RAWABIT UNIQUE?") ── */
 .section-features {
@@ -493,7 +451,6 @@
   line-height: 1.75;
 }
 
-
 /* ── STATISTICS SECTION ── */
 .section-stats {
   padding: var(--space-3xl) var(--space-lg);
@@ -551,7 +508,6 @@
   font-weight: 600;
   color: var(--color-text-secondary);
 }
-
 
 /* ── MASSIVELY SIMPLIFIED FOOTER (Strictly 3 Links, Centered) ── */
 .footer-minimal {
@@ -624,7 +580,6 @@
   font-size: 0.85rem;
   color: var(--color-text-muted);
 }
-
 
 /* ── RESPONSIVE ADAPTATIONS ── */
 @media (max-width: 1024px) {

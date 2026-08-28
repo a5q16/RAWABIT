@@ -564,3 +564,14 @@ export function getProfileById(id) {
   }
   return null;
 }
+
+export function getAllCategories() {
+  return [
+    { id: 'all', label: 'All', labelAr: 'الكل' },
+    { id: 'ai', label: 'AI & DeepTech', labelAr: 'الذكاء الاصطناعي' },
+    { id: 'health', label: 'Health & Biotech', labelAr: 'الصحة والبيوتكنولوجيا' },
+    { id: 'energy', label: 'Renewable Energy', labelAr: 'الطاقات المتجددة' },
+    { id: 'robotics', label: 'Robotics & IoT', labelAr: 'الروبوتات والإنترنت' },
+    { id: 'software', label: 'Cloud & Cyber', labelAr: 'السحابة والأمن السيبراني' }
+  ];
+}

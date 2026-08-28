@@ -1,9 +1,11 @@
 /**
  * Rawabit v2 — Profiles Grid View Component
- * Renders verified Algerian competency directory for a selected wilaya
- * with real-time search, category filtering, and mind-map triggers.
+ * Clean CSS Grid layout of verified Algerian competencies for a selected wilaya,
+ * with real-time filtering, search, and the Mind-Map experience on click.
+ * Strictly Vanilla JS · 60FPS Performance
  */
-import { getProfilesByWilaya } from '../data/profiles-data.js';
+
+import { getProfilesByWilaya, getAllCategories } from '../data/profiles-data.js';
 import { WILAYAS } from './map-paths.js';
 import { openMindMap } from './mindmap.js';
 import { t, applyTranslations } from '../i18n.js';
@@ -31,7 +33,7 @@ export function renderProfiles(wilayaCode) {
   // Calculate average reliability
   const avgRel = allProfiles.length > 0 
     ? Math.round(allProfiles.reduce((acc, p) => acc + p.reliability, 0) / allProfiles.length)
-    : 94;
+    : 95;
 
   main.innerHTML = `
     <!-- Top Wilaya Hero / Header Section -->
@@ -98,220 +100,197 @@ export function renderProfiles(wilayaCode) {
           <!-- Category Filter Pills -->
           <div class="category-pills" id="category-pills">
             <button class="cat-pill ${activeCategory === 'all' ? 'active' : ''}" data-cat="all" data-i18n="profiles.filterAll">${t('profiles.filterAll')}</button>
-            <button class="cat-pill ${activeCategory === 'ai' ? 'active' : ''}" data-cat="ai" data-i18n="profiles.filterAI">${t('profiles.filterAI')}</button>
-            <button class="cat-pill ${activeCategory === 'engineering' ? 'active' : ''}" data-cat="engineering" data-i18n="profiles.filterEngineering">${t('profiles.filterEngineering')}</button>
-            <button class="cat-pill ${activeCategory === 'health' ? 'active' : ''}" data-cat="health" data-i18n="profiles.filterHealth">${t('profiles.filterHealth')}</button>
-            <button class="cat-pill ${activeCategory === 'energy' ? 'active' : ''}" data-cat="energy" data-i18n="profiles.filterEnergy">${t('profiles.filterEnergy')}</button>
+            <button class="cat-pill ${activeCategory === 'ai' ? 'active' : ''}" data-cat="ai">AI & DeepTech</button>
+            <button class="cat-pill ${activeCategory === 'health' ? 'active' : ''}" data-cat="health">Health & Biotech</button>
+            <button class="cat-pill ${activeCategory === 'energy' ? 'active' : ''}" data-cat="energy">Renewable Energy</button>
+            <button class="cat-pill ${activeCategory === 'robotics' ? 'active' : ''}" data-cat="robotics">Robotics & IoT</button>
+            <button class="cat-pill ${activeCategory === 'software' ? 'active' : ''}" data-cat="software">Cloud & Cyber</button>
           </div>
+
         </div>
 
       </div>
     </section>
 
-    <!-- Profiles Grid Container -->
-    <section class="section profiles-grid-section">
+    <!-- ── PROFILES GRID SECTION ── -->
+    <section class="profiles-grid-section section">
       <div class="container">
         <div class="profiles-grid" id="profiles-grid-container">
-          <!-- Populated by updateProfilesGrid() -->
+          <!-- Profiles Cards Injected via JS -->
         </div>
       </div>
     </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-      <div class="footer-inner">
-        <div class="footer-brand">
-          <div class="footer-logo-mark">ر</div>
-          <span class="footer-logo-name">روابط</span>
-        </div>
-        <p class="footer-copy" data-i18n="footer.copy">${t('footer.copy')}</p>
-      </div>
-    </footer>
   `;
 
-  // Apply translations
   applyTranslations();
 
-  // Scroll to top
-  window.scrollTo({ top: 0, behavior: 'instant' });
+  // ── Render Initial Grid ──
+  filterAndRenderGrid(allProfiles);
 
-  // ── Bind Interactive Events ──
-  const backBtn = main.querySelector('#btn-back-map');
-  backBtn.addEventListener('click', () => {
-    navigate('#/');
-  });
-
-  const searchInput = main.querySelector('#profiles-search-input');
-  searchInput.addEventListener('input', (e) => {
-    searchQuery = e.target.value.trim().toLowerCase();
-    updateProfilesGrid(allProfiles, code);
-  });
-
-  const clearBtn = main.querySelector('#clear-search-btn');
-  if (clearBtn) {
-    clearBtn.addEventListener('click', () => {
-      searchQuery = '';
-      searchInput.value = '';
-      updateProfilesGrid(allProfiles, code);
+  // ── Wire Back to Map ──
+  const btnBack = main.querySelector('#btn-back-map');
+  if (btnBack) {
+    btnBack.addEventListener('click', () => {
+      navigate('#/');
     });
   }
 
-  const catPills = main.querySelectorAll('.cat-pill');
-  catPills.forEach(pill => {
-    pill.addEventListener('click', () => {
-      catPills.forEach(p => p.classList.remove('active'));
-      pill.classList.add('active');
-      activeCategory = pill.dataset.cat;
-      updateProfilesGrid(allProfiles, code);
+  // ── Wire Category Filters ──
+  const pillsContainer = main.querySelector('#category-pills');
+  if (pillsContainer) {
+    pillsContainer.addEventListener('click', (e) => {
+      const btn = e.target.closest('.cat-pill');
+      if (!btn) return;
+      pillsContainer.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      activeCategory = btn.dataset.cat;
+      filterAndRenderGrid(allProfiles);
     });
-  });
+  }
 
-  // Initial Grid Render
-  updateProfilesGrid(allProfiles, code);
+  // ── Wire Search Input ──
+  const searchInput = main.querySelector('#profiles-search-input');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value.toLowerCase().trim();
+      filterAndRenderGrid(allProfiles);
+    });
+  }
 
-  // Re-render when language changes
-  store.subscribe('lang', () => {
-    renderProfiles(code);
-  });
+  const clearSearchBtn = main.querySelector('#clear-search-btn');
+  if (clearSearchBtn) {
+    clearSearchBtn.addEventListener('click', () => {
+      searchQuery = '';
+      if (searchInput) searchInput.value = '';
+      filterAndRenderGrid(allProfiles);
+    });
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 /**
  * Filter and render the cards inside the profiles grid container
  */
-function updateProfilesGrid(profiles, wilayaCode) {
+function filterAndRenderGrid(profiles) {
   const container = document.getElementById('profiles-grid-container');
   if (!container) return;
 
   const lang = store.state.lang;
 
-  // Filter based on category and search query
+  // Filter based on active category & search query
   const filtered = profiles.filter(p => {
-    // Category match
-    const catMatch = (activeCategory === 'all') || (p.category === activeCategory);
+    const matchesCat = (activeCategory === 'all') || (p.category === activeCategory);
+    if (!matchesCat) return false;
 
-    // Search query match
-    if (!searchQuery) return catMatch;
-
-    const nameStr = `${p.name} ${p.nameAr || ''} ${p.nameFr || ''}`.toLowerCase();
-    const titleStr = `${p.title} ${p.titleAr || ''} ${p.titleFr || ''}`.toLowerCase();
-    const orgStr = `${p.organization} ${p.organizationAr || ''}`.toLowerCase();
-    const tagsStr = (p.tags || []).join(' ').toLowerCase();
-    const skillsStr = (p.skills || []).map(s => s.name).join(' ').toLowerCase();
-
-    const matchesSearch = nameStr.includes(searchQuery) ||
-                          titleStr.includes(searchQuery) ||
-                          orgStr.includes(searchQuery) ||
-                          tagsStr.includes(searchQuery) ||
-                          skillsStr.includes(searchQuery);
-
-    return catMatch && matchesSearch;
+    if (!searchQuery) return true;
+    const nameMatch = (p.name && p.name.toLowerCase().includes(searchQuery)) ||
+                      (p.nameAr && p.nameAr.includes(searchQuery));
+    const titleMatch = (p.title && p.title.toLowerCase().includes(searchQuery)) ||
+                       (p.titleAr && p.titleAr.includes(searchQuery));
+    const tagMatch = p.tags && p.tags.some(t => t.toLowerCase().includes(searchQuery));
+    return nameMatch || titleMatch || tagMatch;
   });
 
   if (filtered.length === 0) {
     container.innerHTML = `
-      <div class="empty-results-box animate-fade-in">
-        <div class="empty-icon-wrap">
-          <svg viewBox="0 0 24 24" width="40" height="40" stroke="var(--color-text-secondary)" stroke-width="1.5" fill="none">
+      <div class="empty-profiles-state">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            <line x1="8" y1="11" x2="14" y2="11"></line>
           </svg>
         </div>
-        <h3 class="empty-title" data-i18n="profiles.noResults">${t('profiles.noResults')}</h3>
-        <button class="btn-reset-filters" id="btn-reset-filters" data-i18n="profiles.clearFilters">${t('profiles.clearFilters')}</button>
+        <h3 data-i18n="profiles.noResults">${t('profiles.noResults')}</h3>
+        <button class="btn-reset-filters" id="btn-reset-filters" data-i18n="profiles.resetFilters">${t('profiles.resetFilters')}</button>
       </div>
     `;
-
     const resetBtn = container.querySelector('#btn-reset-filters');
     if (resetBtn) {
       resetBtn.addEventListener('click', () => {
-        searchQuery = '';
         activeCategory = 'all';
-        const input = document.getElementById('profiles-search-input');
-        if (input) input.value = '';
-        const pills = document.querySelectorAll('.cat-pill');
-        pills.forEach(p => p.classList.toggle('active', p.dataset.cat === 'all'));
-        updateProfilesGrid(profiles, wilayaCode);
+        searchQuery = '';
+        const searchInput = document.getElementById('profiles-search-input');
+        if (searchInput) searchInput.value = '';
+        document.querySelectorAll('.cat-pill').forEach(p => p.classList.toggle('active', p.dataset.cat === 'all'));
+        filterAndRenderGrid(profiles);
       });
     }
     return;
   }
 
+  // Render profile cards
   container.innerHTML = filtered.map((profile, index) => {
     const displayName = (lang === 'ar' && profile.nameAr) ? profile.nameAr : profile.name;
     const displayTitle = (lang === 'ar' && profile.titleAr) ? profile.titleAr : (lang === 'fr' && profile.titleFr ? profile.titleFr : profile.title);
     const displayOrg = (lang === 'ar' && profile.organizationAr) ? profile.organizationAr : profile.organization;
-    const displayBio = (lang === 'ar' && profile.bioAr) ? profile.bioAr : profile.bio;
+    const displayLoc = (lang === 'ar' && profile.locationAr) ? profile.locationAr : profile.location;
 
     return `
-      <div class="profile-card animate-scale-in" data-id="${profile.id}" style="animation-delay: ${index * 60}ms;">
+      <article class="profile-card animate-fade-in-up" style="animation-delay: ${Math.min(index * 60, 400)}ms;" data-id="${profile.id}">
         
-        <!-- Card Header: Avatar + Verification -->
-        <div class="card-header">
+        <div class="card-top-row">
           <div class="card-avatar-wrap">
-            <img class="card-avatar" src="${profile.avatar}" alt="${profile.name}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=240&auto=format&fit=crop&q=80'" />
-            <span class="card-verified-dot" title="${t('profiles.verified')}">✓</span>
+            <img 
+              class="card-avatar" 
+              src="${profile.avatar}" 
+              alt="${profile.name}" 
+              loading="lazy"
+              onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=240&auto=format&fit=crop&q=80';"
+            />
+            <div class="verified-indicator" title="${t('profiles.reliability')}">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="white">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+              </svg>
+            </div>
           </div>
 
-          <div class="card-reliability-badge">
+          <div class="reliability-badge">
             <span class="rel-score">${profile.reliability}%</span>
-            <span class="rel-text" data-i18n="profiles.verified">${t('profiles.verified')}</span>
+            <span class="rel-label">${t('profiles.reliability')}</span>
           </div>
         </div>
 
-        <!-- Card Body: Name, Title, Institution -->
         <div class="card-body">
           <h3 class="card-name">${displayName}</h3>
           <p class="card-title">${displayTitle}</p>
           
-          <div class="card-org-row">
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M3 7v14M21 7v14M6 7V3h12v4M9 11h2M13 11h2M9 15h2M13 15h2"/></svg>
-            <span>${displayOrg}</span>
-          </div>
-
-          <p class="card-bio">${displayBio}</p>
-
-          <!-- Key Skill Badges -->
-          <div class="card-skills-row">
-            ${(profile.skills || []).slice(0, 3).map(s => `
-              <span class="card-skill-pill">${s.name}</span>
-            `).join('')}
-          </div>
-        </div>
-
-        <!-- Card Footer: Mind-Map CTA Button -->
-        <div class="card-footer">
-          <button class="card-mindmap-btn" data-id="${profile.id}">
-            <span class="mindmap-icon">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="3"></circle>
-                <circle cx="19" cy="6" r="2"></circle>
-                <circle cx="5" cy="6" r="2"></circle>
-                <circle cx="19" cy="18" r="2"></circle>
-                <circle cx="5" cy="18" r="2"></circle>
-                <line x1="12" y1="9" x2="19" y2="6"></line>
-                <line x1="12" y1="9" x2="5" y2="6"></line>
-                <line x1="12" y1="15" x2="19" y2="18"></line>
-                <line x1="12" y1="15" x2="5" y2="18"></line>
-              </svg>
+          <div class="card-meta">
+            <span class="meta-item">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a8 8 0 00-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 00-8-8zm0 11a3 3 0 110-6 3 3 0 010 6z"/></svg>
+              ${displayLoc}
             </span>
-            <span class="mindmap-btn-text" data-i18n="profiles.openMindmap">${t('profiles.openMindmap')}</span>
-            <span class="mindmap-arrow">→</span>
-          </button>
+            <span class="meta-item">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M3 7v14M21 7v14M6 7V3h12v4M9 11h2M13 11h2M9 15h2M13 15h2"/></svg>
+              ${displayOrg}
+            </span>
+          </div>
+
+          <div class="card-tags">
+            ${(profile.tags || []).slice(0, 3).map(tag => `<span class="profile-tag">${tag}</span>`).join('')}
+          </div>
         </div>
 
-      </div>
+        <div class="card-footer">
+          <span class="expand-prompt">
+            <span>Explore Mind-Map</span>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </span>
+        </div>
+
+      </article>
     `;
   }).join('');
 
   // ── Click Card to Open Mind-Map ──
-  const cards = container.querySelectorAll('.profile-card');
-  cards.forEach(card => {
-    card.addEventListener('click', (e) => {
-      const id = Number(card.dataset.id);
-      const profile = profiles.find(p => p.id === id);
-      if (profile) {
-        openMindMap(profile);
+  container.querySelectorAll('.profile-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const profileId = Number(card.dataset.id);
+      const target = profiles.find(p => p.id === profileId);
+      if (target) {
+        openMindMap(target);
       }
     });
   });

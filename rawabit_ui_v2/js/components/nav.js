@@ -1,6 +1,6 @@
 /**
  * Rawabit v2 — Sticky Luxurious Navbar
- * Features brand mark, mock navigation links (#),
+ * Features brand mark, page redirection navigation links,
  * and clean Language Switcher trigger with current active language badge.
  */
 

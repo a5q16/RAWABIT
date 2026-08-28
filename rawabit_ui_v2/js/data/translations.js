@@ -60,6 +60,28 @@ export const TRANSLATIONS = {
     'stats.stat4.suffix': '%',
     'stats.stat4.label': 'دقة التوثيق والمطابقة',
 
+    // Profiles View
+    'profiles.back': 'العودة للخريطة',
+    'profiles.badge': 'دليل الكفاءات الموثقة',
+    'profiles.titlePrefix': 'كفاءات ولاية',
+    'profiles.verifiedCount': 'كفاءة موثقة',
+    'profiles.avgReliability': 'متوسط الموثوقية',
+    'profiles.searchPlaceholder': 'ابحث بالاسم، التخصص، أو الكلمات المفتاحية...',
+    'profiles.filterAll': 'الكل',
+    'profiles.reliability': 'موثوقية',
+    'profiles.noResults': 'لم يتم العثور على نتائج تطابق بحثك',
+    'profiles.resetFilters': 'إعادة تعيين البحث',
+
+    // Mind-Map Experience
+    'mindmap.askAi': 'اسأل الذكاء الاصطناعي عن الكفاءة',
+    'mindmap.linkedin': 'الملف الشخصي على لينكد إن',
+    'mindmap.verifiedBadge': 'كفاءة موثقة رسمياً',
+    'mindmap.close': 'إغلاق',
+    'mindmap.tabAcademic': 'المسار الأكاديمي والبحثي',
+    'mindmap.tabCompetencies': 'الكفاءات والمهارات المحورية',
+    'mindmap.tabCareer': 'المسار المهني والمشاريع',
+    'mindmap.tabCredentials': 'الاعتمادات وبراءات الاختراع',
+
     // Minimalist Footer (Strictly 3 Links + Brand)
     'footer.link1': 'عن منصة روابط',
     'footer.link2': 'الرؤية والأهداف',
@@ -126,6 +148,28 @@ export const TRANSLATIONS = {
     'stats.stat4.suffix': '%',
     'stats.stat4.label': 'Verification Accuracy Rate',
 
+    // Profiles View
+    'profiles.back': 'Back to Map',
+    'profiles.badge': 'Verified Talent Directory',
+    'profiles.titlePrefix': 'Competencies in',
+    'profiles.verifiedCount': 'Verified Experts',
+    'profiles.avgReliability': 'Average Reliability',
+    'profiles.searchPlaceholder': 'Search by name, expertise, or keyword...',
+    'profiles.filterAll': 'All',
+    'profiles.reliability': 'Reliability',
+    'profiles.noResults': 'No matching profiles found',
+    'profiles.resetFilters': 'Reset Filters',
+
+    // Mind-Map Experience
+    'mindmap.askAi': 'Ask AI about Talent',
+    'mindmap.linkedin': 'LinkedIn Profile',
+    'mindmap.verifiedBadge': 'Officially Verified Talent',
+    'mindmap.close': 'Close',
+    'mindmap.tabAcademic': 'Academic & Research',
+    'mindmap.tabCompetencies': 'Core Competencies',
+    'mindmap.tabCareer': 'Professional Career',
+    'mindmap.tabCredentials': 'Credentials & Accreditations',
+
     // Minimalist Footer (Strictly 3 Links + Brand)
     'footer.link1': 'About Rawabit Platform',
     'footer.link2': 'Vision and Goals',
@@ -191,6 +235,28 @@ export const TRANSLATIONS = {
     'stats.stat4.val': '98.4',
     'stats.stat4.suffix': '%',
     'stats.stat4.label': 'Taux de Précision de Vérification',
+
+    // Profiles View
+    'profiles.back': 'Retour à la carte',
+    'profiles.badge': 'Répertoire des Compétences',
+    'profiles.titlePrefix': 'Compétences à',
+    'profiles.verifiedCount': 'Experts Vérifiés',
+    'profiles.avgReliability': 'Fiabilité Moyenne',
+    'profiles.searchPlaceholder': 'Rechercher par nom, spécialité ou mot-clé...',
+    'profiles.filterAll': 'Tous',
+    'profiles.reliability': 'Fiabilité',
+    'profiles.noResults': 'Aucun profil correspondant',
+    'profiles.resetFilters': 'Réinitialiser',
+
+    // Mind-Map Experience
+    'mindmap.askAi': 'Consulter l’IA sur ce profil',
+    'mindmap.linkedin': 'Profil LinkedIn',
+    'mindmap.verifiedBadge': 'Compétence Officiellement Vérifiée',
+    'mindmap.close': 'Fermer',
+    'mindmap.tabAcademic': 'Parcours Académique & Recherche',
+    'mindmap.tabCompetencies': 'Compétences Clés',
+    'mindmap.tabCareer': 'Parcours Professionnel',
+    'mindmap.tabCredentials': 'Accréditations & Brevets',
 
     // Minimalist Footer (Strictly 3 Links + Brand)
     'footer.link1': 'À propos de Rawabit',
