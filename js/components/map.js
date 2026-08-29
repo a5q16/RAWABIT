@@ -166,8 +166,10 @@ export function renderMap(container) {
     // Hover: display Wilaya name and show solid white tether line with white dot
     path.addEventListener('mouseenter', (e) => {
       if (isTransitioning) return;
-      const isArabic = store.state.lang === 'ar';
-      const displayName = isArabic ? (wilaya.nameAr || wilaya.name) : wilaya.name;
+      const lang = store.state.lang;
+      const displayName = lang === 'ar' 
+        ? (wilaya.nameAr || wilaya.name) 
+        : (lang === 'en' ? (wilaya.nameEn || wilaya.name) : (wilaya.nameFr || wilaya.name));
       wilayaTooltip.innerHTML = `<span style="color:#00875A; font-weight:800; margin-inline-end:8px;">${wilaya.code}</span><span>${displayName}</span>`;
       wilayaTooltip.style.opacity = '1';
       tetherLayer.style.opacity = '1';

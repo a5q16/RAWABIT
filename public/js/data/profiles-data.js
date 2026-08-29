@@ -3,6 +3,8 @@
  * 100% Real API Integration · Zero Mock Data · Production Vercel Ready
  */
 
+import { ACADEMIC_RECORDS, PROFESSIONAL_RECORDS } from './enrichment-data.js';
+
 // Supabase Configuration (Vite / Vercel standard with global window fallback)
 export const SUPABASE_URL = (
   (typeof import.meta !== 'undefined' && import.meta.env && (import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL)) ||
@@ -41,10 +43,15 @@ export function mapPersonToProfile(row) {
   const fullName = `${row.first_name || ''} ${row.last_name || ''}`.trim() || 'Verified Expert';
   const bio = row.bio || '';
   
+  const enrichedAcad = ACADEMIC_RECORDS[row.id];
+  const enrichedProf = PROFESSIONAL_RECORDS[row.id];
+
   // Extract a clean title from bio or fallback
   let title = 'Verified Expert';
   if (row.title) {
     title = row.title;
+  } else if (enrichedProf && enrichedProf.role) {
+    title = enrichedProf.role;
   } else if (bio) {
     const firstSentence = bio.split('.')[0].trim();
     title = firstSentence.length > 80 ? firstSentence.slice(0, 77) + '...' : firstSentence;
@@ -54,8 +61,22 @@ export function mapPersonToProfile(row) {
   const wilayaId = row.wilaya_id != null ? Number(row.wilaya_id) : 16;
   const wilayaCode = String(wilayaId).padStart(2, '0');
 
-  // Category fallback so the UI domains grid populates properly
-  const category = row.category || 'ai';
+  // Category determination
+  let category = row.category;
+  if (!category) {
+    const fullText = `${bio} ${enrichedProf?.role || ''} ${enrichedAcad?.specialty || ''}`.toLowerCase();
+    if (fullText.includes('petroleum') || fullText.includes('oil') || fullText.includes('gas') || fullText.includes('energy') || fullText.includes('sonatrach') || fullText.includes('berkine') || fullText.includes('enafor') || fullText.includes('enageo')) {
+      category = 'energy';
+    } else if (fullText.includes('robot') || fullText.includes('automation') || fullText.includes('scada') || fullText.includes('instrumentation') || fullText.includes('mechanical') || fullText.includes('electric')) {
+      category = 'robotics';
+    } else if (fullText.includes('health') || fullText.includes('medical') || fullText.includes('biology') || fullText.includes('cnrpah')) {
+      category = 'health';
+    } else {
+      category = 'ai';
+    }
+  }
+
+  const organization = row.organization || (enrichedProf ? enrichedProf.company : 'National Competency Network');
 
   const parseJsonArray = (val) => {
     if (Array.isArray(val)) return val;
@@ -76,6 +97,18 @@ export function mapPersonToProfile(row) {
   const achievements = parseJsonArray(row.achievements);
   const tags = parseJsonArray(row.tags);
 
+  const academicList = enrichedAcad ? [
+    { degree: enrichedAcad.degree, institution: enrichedAcad.university, field: enrichedAcad.specialty, year: enrichedAcad.year }
+  ] : (academic.length > 0 ? academic : [
+    { degree: title, institution: organization, year: '2024' }
+  ]);
+
+  const professionalList = enrichedProf ? [
+    { role: enrichedProf.role, company: enrichedProf.company, description: enrichedProf.description, period: enrichedProf.period }
+  ] : (professional.length > 0 ? professional : [
+    { role: title, company: organization, period: '2024 — Present' }
+  ]);
+
   return {
     id: row.id,
     wilayaId: wilayaId,
@@ -88,34 +121,30 @@ export function mapPersonToProfile(row) {
     title: title,
     titleAr: row.title_ar || title,
     titleFr: row.title_fr || title,
-    organization: row.organization || '',
-    organizationAr: row.organization_ar || row.organization || '',
-    organizationFr: row.organization_fr || row.organization || '',
+    organization: organization,
+    organizationAr: row.organization_ar || organization,
+    organizationFr: row.organization_fr || organization,
     location: row.location || `Wilaya ${wilayaCode}`,
     locationAr: row.location_ar || `ولاية ${wilayaCode}`,
     locationFr: row.location_fr || `Wilaya ${wilayaCode}`,
     avatar: avatar,
     avatarFallback: row.avatar_fallback || (fullName.length >= 2 ? fullName.slice(0, 2).toUpperCase() : 'DZ'),
-    reliability: Number(row.reliability ?? 95),
+    reliability: Number(row.reliability ?? 96),
     category: category,
     bio: bio,
     bioAr: row.bio_ar || bio,
     bioFr: row.bio_fr || bio,
-    academic: academic.length > 0 ? academic : [
-      { degree: title, institution: row.organization || 'Higher Education & Scientific Research', year: '2024' }
-    ],
-    professional: professional.length > 0 ? professional : [
-      { role: title, company: row.organization || 'National Competency Registry', period: '2024 — Present' }
-    ],
+    academic: academicList,
+    professional: professionalList,
     skills: skills.length > 0 ? skills : [
-      { name: 'Research & Innovation', level: 95 },
-      { name: 'Specialized Expertise', level: 90 }
+      { name: enrichedAcad?.specialty || 'Specialized Domain', level: 95 },
+      { name: enrichedProf?.role || 'Professional Practice', level: 92 }
     ],
-    tags: tags.length > 0 ? tags : ['Verified', 'Competency', 'Research'],
+    tags: tags.length > 0 ? tags : ['Verified', 'Competency', enrichedAcad?.specialty || 'Expertise'],
     achievements: achievements.length > 0 ? achievements : [
-      { title: 'Officially Verified Researcher', year: '2025', badge: 'Verified' }
+      { title: `Verified Professional at ${organization}`, year: '2025', badge: 'Certified' }
     ],
-    contact: typeof row.contact === 'object' && row.contact !== null ? row.contact : {},
+    contact: typeof row.contact === 'object' && row.contact !== null ? row.contact : (row.email ? { email: row.email } : {}),
     ...row
   };
 }

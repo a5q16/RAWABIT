@@ -94,14 +94,14 @@ export async function renderProfiles(wilayaCode) {
   const categories = getAllCategories();
   const lang = store.state.lang;
   
-  // Format localized Wilaya Title (Clean luxury typography: "ولاية تمنراست" / "Wilaya of Algiers")
+  // Format localized Wilaya Title (Clean luxury typography: "ولاية الجزائر" / "Wilaya of Algiers")
   let wilayaCleanTitle = '';
   if (lang === 'ar') {
     wilayaCleanTitle = `${t('domains.wilayaPrefix')} ${wilayaMeta.nameAr || wilayaMeta.name}`;
   } else if (lang === 'fr') {
-    wilayaCleanTitle = `${t('domains.wilayaPrefix')} ${wilayaMeta.name}`;
+    wilayaCleanTitle = `${t('domains.wilayaPrefix')} ${wilayaMeta.nameFr || wilayaMeta.name}`;
   } else {
-    wilayaCleanTitle = `${t('domains.wilayaPrefix')} ${wilayaMeta.name}`;
+    wilayaCleanTitle = `${t('domains.wilayaPrefix')} ${wilayaMeta.nameEn || wilayaMeta.name}`;
   }
 
   const loadingText = lang === 'ar' 
