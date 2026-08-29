@@ -16,10 +16,9 @@ let isStreaming = false;
  */
 function getAiApiUrl() {
   return (
-    (typeof import.meta !== 'undefined' && import.meta.env && (import.meta.env.VITE_AI_API_URL || import.meta.env.AI_API_URL)) ||
     (typeof window !== 'undefined' && window.ENV && (window.ENV.VITE_AI_API_URL || window.ENV.AI_API_URL)) ||
-    (typeof window !== 'undefined' && window.__ENV__ && (window.__ENV__.VITE_AI_API_URL || window.__ENV__.AI_API_URL)) ||
-    'http://localhost:8000/api/chat'
+    (typeof import.meta !== 'undefined' && import.meta.env && (import.meta.env.VITE_AI_API_URL || import.meta.env.AI_API_URL)) ||
+    '/api/chat'
   );
 }
 
@@ -416,6 +415,35 @@ ${profileContext ? `السياق الحالي للملف الشخصي: ${JSON.st
     const decoder = new TextDecoder('utf-8');
     let buffer = '';
 
+    const parseChunk = (raw) => {
+      if (!raw) return '';
+      if (raw.startsWith('data:')) {
+        const payload = raw.slice(5).trim();
+        if (payload === '[DONE]') return null;
+        try {
+          const parsed = JSON.parse(payload);
+          if (parsed.choices && Array.isArray(parsed.choices) && parsed.choices.length > 0) {
+            const choice = parsed.choices[0];
+            if (choice.delta && typeof choice.delta.content === 'string') {
+              return choice.delta.content;
+            }
+            if (typeof choice.text === 'string') {
+              return choice.text;
+            }
+          }
+          if (typeof parsed.chunk === 'string') return parsed.chunk;
+          if (typeof parsed.delta === 'string') return parsed.delta;
+          if (typeof parsed.content === 'string') return parsed.content;
+          if (typeof parsed.response === 'string') return parsed.response;
+          if (typeof parsed.text === 'string') return parsed.text;
+          return '';
+        } catch (e) {
+          return payload;
+        }
+      }
+      return raw;
+    };
+
     while (true) {
       const { value, done } = await reader.read();
       if (done) break;
@@ -432,24 +460,8 @@ ${profileContext ? `السياق الحالي للملف الشخصي: ${JSON.st
         line = line.trim();
         if (!line) continue;
 
-        let content = '';
-
-        // Handle SSE "data: " prefix if present
-        if (line.startsWith('data:')) {
-          const rawData = line.slice(5).trim();
-          if (rawData === '[DONE]') {
-            break;
-          }
-          try {
-            const parsed = JSON.parse(rawData);
-            content = parsed.delta || parsed.content || parsed.text || parsed.response || parsed.chunk || '';
-          } catch (e) {
-            content = rawData;
-          }
-        } else {
-          // Standard chunked text
-          content = line;
-        }
+        const content = parseChunk(line);
+        if (content === null) break;
 
         if (content) {
           // Remove thinking dots the exact moment the FIRST chunk arrives
@@ -484,21 +496,8 @@ ${profileContext ? `السياق الحالي للملف الشخصي: ${JSON.st
 
     // Process any remaining bytes in buffer
     if (buffer.trim()) {
-      let finalChunk = buffer.trim();
-      if (finalChunk.startsWith('data:')) {
-        const rawData = finalChunk.slice(5).trim();
-        if (rawData !== '[DONE]') {
-          try {
-            const parsed = JSON.parse(rawData);
-            finalChunk = parsed.delta || parsed.content || parsed.text || parsed.response || '';
-          } catch (e) {
-            finalChunk = rawData;
-          }
-        } else {
-          finalChunk = '';
-        }
-      }
-      if (finalChunk) {
+      const finalChunk = parseChunk(buffer.trim());
+      if (finalChunk && finalChunk !== null) {
         if (isFirstChunk) {
           removeThinkingIndicator();
           isFirstChunk = false;

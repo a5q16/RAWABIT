@@ -70,6 +70,9 @@ def api_health():
     return health_check()
 
 @app.post("/api/chat")
+@app.post("/chat")
+@app.post("/api/index.py")
+@app.post("/api/index.py/api/chat")
 async def chat_stream(request: Request):
     """
     SSE chat streaming endpoint securely reading GROQ_API_KEY from environment variables.

@@ -188,7 +188,7 @@ export async function getProfilesByWilaya(wilayaId) {
  * @returns {Promise<Object|null>} Mapped profile object or null
  */
 export async function getProfileById(id) {
-  const pId = Number(id);
+  const pId = String(id);
 
   if (!SUPABASE_URL || !SUPABASE_KEY) {
     console.warn('[Rawabit Supabase] SUPABASE_URL or SUPABASE_ANON_KEY is not configured.');
@@ -230,7 +230,7 @@ export async function getPlatformStats() {
   }
 
   try {
-    const endpoint = `${SUPABASE_URL}/rest/v1/person?select=id,wilaya_id,category`;
+    const endpoint = `${SUPABASE_URL}/rest/v1/person?select=id,wilaya_id,bio`;
     const response = await fetch(endpoint, {
       method: 'GET',
       headers: getSupabaseHeaders()
