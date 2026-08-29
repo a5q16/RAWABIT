@@ -1,5 +1,3 @@
 .git
 .vscode
-rag-service/node_modules
-rag-service/app/__pycache__
-rag-service/scripts/__pycache__
+rag-service/
