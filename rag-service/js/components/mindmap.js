@@ -219,25 +219,30 @@ export function openMindMap(profile, originCard = null) {
 
   // ── 2. Mount Overlay & Animate In ──
   document.body.appendChild(overlay);
-  requestAnimationFrame(() => {
+  const rAF = (typeof window !== 'undefined' && window.requestAnimationFrame) ? window.requestAnimationFrame : (cb) => setTimeout(cb, 16);
+  rAF(() => {
     overlay.classList.add('active');
     drawConnectorLines();
   });
 
   // ── 3. Wire AI Action Button ──
   const btnAskAi = overlay.querySelector('#btn-ask-ai');
-  btnAskAi.addEventListener('click', () => {
-    openAIChat({ 
-      type: 'profile', 
-      profile, 
-      displayName, 
-      displayTitle 
+  if (btnAskAi) {
+    btnAskAi.addEventListener('click', () => {
+      openAIChat({ 
+        type: 'profile', 
+        profile, 
+        displayName, 
+        displayTitle 
+      });
     });
-  });
+  }
 
   // ── 4. Dismissal Listeners ──
   const closeBtn = overlay.querySelector('#mindmap-close-btn');
-  closeBtn.addEventListener('click', () => closeMindMap(true));
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => closeMindMap(true));
+  }
 
   // Dismiss on clicking empty blurred background
   overlay.addEventListener('click', (e) => {

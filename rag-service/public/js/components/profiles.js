@@ -473,8 +473,8 @@ function renderProfilesGrid(container, profiles, categories) {
   container.querySelectorAll('.profile-card').forEach(card => {
     card.addEventListener('click', () => {
       recordUserEngagement();
-      const profileId = Number(card.dataset.id);
-      const target = profiles.find(p => p.id === profileId);
+      const profileId = card.getAttribute('data-id') || (card.dataset && card.dataset.id);
+      const target = profiles.find(p => String(p.id) === String(profileId));
       if (target) {
         openMindMap(target, card);
       }
@@ -635,9 +635,13 @@ export function triggerProactiveAiOverlay() {
   `;
 
   document.body.appendChild(overlay);
-  requestAnimationFrame(() => {
-    overlay.classList.add('active');
-  });
+  if (typeof window !== 'undefined' && window.requestAnimationFrame) {
+    window.requestAnimationFrame(() => {
+      overlay.classList.add('active');
+    });
+  } else {
+    setTimeout(() => overlay.classList.add('active'), 16);
+  }
 
   // Action Button Click -> Open AI Chat Drawer & record engagement
   const askBtn = overlay.querySelector('#btn-proactive-ask');

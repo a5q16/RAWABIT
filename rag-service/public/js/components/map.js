@@ -195,7 +195,11 @@ export function renderMap(container) {
   // Global mousemove tracker on container for 60FPS RAF updating
   container.addEventListener('mousemove', (e) => {
     if (isHoveringState && !isTransitioning) {
-      requestAnimationFrame(() => updateTooltipCoords(e.clientX, e.clientY));
+      if (typeof window !== 'undefined' && window.requestAnimationFrame) {
+        window.requestAnimationFrame(() => updateTooltipCoords(e.clientX, e.clientY));
+      } else {
+        updateTooltipCoords(e.clientX, e.clientY);
+      }
     }
   });
 
