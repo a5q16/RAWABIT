@@ -89,23 +89,27 @@ export function createNav() {
 
   // ── Language Button Trigger ──
   const langBtn = nav.querySelector('#nav-lang-btn');
-  langBtn.addEventListener('click', () => {
-    openLanguageSelector(false);
-  });
+  if (langBtn) {
+    langBtn.addEventListener('click', () => {
+      openLanguageSelector(false);
+    });
+  }
 
   // ── Mobile Menu Toggle ──
   const menuBtn = nav.querySelector('#nav-menu-toggle');
   const mobileMenu = nav.querySelector('#nav-mobile-menu');
-  menuBtn.addEventListener('click', () => {
-    mobileMenu.classList.toggle('open');
-  });
-
-  // Close mobile menu on clicking any link
-  nav.querySelectorAll('.nav-mobile-link').forEach(link => {
-    link.addEventListener('click', () => {
-      mobileMenu.classList.remove('open');
+  if (menuBtn && mobileMenu) {
+    menuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('open');
     });
-  });
+
+    // Close mobile menu on clicking any link
+    nav.querySelectorAll('.nav-mobile-link').forEach(link => {
+      link.addEventListener('click', () => {
+        mobileMenu.classList.remove('open');
+      });
+    });
+  }
 
   // ── Sticky Navbar Scroll Listener ──
   window.addEventListener('scroll', () => {

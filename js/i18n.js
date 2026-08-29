@@ -33,7 +33,7 @@ export function getLang() {
     }
     
     // fallback to navigator.language detection
-    const navLang = navigator.language.slice(0, 2);
+    const navLang = (typeof navigator !== 'undefined' && (navigator.language || 'ar')).slice(0, 2);
     if (navLang === 'ar') return 'ar';
     if (navLang === 'fr') return 'fr';
     return 'en';
@@ -41,11 +41,17 @@ export function getLang() {
 
 export function applyTranslations() {
     document.querySelectorAll('[data-i18n]').forEach(el => {
-        el.textContent = t(el.dataset.i18n);
+        const key = el.getAttribute('data-i18n') || (el.dataset && el.dataset.i18n);
+        if (key) {
+            el.textContent = t(key);
+        }
     });
     
     document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-        el.placeholder = t(el.dataset.i18nPlaceholder);
+        const key = el.getAttribute('data-i18n-placeholder') || (el.dataset && el.dataset.i18nPlaceholder);
+        if (key) {
+            el.placeholder = t(key);
+        }
     });
 }
 

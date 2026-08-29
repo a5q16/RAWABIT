@@ -151,8 +151,8 @@ export function renderMap(container) {
   WILAYAS.forEach(wilaya => {
     const g = document.createElementNS(SVG_NS, 'g');
     g.classList.add('wilaya-group');
-    g.dataset.code = wilaya.code;
-    g.dataset.name = wilaya.name;
+    g.setAttribute('data-code', wilaya.code);
+    g.setAttribute('data-name', wilaya.name);
 
     const path = document.createElementNS(SVG_NS, 'path');
     path.setAttribute('d', wilaya.d);

@@ -8,6 +8,11 @@ export function initStatsAnimation(container) {
   const statNumbers = (container || document).querySelectorAll('.stat-number[data-target]');
   if (!statNumbers || statNumbers.length === 0) return;
 
+  if (typeof IntersectionObserver === 'undefined') {
+    statNumbers.forEach(el => animateCounter(el));
+    return;
+  }
+
   const observer = new IntersectionObserver((entries, obs) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -21,8 +26,9 @@ export function initStatsAnimation(container) {
 }
 
 function animateCounter(el) {
-  const target = parseFloat(el.dataset.target);
-  const isFloat = el.dataset.target.includes('.');
+  const rawTarget = el.getAttribute('data-target') || (el.dataset && el.dataset.target) || '0';
+  const target = parseFloat(rawTarget) || 0;
+  const isFloat = rawTarget.includes('.');
   const duration = 1800; // ms
   const startTime = performance.now();
 
@@ -41,11 +47,19 @@ function animateCounter(el) {
     }
 
     if (progress < 1) {
-      requestAnimationFrame(update);
+      if (typeof window !== 'undefined' && window.requestAnimationFrame) {
+        window.requestAnimationFrame(update);
+      } else {
+        update(startTime + duration);
+      }
     } else {
       el.textContent = isFloat ? target.toFixed(1) : target.toLocaleString();
     }
   }
 
-  requestAnimationFrame(update);
+  if (typeof window !== 'undefined' && window.requestAnimationFrame) {
+    window.requestAnimationFrame(update);
+  } else {
+    update(startTime + duration);
+  }
 }

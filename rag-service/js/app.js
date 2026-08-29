@@ -275,16 +275,16 @@ export function renderHome() {
       const statAccuracy = main.querySelector('[data-stat="accuracy"]');
 
       if (statWilayas && stats.coveredWilayas > 0) {
-        statWilayas.dataset.target = String(stats.coveredWilayas);
+        statWilayas.setAttribute('data-target', String(stats.coveredWilayas));
       }
       if (statTalents && stats.totalPersons > 0) {
-        statTalents.dataset.target = String(stats.totalPersons);
+        statTalents.setAttribute('data-target', String(stats.totalPersons));
       }
       if (statCategories && stats.categoriesCount > 0) {
-        statCategories.dataset.target = String(stats.categoriesCount);
+        statCategories.setAttribute('data-target', String(stats.categoriesCount));
       }
       if (statAccuracy && stats.accuracyRate > 0) {
-        statAccuracy.dataset.target = String(stats.accuracyRate);
+        statAccuracy.setAttribute('data-target', String(stats.accuracyRate));
       }
 
       // Trigger animated count-up with live Supabase counts

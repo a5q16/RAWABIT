@@ -1,6 +1,7 @@
 {
   "name": "rawabit-platform",
   "version": "2.0.0",
+  "type": "module",
   "description": "Rawabit — Algerian National Competency & Talent Platform",
   "scripts": {
     "build": "echo 'Building Rawabit Frontend'"

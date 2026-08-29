@@ -357,7 +357,7 @@ export async function streamAIResponse(userQuery, profileContext) {
   let bubbleEl = null;
   let accumulatedText = '';
   let isFirstChunk = true;
-
+  try {
     let response;
     try {
       response = await fetch(apiUrl, {

@@ -148,25 +148,28 @@ export function openLanguageSelector(isFirstVisit = false) {
   // Dynamic Title Logic based on isFirstVisit
   if (isFirstVisit) {
     // Onboarding Title
-    titleEl.textContent = 'كيف تريد ان تبدأ؟';
-    closeBtn.classList.add('hidden');
+    if (titleEl) titleEl.textContent = 'كيف تريد ان تبدأ؟';
+    if (closeBtn) closeBtn.classList.add('hidden');
   } else {
     // In-Site Language Switcher Title
     const currentLang = store.state.lang;
-    if (currentLang === 'en') {
-      titleEl.textContent = 'You can change your experience at any time';
-    } else if (currentLang === 'fr') {
-      titleEl.textContent = 'Vous pouvez changer votre expérience à tout moment';
-    } else {
-      titleEl.textContent = 'تستطيع تغيير تجربتك في أي لحظة';
+    if (titleEl) {
+      if (currentLang === 'en') {
+        titleEl.textContent = 'You can change your experience at any time';
+      } else if (currentLang === 'fr') {
+        titleEl.textContent = 'Vous pouvez changer votre expérience à tout moment';
+      } else {
+        titleEl.textContent = 'تستطيع تغيير تجربتك في أي لحظة';
+      }
     }
-    closeBtn.classList.remove('hidden');
+    if (closeBtn) closeBtn.classList.remove('hidden');
   }
 
   // Update selected card state
   const cards = overlayElement.querySelectorAll('.lang-luxury-card');
   cards.forEach(c => {
-    c.classList.toggle('selected', c.dataset.lang === store.state.lang);
+    const cardLang = c.getAttribute('data-lang') || (c.dataset && c.dataset.lang);
+    c.classList.toggle('selected', cardLang === store.state.lang);
   });
 
   pushOverlay('language');
