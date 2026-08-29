@@ -6,7 +6,7 @@ RUN groupadd -r rawabit && useradd -r -g rawabit -d /app -s /sbin/nologin rawabi
 WORKDIR /app
 
 # Install dependencies first (layer caching)
-COPY requirements.txt .
+COPY requirements-docker.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
