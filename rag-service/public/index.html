@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="روابط — المنصة الرقمية للكفاءات الجزائرية. اكتشف واستكشف وتواصل مع الكفاءات الجزائرية الموثقة عبر كل الولايات والتخصصات." />
+  <title>روابط — Rawabit</title>
+
+  <!-- Tajawal Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet" />
+
+  <!-- Design System CSS -->
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/layout.css" />
+  <link rel="stylesheet" href="css/map.css" />
+  <link rel="stylesheet" href="css/overlays.css" />
+  <link rel="stylesheet" href="css/transitions.css" />
+  <link rel="stylesheet" href="css/profiles.css" />
+  <link rel="stylesheet" href="css/chat.css" />
+
+  <!-- Supabase & AI Backend Runtime Environment Configuration -->
+  <script>
+    window.ENV = window.ENV || {
+      VITE_SUPABASE_URL: 'https://jxqrxlyostqhvsluzflw.supabase.co',
+      VITE_SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp4cXJ4bHlvc3RxaHZzbHV6Zmx3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NzY0MzE4NSwiZXhwIjoyMTAzMjE5MTg1fQ.bQfsnm31h6rs1XSLCsi9s6CaFHWYjGqqb2qaaSTJfCs',
+      VITE_AI_API_URL: '/api/chat'
+    };
+  </script>
+
+  <!-- Prevent FOUC: set lang/dir early from localStorage or browser detection -->
+  <script>
+    (function() {
+      try {
+        var lang = localStorage.getItem('rawabit-lang');
+        if (!lang) {
+          var navLang = (navigator.languages && navigator.languages.length > 0)
+            ? navigator.languages[0].slice(0, 2)
+            : (navigator.language || 'ar').slice(0, 2);
+          lang = (navLang === 'fr' || navLang === 'en') ? navLang : 'ar';
+        }
+        if (lang === 'ar') {
+          document.documentElement.lang = 'ar';
+          document.documentElement.dir = 'rtl';
+        } else if (lang === 'fr') {
+          document.documentElement.lang = 'fr';
+          document.documentElement.dir = 'ltr';
+        } else {
+          document.documentElement.lang = 'en';
+          document.documentElement.dir = 'ltr';
+        }
+      } catch(e) {}
+    })();
+  </script>
+</head>
+<body>
+
+  <!-- Main Content Container (populated by router) -->
+  <main id="main-content"></main>
+
+  <!-- Application Entry Point -->
+  <script type="module" src="js/app.js"></script>
+
+</body>
+</html>
