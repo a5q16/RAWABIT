@@ -374,8 +374,11 @@ export async function streamAIResponse(userQuery, profileContext) {
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
     } catch (networkErr) {
-      console.warn('[Rawabit AI Chat] Primary endpoint failed, attempting direct cloud fallback...', networkErr);
-      const groqKey = (window.ENV && window.ENV.GROQ_API_KEY) || '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';
+      console.warn('[Rawabit AI Chat] Primary endpoint error, trying direct API if configured...', networkErr);
+      const groqKey = (typeof window !== 'undefined' && window.ENV && window.ENV.GROQ_API_KEY) ? window.ENV.GROQ_API_KEY : '';
+      if (!groqKey) {
+        throw new Error(`تعذر الاتصال بخادم الذكاء الاصطناعي: ${networkErr.message}`);
+      }
       const systemPrompt = `أنت المساعد الذكي لمنصة روابط الجزائرية (Rawabit) للكفاءات والمواهب الوطنية.
 مهمتك مساعدة المستخدمين في استكشاف الكفاءات والخبراء والمشاريع في مختلف ولايات الجزائر.
 ${profileContext ? `السياق الحالي للملف الشخصي: ${JSON.stringify(profileContext)}` : ''}

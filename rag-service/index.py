@@ -6,7 +6,7 @@ import os
 import json
 import httpx
 from pathlib import Path
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse, FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -22,11 +22,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-GROQ_API_KEY = os.environ.get(
-    "GROQ_API_KEY", 
-    "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"
-)
-
 BASE_DIR = Path(__file__).resolve().parent
 
 # Comprehensive static lookup directories
@@ -39,7 +34,6 @@ STATIC_DIRS = [
 ]
 
 def find_static_file(rel_path: str):
-    # Strip leading slashes
     clean_path = rel_path.lstrip("/\\")
     for sdir in STATIC_DIRS:
         if not sdir.is_dir():
@@ -78,8 +72,15 @@ def api_health():
 @app.post("/api/chat")
 async def chat_stream(request: Request):
     """
-    SSE chat streaming endpoint powered by Groq AI.
+    SSE chat streaming endpoint securely reading GROQ_API_KEY from environment variables.
     """
+    groq_api_key = os.environ.get("GROQ_API_KEY") or os.environ.get("VITE_GROQ_API_KEY")
+    if not groq_api_key:
+        raise HTTPException(
+            status_code=500, 
+            detail="GROQ_API_KEY is not configured in server environment variables."
+        )
+
     try:
         data = await request.json()
     except Exception:
@@ -99,7 +100,7 @@ async def chat_stream(request: Request):
     async def event_generator():
         url = "https://api.groq.com/openai/v1/chat/completions"
         headers = {
-            "Authorization": f"Bearer {GROQ_API_KEY}",
+            "Authorization": f"Bearer {groq_api_key}",
             "Content-Type": "application/json",
         }
         payload = {

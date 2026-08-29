@@ -25,8 +25,15 @@ export default async function handler(req) {
   }
 
   try {
+    const groqApiKey = process.env.GROQ_API_KEY;
+    if (!groqApiKey) {
+      return new Response(JSON.stringify({ error: 'GROQ_API_KEY is not configured in environment variables' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     const { query, context } = await req.json();
-    const groqApiKey = process.env.GROQ_API_KEY || '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';
 
     const systemPrompt = `أنت المساعد الذكي لمنصة روابط الجزائرية (Rawabit) للكفاءات والمواهب الوطنية.
 مهمتك مساعدة المستخدمين في استكشاف الكفاءات والخبراء والمشاريع في مختلف ولايات الجزائر.
@@ -72,59 +79,35 @@ ${context ? `السياق الحالي للملف الشخصي: ${JSON.stringify
       });
 
       if (!fallbackResponse.ok) {
-        throw new Error(`Groq API error: ${fallbackResponse.statusText}`);
+        const errText = await fallbackResponse.text();
+        return new Response(JSON.stringify({ error: `Groq AI API error: ${errText}` }), {
+          status: fallbackResponse.status,
+          headers: { 'Content-Type': 'application/json' },
+        });
       }
 
-      return createStreamResponse(fallbackResponse.body);
+      return new Response(fallbackResponse.body, {
+        headers: {
+          'Content-Type': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Connection': 'keep-alive',
+          'Access-Control-Allow-Origin': '*',
+        },
+      });
     }
 
-    return createStreamResponse(groqResponse.body);
-  } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
+    return new Response(groqResponse.body, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'Access-Control-Allow-Origin': '*',
+      },
+    });
+  } catch (error) {
+    return new Response(JSON.stringify({ error: error.message || 'Internal Server Error' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      headers: { 'Content-Type': 'application/json' },
     });
   }
-}
-
-function createStreamResponse(upstreamBody) {
-  const encoder = new TextEncoder();
-  const decoder = new TextDecoder('utf-8');
-
-  const transformStream = new TransformStream({
-    async transform(chunk, controller) {
-      const text = decoder.decode(chunk, { stream: true });
-      const lines = text.split('\n');
-
-      for (const line of lines) {
-        const trimmed = line.trim();
-        if (!trimmed || !trimmed.startsWith('data:')) continue;
-        const jsonStr = trimmed.replace(/^data:\s*/, '');
-        if (jsonStr === '[DONE]') {
-          controller.enqueue(encoder.encode('data: [DONE]\n\n'));
-          continue;
-        }
-        try {
-          const parsed = JSON.parse(jsonStr);
-          const content = parsed.choices?.[0]?.delta?.content || '';
-          if (content) {
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ chunk: content })}\n\n`));
-          }
-        } catch (_) {
-          // ignore parse chunk fragments
-        }
-      }
-    },
-  });
-
-  return new Response(upstreamBody.pipeThrough(transformStream), {
-    headers: {
-      'Content-Type': 'text/event-stream; charset=utf-8',
-      'Cache-Control': 'no-cache, no-transform',
-      'Connection': 'keep-alive',
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    },
-  });
 }
