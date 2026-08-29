@@ -20,10 +20,32 @@ export function getCurrentParams() {
 
 export function initRouter() {
     const handleHashChange = () => {
-        const hash = window.location.hash || '#/';
+        let rawHash = window.location.hash || '#/';
         
+        // Handle in-page smooth scrolling anchors on home page
+        if (['#ai-search', '#map-section', '#features', '#stats', '#hero'].includes(rawHash)) {
+            const targetEl = document.querySelector(rawHash);
+            if (targetEl) {
+                targetEl.scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+        }
+
+        if (!rawHash || rawHash === '#' || rawHash === '') {
+            rawHash = '#/';
+        }
+        if (!rawHash.startsWith('#/')) {
+            rawHash = '#/' + rawHash.replace(/^#/, '');
+        }
+
+        // Strip trailing slash if not root
+        const hash = (rawHash !== '#/' && rawHash.endsWith('/')) ? rawHash.slice(0, -1) : rawHash;
+        
+        let matched = false;
+
         for (const route of _routes) {
-            const routeSegments = route.pattern.split('/');
+            const routeClean = (route.pattern !== '#/' && route.pattern.endsWith('/')) ? route.pattern.slice(0, -1) : route.pattern;
+            const routeSegments = routeClean.split('/');
             const hashSegments = hash.split('/');
             
             if (routeSegments.length !== hashSegments.length) continue;
@@ -42,6 +64,7 @@ export function initRouter() {
             }
             
             if (match) {
+                matched = true;
                 _currentParams = params;
                 
                 const updateView = () => {
@@ -49,7 +72,6 @@ export function initRouter() {
                     // Update store.state.view based on the matched pattern
                     let viewName = 'home';
                     if (route.pattern !== '#/') {
-                        // Extract basic view name from pattern
                         viewName = route.pattern.split('/')[1] || 'home';
                     }
                     store.setState({ view: viewName });
@@ -62,6 +84,15 @@ export function initRouter() {
                 }
                 
                 break;
+            }
+        }
+
+        // Fallback to home if no route matched
+        if (!matched && _routes.length > 0) {
+            const homeRoute = _routes.find(r => r.pattern === '#/');
+            if (homeRoute) {
+                homeRoute.handler({});
+                store.setState({ view: 'home' });
             }
         }
     };

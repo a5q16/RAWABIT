@@ -1,0 +1,10 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/", "destination": "/rawabit_ui_v2/index.html" },
+    { "source": "/about", "destination": "/rawabit_ui_v2/index.html" },
+    { "source": "/why", "destination": "/rawabit_ui_v2/index.html" },
+    { "source": "/vision", "destination": "/rawabit_ui_v2/index.html" },
+    { "source": "/contact", "destination": "/rawabit_ui_v2/index.html" }
+  ]
+}

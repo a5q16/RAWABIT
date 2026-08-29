@@ -14,6 +14,8 @@ import { showLoader, hideLoader } from './components/loader.js';
 import { initStatsAnimation } from './components/stats.js';
 import { renderMap } from './components/map.js';
 import { renderProfiles } from './components/profiles.js';
+import { renderAbout, renderWhy, renderContact } from './components/pages.js';
+import { getPlatformStats } from './data/profiles-data.js';
 
 /**
  * Render the Minimalist Homepage Layout
@@ -186,7 +188,7 @@ export function renderHome() {
           <div class="stat-card">
             <div class="stat-number-wrap">
               <span class="stat-suffix" data-i18n="stats.stat1.suffix">${t('stats.stat1.suffix')}</span>
-              <span class="stat-number" data-target="58">0</span>
+              <span class="stat-number" data-stat="wilayas" data-target="58">0</span>
             </div>
             <p class="stat-desc" data-i18n="stats.stat1.label">${t('stats.stat1.label')}</p>
           </div>
@@ -194,7 +196,7 @@ export function renderHome() {
           <div class="stat-card">
             <div class="stat-number-wrap">
               <span class="stat-suffix" data-i18n="stats.stat2.suffix">${t('stats.stat2.suffix')}</span>
-              <span class="stat-number" data-target="1200">0</span>
+              <span class="stat-number" data-stat="talents" data-target="0">0</span>
             </div>
             <p class="stat-desc" data-i18n="stats.stat2.label">${t('stats.stat2.label')}</p>
           </div>
@@ -202,14 +204,14 @@ export function renderHome() {
           <div class="stat-card">
             <div class="stat-number-wrap">
               <span class="stat-suffix" data-i18n="stats.stat3.suffix">${t('stats.stat3.suffix')}</span>
-              <span class="stat-number" data-target="85">0</span>
+              <span class="stat-number" data-stat="categories" data-target="6">0</span>
             </div>
             <p class="stat-desc" data-i18n="stats.stat3.label">${t('stats.stat3.label')}</p>
           </div>
 
           <div class="stat-card">
             <div class="stat-number-wrap">
-              <span class="stat-number" data-target="98.4">0</span>
+              <span class="stat-number" data-stat="accuracy" data-target="98.4">0</span>
               <span class="stat-suffix" data-i18n="stats.stat4.suffix">${t('stats.stat4.suffix')}</span>
             </div>
             <p class="stat-desc" data-i18n="stats.stat4.label">${t('stats.stat4.label')}</p>
@@ -264,7 +266,33 @@ export function renderHome() {
     });
   }
 
-  // Initialize stats animation
+  // ── Fetch Real Live Supabase Platform Aggregate Statistics ──
+  getPlatformStats().then(stats => {
+    if (stats && main) {
+      const statWilayas = main.querySelector('[data-stat="wilayas"]');
+      const statTalents = main.querySelector('[data-stat="talents"]');
+      const statCategories = main.querySelector('[data-stat="categories"]');
+      const statAccuracy = main.querySelector('[data-stat="accuracy"]');
+
+      if (statWilayas && stats.coveredWilayas > 0) {
+        statWilayas.dataset.target = String(stats.coveredWilayas);
+      }
+      if (statTalents && stats.totalPersons > 0) {
+        statTalents.dataset.target = String(stats.totalPersons);
+      }
+      if (statCategories && stats.categoriesCount > 0) {
+        statCategories.dataset.target = String(stats.categoriesCount);
+      }
+      if (statAccuracy && stats.accuracyRate > 0) {
+        statAccuracy.dataset.target = String(stats.accuracyRate);
+      }
+
+      // Trigger animated count-up with live Supabase counts
+      initStatsAnimation(main);
+    }
+  });
+
+  // Initialize stats animation fallback
   initStatsAnimation(main);
 
   // ── Render Interactive Algeria SVG Map ──
@@ -299,25 +327,13 @@ async function init() {
 
   // Register routes (standard page navigation, no in-page jumping)
   registerRoute('#/', renderHome);
+  registerRoute('#/about', renderAbout);
+  registerRoute('#/why', () => renderWhy('why'));
+  registerRoute('#/vision', () => renderWhy('vision'));
+  registerRoute('#/contact', renderContact);
 
-  registerRoute('#/about', () => {
-    renderHome();
-  });
-
-  registerRoute('#/why', () => {
-    renderHome();
-  });
-
-  registerRoute('#/vision', () => {
-    renderHome();
-  });
-
-  registerRoute('#/contact', () => {
-    renderHome();
-  });
-
-  registerRoute('#/wilaya/:code', (params) => {
-    renderProfiles(params.code);
+  registerRoute('#/wilaya/:code', async (params) => {
+    await renderProfiles(params.code);
   });
 
   // Boot router
@@ -327,12 +343,23 @@ async function init() {
   hideLoader();
 
   // Re-render when language changes
-  store.subscribe('lang', () => {
-    if (store.state.view === 'home' || !window.location.hash || window.location.hash === '#/') {
+  store.subscribe('lang', async () => {
+    const rawHash = window.location.hash || '#/';
+    const baseRoute = rawHash.split('?')[0];
+
+    if (baseRoute === '#/' || baseRoute === '#' || !baseRoute) {
       renderHome();
-    } else if (window.location.hash.startsWith('#/wilaya/')) {
-      const code = window.location.hash.split('/')[2];
-      if (code) renderProfiles(code);
+    } else if (baseRoute === '#/about') {
+      renderAbout();
+    } else if (baseRoute === '#/why') {
+      renderWhy('why');
+    } else if (baseRoute === '#/vision') {
+      renderWhy('vision');
+    } else if (baseRoute === '#/contact') {
+      renderContact();
+    } else if (baseRoute.startsWith('#/wilaya/')) {
+      const code = baseRoute.split('/')[2];
+      if (code) await renderProfiles(code);
     }
   });
 }

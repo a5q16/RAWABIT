@@ -19,6 +19,16 @@
   <link rel="stylesheet" href="css/overlays.css" />
   <link rel="stylesheet" href="css/transitions.css" />
   <link rel="stylesheet" href="css/profiles.css" />
+  <link rel="stylesheet" href="css/chat.css" />
+
+  <!-- Supabase & AI Backend Runtime Environment Configuration -->
+  <script>
+    window.ENV = window.ENV || {
+      VITE_SUPABASE_URL: 'https://jxqrxlyostqhvsluzflw.supabase.co',
+      VITE_SUPABASE_ANON_KEY: '',
+      VITE_AI_API_URL: 'http://localhost:8000/api/chat'
+    };
+  </script>
 
   <!-- Prevent FOUC: set lang/dir early from localStorage or browser detection -->
   <script>

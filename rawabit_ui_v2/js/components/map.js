@@ -272,7 +272,7 @@ export function renderMap(container) {
     applyTransform();
   }, { passive: false });
 
-  // ── Mouse Drag-to-Pan (Zero CSS transitions for 60fps) ──
+  // ── Unified Mouse & Touch Drag-to-Pan (Zero CSS transitions for 60fps) ──
   svg.addEventListener('mousedown', (e) => {
     if (e.button !== 0 || isTransitioning) return;
     isDragging = true;
@@ -292,7 +292,9 @@ export function renderMap(container) {
     translateX += (ptCurr.x - ptPrev.x);
     translateY += (ptCurr.y - ptPrev.y);
 
-    dragDistance += Math.hypot(e.movementX || (e.clientX - lastScreenX), e.movementY || (e.clientY - lastScreenY));
+    const movementX = e.movementX ?? (e.clientX - lastScreenX);
+    const movementY = e.movementY ?? (e.clientY - lastScreenY);
+    dragDistance += Math.hypot(movementX, movementY);
     lastScreenX = e.clientX;
     lastScreenY = e.clientY;
 
@@ -306,16 +308,19 @@ export function renderMap(container) {
     svg.classList.remove('is-dragging');
   });
 
-  // ── Touch Support ──
+  // ── Touch Event Listeners for Mobile / Tablets ──
   let lastTouchDist = 0;
+
   svg.addEventListener('touchstart', (e) => {
     if (isTransitioning) return;
     mapGroup.classList.remove('smooth-zoom');
+
     if (e.touches.length === 1) {
       isDragging = true;
       dragDistance = 0;
       lastScreenX = e.touches[0].clientX;
       lastScreenY = e.touches[0].clientY;
+      svg.classList.add('is-dragging');
     } else if (e.touches.length === 2) {
       isDragging = false;
       lastTouchDist = Math.hypot(
@@ -327,24 +332,40 @@ export function renderMap(container) {
 
   svg.addEventListener('touchmove', (e) => {
     if (isTransitioning) return;
+
+    // Single-finger Pan
     if (e.touches.length === 1 && isDragging) {
+      // Prevent browser page scrolling during active map drag
+      if (e.cancelable) e.preventDefault();
+
+      const currentX = e.touches[0].clientX;
+      const currentY = e.touches[0].clientY;
+
+      const movementX = currentX - lastScreenX;
+      const movementY = currentY - lastScreenY;
+
       const ptPrev = screenToSvgCoords(lastScreenX, lastScreenY);
-      const ptCurr = screenToSvgCoords(e.touches[0].clientX, e.touches[0].clientY);
+      const ptCurr = screenToSvgCoords(currentX, currentY);
 
       translateX += (ptCurr.x - ptPrev.x);
       translateY += (ptCurr.y - ptPrev.y);
 
-      dragDistance += Math.hypot(e.touches[0].clientX - lastScreenX, e.touches[0].clientY - lastScreenY);
-      lastScreenX = e.touches[0].clientX;
-      lastScreenY = e.touches[0].clientY;
+      dragDistance += Math.hypot(movementX, movementY);
+      lastScreenX = currentX;
+      lastScreenY = currentY;
 
       clampBounds();
       applyTransform();
-    } else if (e.touches.length === 2) {
+    } 
+    // Two-finger Pinch Zoom
+    else if (e.touches.length === 2) {
+      if (e.cancelable) e.preventDefault();
+
       const dist = Math.hypot(
         e.touches[0].clientX - e.touches[1].clientX,
         e.touches[0].clientY - e.touches[1].clientY
       );
+
       if (lastTouchDist > 0) {
         const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
         const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
@@ -363,11 +384,26 @@ export function renderMap(container) {
       }
       lastTouchDist = dist;
     }
-  }, { passive: true });
+  }, { passive: false });
 
-  svg.addEventListener('touchend', () => {
+  svg.addEventListener('touchend', (e) => {
+    if (e.touches.length === 0) {
+      isDragging = false;
+      lastTouchDist = 0;
+      svg.classList.remove('is-dragging');
+    } else if (e.touches.length === 1) {
+      // Smoothly transition from pinch zoom back to 1-finger pan
+      isDragging = true;
+      lastScreenX = e.touches[0].clientX;
+      lastScreenY = e.touches[0].clientY;
+      lastTouchDist = 0;
+    }
+  });
+
+  svg.addEventListener('touchcancel', () => {
     isDragging = false;
     lastTouchDist = 0;
+    svg.classList.remove('is-dragging');
   });
 
   // ── Floating Control Buttons ──

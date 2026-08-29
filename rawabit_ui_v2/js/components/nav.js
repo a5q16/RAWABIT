@@ -33,9 +33,10 @@ export function createNav() {
 
       <!-- Navigation Links -->
       <div class="nav-links" id="nav-links">
-        <a class="nav-link active" href="#/" data-i18n="nav.home">${t('nav.home')}</a>
-        <a class="nav-link" href="#/about" data-i18n="nav.about">${t('nav.about')}</a>
-        <a class="nav-link" href="#/why" data-i18n="nav.why">${t('nav.why')}</a>
+        <a class="nav-link active" href="#/" data-i18n="nav.home" data-route="#/">${t('nav.home')}</a>
+        <a class="nav-link" href="#/about" data-i18n="nav.about" data-route="#/about">${t('nav.about')}</a>
+        <a class="nav-link" href="#/why" data-i18n="nav.why" data-route="#/why">${t('nav.why')}</a>
+        <a class="nav-link" href="#/contact" data-i18n="nav.contact" data-route="#/contact">${t('nav.contact')}</a>
       </div>
 
       <!-- Action & Language Switcher -->
@@ -61,13 +62,30 @@ export function createNav() {
 
       <!-- Mobile Dropdown Menu -->
       <div class="nav-mobile-menu" id="nav-mobile-menu">
-        <a class="nav-mobile-link active" href="#/" data-i18n="nav.home">${t('nav.home')}</a>
-        <a class="nav-mobile-link" href="#/about" data-i18n="nav.about">${t('nav.about')}</a>
-        <a class="nav-mobile-link" href="#/why" data-i18n="nav.why">${t('nav.why')}</a>
+        <a class="nav-mobile-link active" href="#/" data-i18n="nav.home" data-route="#/">${t('nav.home')}</a>
+        <a class="nav-mobile-link" href="#/about" data-i18n="nav.about" data-route="#/about">${t('nav.about')}</a>
+        <a class="nav-mobile-link" href="#/why" data-i18n="nav.why" data-route="#/why">${t('nav.why')}</a>
+        <a class="nav-mobile-link" href="#/contact" data-i18n="nav.contact" data-route="#/contact">${t('nav.contact')}</a>
       </div>
 
     </div>
   `;
+
+  // Update active links based on hash
+  function updateActiveNav() {
+    const rawHash = window.location.hash || '#/';
+    const baseRoute = rawHash.split('?')[0];
+
+    nav.querySelectorAll('[data-route]').forEach(link => {
+      const targetRoute = link.getAttribute('data-route');
+      const isMatch = (targetRoute === '#/' && (baseRoute === '#/' || baseRoute === '#' || !baseRoute)) ||
+                      (targetRoute !== '#/' && (baseRoute === targetRoute || (targetRoute === '#/why' && baseRoute === '#/vision')));
+      link.classList.toggle('active', isMatch);
+    });
+  }
+
+  window.addEventListener('hashchange', updateActiveNav);
+  updateActiveNav();
 
   // ── Language Button Trigger ──
   const langBtn = nav.querySelector('#nav-lang-btn');
@@ -100,6 +118,7 @@ export function createNav() {
     if (langLabel) {
       langLabel.textContent = langMap[newLang] || 'العربية';
     }
+    updateActiveNav();
   });
 
   return nav;

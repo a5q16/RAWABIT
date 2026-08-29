@@ -1,12 +1,14 @@
 /**
  * Rawabit v2 — The Mind-Map Expansion Experience
  * Radial satellite card expansion, animated SVG connector drawing,
- * blurred backdrop, centered main card with AI actions, and smooth retraction dismissal.
+ * blurred backdrop, centered main card with AI actions, and
+ * Cinematic Inward Pull & Breath Out Collapse Closing Animation.
  * Strictly Vanilla JS · 60FPS Hardware Accelerated
  */
 
 import { t } from '../i18n.js';
 import { store, pushOverlay, popOverlay } from '../store.js';
+import { openAIChat } from './chat.js';
 
 let activeOverlay = null;
 let activeResizeHandler = null;
@@ -14,8 +16,9 @@ let activeResizeHandler = null;
 /**
  * Open the Mind-Map experience for a specific profile
  * @param {Object} profile - Full competency profile data
+ * @param {HTMLElement} originCard - The original clicked card element in the grid
  */
-export function openMindMap(profile) {
+export function openMindMap(profile, originCard = null) {
   closeMindMap(false);
 
   store.setState({ selectedProfile: profile });
@@ -30,15 +33,15 @@ export function openMindMap(profile) {
   overlay.id = 'mindmap-overlay';
   activeOverlay = overlay;
 
-  const displayName = (lang === 'ar' && profile.nameAr) ? profile.nameAr : profile.name;
+  const displayName = (lang === 'ar' && profile.nameAr) ? profile.nameAr : (lang === 'fr' && profile.nameFr ? profile.nameFr : profile.name);
   const displayTitle = (lang === 'ar' && profile.titleAr) ? profile.titleAr : (lang === 'fr' && profile.titleFr ? profile.titleFr : profile.title);
-  const displayOrg = (lang === 'ar' && profile.organizationAr) ? profile.organizationAr : profile.organization;
-  const displayLoc = (lang === 'ar' && profile.locationAr) ? profile.locationAr : profile.location;
-  const displayBio = (lang === 'ar' && profile.bioAr) ? profile.bioAr : profile.bio;
+  const displayOrg = (lang === 'ar' && profile.organizationAr) ? profile.organizationAr : (lang === 'fr' && profile.organizationFr ? profile.organizationFr : profile.organization);
+  const displayLoc = (lang === 'ar' && profile.locationAr) ? profile.locationAr : (lang === 'fr' && profile.locationFr ? profile.locationFr : profile.location);
+  const displayBio = (lang === 'ar' && profile.bioAr) ? profile.bioAr : (lang === 'fr' && profile.bioFr ? profile.bioFr : profile.bio);
 
   overlay.innerHTML = `
     <!-- Top Bar Controls -->
-    <div class="mindmap-header-bar">
+    <div class="mindmap-header-bar" id="mindmap-header-bar">
       <div class="mindmap-title-badge">
         <span class="pulse-dot"></span>
         <span class="mindmap-badge-text" data-i18n="mindmap.verifiedBadge">${t('mindmap.verifiedBadge')}</span>
@@ -110,7 +113,7 @@ export function openMindMap(profile) {
             `).join('')}
           </div>
           <div class="node-tags-wrap">
-            ${(profile.tags || []).map(t => `<span class="competency-tag">${t}</span>`).join('')}
+            ${(profile.tags || []).map(tg => `<span class="competency-tag">${tg}</span>`).join('')}
           </div>
         </div>
       </div>
@@ -167,10 +170,11 @@ export function openMindMap(profile) {
               <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
             </svg>
           </div>
-          <div class="center-reliability-tag">
-            <span class="reliability-num">${profile.reliability}%</span>
-            <span class="reliability-label">${t('profiles.reliability')}</span>
-          </div>
+        </div>
+
+        <div class="center-reliability-tag">
+          <span class="reliability-num">${profile.reliability}%</span>
+          <span class="reliability-label" data-i18n="profiles.reliability">${t('profiles.reliability')}</span>
         </div>
 
         <div class="center-info">
@@ -191,9 +195,8 @@ export function openMindMap(profile) {
           <p class="center-bio">${displayBio}</p>
         </div>
 
-        <!-- ── 3. CENTER CARD ACTIONS (Ask AI & LinkedIn) ── -->
+        <!-- CENTER CARD ACTIONS (Ask AI & LinkedIn) -->
         <div class="center-actions-wrap">
-          <!-- Vibrant Green Ask AI Button -->
           <button class="btn-ask-ai" id="btn-ask-ai">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
               <path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/>
@@ -201,7 +204,6 @@ export function openMindMap(profile) {
             <span data-i18n="mindmap.askAi">${t('mindmap.askAi')}</span>
           </button>
 
-          <!-- Secondary Clean LinkedIn Button -->
           <a class="btn-linkedin" href="${profile.contact?.linkedin || '#'}" target="_blank" rel="noopener noreferrer">
             <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor">
               <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.25c-.9 0-1.63.73-1.63 1.63s.73 1.63 1.63 1.63 1.63-.73 1.63-1.63-.73-1.63-1.63-1.63z"/>
@@ -225,7 +227,12 @@ export function openMindMap(profile) {
   // ── 3. Wire AI Action Button ──
   const btnAskAi = overlay.querySelector('#btn-ask-ai');
   btnAskAi.addEventListener('click', () => {
-    alert(`🤖 AI Assistant initialized for ${displayName}.\nSpecialization: ${profile.title}\nReliability Index: ${profile.reliability}%`);
+    openAIChat({ 
+      type: 'profile', 
+      profile, 
+      displayName, 
+      displayTitle 
+    });
   });
 
   // ── 4. Dismissal Listeners ──
@@ -293,7 +300,6 @@ function drawConnectorLines() {
     if (!el) return;
     const nRect = el.getBoundingClientRect();
 
-    // Node anchor point relative to stage
     let nX = 0;
     let nY = 0;
 
@@ -301,16 +307,13 @@ function drawConnectorLines() {
     const nCenterY = (nRect.top + nRect.height / 2) - stageRect.top;
 
     if (nCenterX < cX) {
-      // Node is to the left of center card -> connect to its right edge
       nX = (nRect.right) - stageRect.left;
       nY = nCenterY;
     } else {
-      // Node is to the right of center card -> connect to its left edge
       nX = (nRect.left) - stageRect.left;
       nY = nCenterY;
     }
 
-    // Calculate smooth bezier control points
     const deltaX = (nX - cX) * 0.5;
     const cp1X = cX + deltaX;
     const cp1Y = cY;
@@ -333,8 +336,11 @@ function drawConnectorLines() {
 }
 
 /**
- * Close and unmount the Mind-Map experience smoothly
- * @param {boolean} animate - Whether to run smooth dismissal animation
+ * Cinematic 3-Step Mind-Map Close Sequence ("The Pull" & "The Breath Out")
+ * STEP 1: .is-collapsing triggers 4 satellites & SVG lines to retract into center card (0.4s).
+ * STEP 2: .breath-out triggers main center card to scale down to 0.9 and fade (0.3s).
+ * STEP 3: Fade out blurred background overlay, remove elements, and restore grid.
+ * @param {boolean} animate - Whether to run the collapse animation sequence
  */
 export function closeMindMap(animate = true) {
   if (!activeOverlay) return;
@@ -344,22 +350,79 @@ export function closeMindMap(animate = true) {
     activeResizeHandler = null;
   }
 
-  if (animate) {
-    activeOverlay.classList.add('closing');
-    activeOverlay.classList.remove('active');
-
-    setTimeout(() => {
-      if (activeOverlay && activeOverlay.parentNode) {
-        activeOverlay.parentNode.removeChild(activeOverlay);
-      }
-      activeOverlay = null;
-      popOverlay();
-    }, 350);
-  } else {
+  if (!animate) {
     if (activeOverlay.parentNode) {
       activeOverlay.parentNode.removeChild(activeOverlay);
     }
     activeOverlay = null;
     popOverlay();
+    return;
   }
+
+  const overlay = activeOverlay;
+  const stage = overlay.querySelector('#mindmap-stage') || overlay;
+  const centerCard = overlay.querySelector('#mindmap-center-card');
+  const satellites = overlay.querySelectorAll('.mindmap-node');
+
+  // Prevent multiple closing triggers
+  if (overlay.classList.contains('is-collapsing') || overlay.classList.contains('is-closing')) return;
+  overlay.classList.add('is-closing');
+
+  // ── STEP 1: "THE PULL" (Satellites & SVG lines retracting into center) ──
+  if (centerCard) {
+    const centerRect = centerCard.getBoundingClientRect();
+    const cX = centerRect.left + centerRect.width / 2;
+    const cY = centerRect.top + centerRect.height / 2;
+
+    satellites.forEach(node => {
+      const nRect = node.getBoundingClientRect();
+      const nX = nRect.left + nRect.width / 2;
+      const nY = nRect.top + nRect.height / 2;
+
+      // Exact vector towards center of main card
+      const deltaX = cX - nX;
+      const deltaY = cY - nY;
+      node.style.setProperty('--pull-x', `${deltaX}px`);
+      node.style.setProperty('--pull-y', `${deltaY}px`);
+    });
+  }
+
+  // Trigger CSS class for Step 1
+  overlay.classList.add('is-collapsing');
+  if (stage) stage.classList.add('is-collapsing');
+
+  // ── STEP 2: "THE BREATH OUT" (Wait 400ms for satellites to be fully swallowed) ──
+  setTimeout(() => {
+    if (!activeOverlay || !centerCard) return;
+
+    // Apply .breath-out class to main centered profile card
+    centerCard.classList.add('breath-out');
+
+    // ── STEP 3: RESTORE GRID (Wait 300ms after Step 2 begins) ──
+    setTimeout(() => {
+      if (!activeOverlay) return;
+
+      // Fade out the blurred background
+      activeOverlay.classList.add('is-fading-out');
+
+      setTimeout(() => {
+        if (activeOverlay && activeOverlay.parentNode) {
+          activeOverlay.parentNode.removeChild(activeOverlay);
+        }
+        activeOverlay = null;
+        store.setState({ selectedProfile: null });
+        popOverlay();
+      }, 250);
+
+    }, 300);
+
+  }, 400);
 }
+
+// Reactive language change re-render for active MindMap
+store.subscribe('lang', () => {
+  if (activeOverlay && store.state.selectedProfile) {
+    openMindMap(store.state.selectedProfile, null);
+  }
+});
+
