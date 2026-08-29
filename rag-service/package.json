@@ -1,0 +1,11 @@
+{
+  "name": "rawabit-tunnel",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "tunnel": "node tunnel.js"
+  },
+  "dependencies": {
+    "localtunnel": "^2.0.2"
+  }
+}
