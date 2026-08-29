@@ -1,0 +1,11 @@
+{
+  "name": "rawabit-platform",
+  "version": "2.0.0",
+  "description": "Rawabit — Algerian National Competency & Talent Platform",
+  "scripts": {
+    "build": "echo 'Building Rawabit Frontend'"
+  },
+  "keywords": ["rawabit", "algeria", "talents"],
+  "author": "Rawabit Team",
+  "license": "MIT"
+}

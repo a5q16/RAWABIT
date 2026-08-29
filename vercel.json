@@ -1,10 +1,11 @@
 {
+  "version": 2,
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/", "destination": "/rawabit_ui_v2/index.html" },
-    { "source": "/about", "destination": "/rawabit_ui_v2/index.html" },
-    { "source": "/why", "destination": "/rawabit_ui_v2/index.html" },
-    { "source": "/vision", "destination": "/rawabit_ui_v2/index.html" },
-    { "source": "/contact", "destination": "/rawabit_ui_v2/index.html" }
+    { "source": "/api/chat", "destination": "/api/chat.js" },
+    { "source": "/about", "destination": "/index.html" },
+    { "source": "/why", "destination": "/index.html" },
+    { "source": "/vision", "destination": "/index.html" },
+    { "source": "/contact", "destination": "/index.html" }
   ]
 }
