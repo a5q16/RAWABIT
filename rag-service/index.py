@@ -1,5 +1,5 @@
 """
-Rawabit Platform — FastAPI Application for Vercel
+Rawabit Platform — FastAPI Application for Vercel & Container Environments
 """
 
 import os
@@ -27,9 +27,45 @@ GROQ_API_KEY = os.environ.get(
     "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"
 )
 
-# Paths
 BASE_DIR = Path(__file__).resolve().parent
-PUBLIC_DIR = BASE_DIR / "public"
+
+# Comprehensive static lookup directories
+STATIC_DIRS = [
+    BASE_DIR,
+    BASE_DIR / "public",
+    BASE_DIR.parent / "public",
+    BASE_DIR.parent,
+    BASE_DIR / "rawabit_ui_v2"
+]
+
+def find_static_file(rel_path: str):
+    # Strip leading slashes
+    clean_path = rel_path.lstrip("/\\")
+    for sdir in STATIC_DIRS:
+        if not sdir.is_dir():
+            continue
+        p = (sdir / clean_path).resolve()
+        if p.is_file():
+            return p
+    return None
+
+def find_dir(dir_name: str):
+    clean_dir = dir_name.lstrip("/\\")
+    for sdir in STATIC_DIRS:
+        if not sdir.is_dir():
+            continue
+        d = (sdir / clean_dir).resolve()
+        if d.is_dir():
+            return d
+    return None
+
+css_dir = find_dir("css")
+if css_dir:
+    app.mount("/css", StaticFiles(directory=str(css_dir)), name="css")
+
+js_dir = find_dir("js")
+if js_dir:
+    app.mount("/js", StaticFiles(directory=str(js_dir)), name="js")
 
 @app.get("/health")
 def health_check():
@@ -128,20 +164,14 @@ async def chat_stream(request: Request):
         }
     )
 
-# Static file serving if public directory exists
-if PUBLIC_DIR.is_dir():
-    if (PUBLIC_DIR / "css").is_dir():
-        app.mount("/css", StaticFiles(directory=str(PUBLIC_DIR / "css")), name="css")
-    if (PUBLIC_DIR / "js").is_dir():
-        app.mount("/js", StaticFiles(directory=str(PUBLIC_DIR / "js")), name="js")
-
-    @app.get("/")
-    @app.get("/{full_path:path}")
-    async def serve_spa(full_path: str = ""):
-        file_path = PUBLIC_DIR / full_path
-        if file_path.is_file():
-            return FileResponse(file_path)
-        index_file = PUBLIC_DIR / "index.html"
-        if index_file.is_file():
-            return FileResponse(index_file)
-        return HTMLResponse("<h1>Rawabit Platform</h1><p>Running on Vercel</p>")
+@app.get("/")
+@app.get("/{full_path:path}")
+async def serve_frontend(full_path: str = ""):
+    if full_path:
+        f = find_static_file(full_path)
+        if f:
+            return FileResponse(f)
+    idx = find_static_file("index.html")
+    if idx:
+        return FileResponse(idx)
+    return HTMLResponse("<!DOCTYPE html><html><body><h1>Rawabit Platform</h1></body></html>")
