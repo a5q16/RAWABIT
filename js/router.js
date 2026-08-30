@@ -23,39 +23,43 @@ export function initRouter() {
         let rawHash = (typeof window !== 'undefined' && window.location && window.location.hash) ? window.location.hash : '#/';
 
         // ── Global Cleanup Routine: Destroy orphaned overlays & unlock body scroll on route change/back button ──
-        const overlaySelectors = [
-            '#hud-master-overlay',
-            '#hud-overlay',
-            '#mindmap-overlay',
-            '.wilaya-modal-overlay'
-        ];
-        overlaySelectors.forEach(sel => {
+        try {
+            const overlaySelectors = [
+                '#hud-master-overlay',
+                '#hud-overlay',
+                '#mindmap-overlay',
+                '.wilaya-modal-overlay'
+            ];
+            overlaySelectors.forEach(sel => {
+                if (typeof document !== 'undefined') {
+                    document.querySelectorAll(sel).forEach(el => {
+                        if (el && typeof el.remove === 'function') el.remove();
+                    });
+                }
+            });
+
+            // Close active AI chat drawer & backdrop with safe null checks
             if (typeof document !== 'undefined') {
-                document.querySelectorAll(sel).forEach(el => {
-                    if (el && typeof el.remove === 'function') el.remove();
-                });
-            }
-        });
+                const chatDrawer = document.getElementById('ai-drawer-panel');
+                const chatBackdrop = document.getElementById('ai-drawer-backdrop');
+                if (chatDrawer && chatDrawer.classList && chatDrawer.classList.contains('active')) {
+                    chatDrawer.classList.remove('active');
+                }
+                if (chatBackdrop && chatBackdrop.classList && chatBackdrop.classList.contains('active')) {
+                    chatBackdrop.classList.remove('active');
+                }
 
-        // Close active AI chat drawer & backdrop with safe null checks
-        if (typeof document !== 'undefined') {
-            const chatDrawer = document.getElementById('ai-drawer-panel');
-            const chatBackdrop = document.getElementById('ai-drawer-backdrop');
-            if (chatDrawer && chatDrawer.classList && chatDrawer.classList.contains('active')) {
-                chatDrawer.classList.remove('active');
+                // Force unlock body scroll
+                if (document.body && document.body.classList) {
+                    document.body.classList.remove('modal-open');
+                }
             }
-            if (chatBackdrop && chatBackdrop.classList && chatBackdrop.classList.contains('active')) {
-                chatBackdrop.classList.remove('active');
+            
+            if (store && typeof store.setState === 'function') {
+                store.setState({ overlayStack: [] });
             }
-
-            // Force unlock body scroll
-            if (document.body && document.body.classList) {
-                document.body.classList.remove('modal-open');
-            }
-        }
-        
-        if (store && typeof store.setState === 'function') {
-            store.setState({ overlayStack: [] });
+        } catch (e) {
+            console.warn('Router cleanup error:', e);
         }
 
         // Handle in-page smooth scrolling anchors on home page
