@@ -25,24 +25,18 @@ export function createLoader() {
 }
 
 export function showLoader() {
-    const loader = _loaderEl || createLoader();
-    loader.style.display = 'flex';
-    loader.classList.remove('hidden');
+    if (!_loaderEl) {
+        createLoader();
+    }
+    _loaderEl.classList.remove('hidden');
     
     return new Promise(resolve => {
-        setTimeout(resolve, 200);
+        setTimeout(resolve, 300);
     });
 }
 
 export function hideLoader() {
-    const loader = _loaderEl || document.getElementById('loader') || document.querySelector('.loader-screen');
-    if (loader) {
-        loader.classList.add('hidden');
-        loader.style.zIndex = '';
-        setTimeout(() => {
-            if (loader && loader.classList.contains('hidden')) {
-                loader.style.display = 'none';
-            }
-        }, 350);
+    if (_loaderEl) {
+        _loaderEl.classList.add('hidden');
     }
 }

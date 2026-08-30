@@ -567,8 +567,6 @@ export function renderMap(container) {
     clonedPath.setAttribute('id', `hud-clone-path-${wilaya.code}`);
     cloneWrap.appendChild(clonedPath);
 
-    isHUDActive = true;
-
     // Fade in translucent frosted blur backdrop
     requestAnimationFrame(() => {
       hudMaster.style.opacity = '1';
@@ -594,104 +592,112 @@ export function renderMap(container) {
       reveal4HUDCards(hudMaster);
     }, 500);
 
-    // ── Wire Click 2: Direct, Fail-Safe Entry to Wilaya Page ──
-    function executeClick2Enter(e) {
-      if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
-
-      // 1. Remove keyboard listener
-      if (hudEscHandler) {
-        document.removeEventListener('keydown', hudEscHandler);
-        hudEscHandler = null;
-      }
-
-      // 2. Unlock scroll and deactivate HUD state
-      isHUDActive = false;
-      if (document.body && document.body.classList) {
-        document.body.classList.remove('modal-open');
-      }
-
-      // 3. Smoothly fade out HUD and remove
-      if (hudMaster) {
-        hudMaster.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
-        hudMaster.style.opacity = '0';
-        hudMaster.style.transform = 'scale(1.02)';
-        setTimeout(() => {
-          if (hudMaster && hudMaster.parentNode) {
-            hudMaster.parentNode.removeChild(hudMaster);
-          }
-        }, 200);
-      }
-
-      // 4. Update store and navigate immediately
-      const wilayaCode = wilaya.code;
-      store.setState({ selectedWilaya: wilaya });
-      window.location.hash = `#/wilaya/${wilayaCode}`;
+    // ── Wire Click 2: "Breathe Out" Exit & Native Loader Elevation ──
+    function executeClick2BreatheOut(e) {
+      e.stopPropagation();
+      executeBreatheOutTransition(hudMaster, wilaya);
     }
 
-    const centerClone = hudMaster.querySelector('.hud-center-clone');
-    if (centerClone) centerClone.addEventListener('click', executeClick2Enter);
-    if (clonedPath) clonedPath.addEventListener('click', executeClick2Enter);
-    hudMaster.querySelectorAll('.hud-card').forEach(c => c.addEventListener('click', executeClick2Enter));
+    clonedPath.addEventListener('click', executeClick2BreatheOut);
+    hudMaster.querySelectorAll('.hud-card').forEach(c => c.addEventListener('click', executeClick2BreatheOut));
 
-    // ── Wire Reversal: Clicking backdrop or empty space ──
+    // ── Wire Reversal: Clicking blurred backdrop or pressing Escape ──
     hudMaster.addEventListener('click', (e) => {
-      if (e.target.closest('.hud-center-clone') || e.target.closest('.hud-card')) {
-        return;
-      }
-      reverseHUDToNational(hudMaster);
-    });
-
-    if (hudEscHandler) {
-      document.removeEventListener('keydown', hudEscHandler);
-      hudEscHandler = null;
-    }
-
-    hudEscHandler = (e) => {
-      if (e.key === 'Escape' && isHUDActive) {
+      if (e.target === hudMaster || e.target.id === 'hud-tether-canvas' || e.target.id === 'hud-cards-stage') {
         reverseHUDToNational(hudMaster);
       }
+    });
+
+    const escHandler = (e) => {
+      if (e.key === 'Escape' && isHUDActive) {
+        reverseHUDToNational(hudMaster);
+        document.removeEventListener('keydown', escHandler);
+      }
     };
-    document.addEventListener('keydown', hudEscHandler);
+    document.addEventListener('keydown', escHandler);
   }
 
   // Reveal 4 HUD Cards with spring animation
   function reveal4HUDCards(hudMaster) {
-    if (!hudMaster) return;
     const cards = hudMaster.querySelectorAll('.hud-card');
     cards.forEach((card, idx) => {
       setTimeout(() => {
-        if (card) {
-          card.style.transition = 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
-          card.style.opacity = '1';
-          card.style.transform = 'scale(1)';
-        }
+        card.style.transition = 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)';
+        card.style.opacity = '1';
+        card.style.transform = 'scale(1)';
       }, idx * 60);
     });
   }
 
+  // ── Click 2: "Breathe Out" Exit & Native Loader Elevation ──
+  function executeBreatheOutTransition(hudMaster, wilaya) {
+    const cards = hudMaster.querySelectorAll('.hud-card');
+    const tetherCanvas = hudMaster.querySelector('#hud-tether-canvas');
+    const topText = hudMaster.querySelector('.hud-top-text');
+    const cloneCenter = hudMaster.querySelector('.hud-center-clone');
+
+    // 1. Fade out cards, lines, top typography, and glowing Wilaya clone
+    cards.forEach(c => {
+      c.style.transition = 'all 0.25s ease';
+      c.style.transform = 'scale(0.95)';
+      c.style.opacity = '0';
+    });
+    if (tetherCanvas) tetherCanvas.style.opacity = '0';
+    if (topText) topText.style.opacity = '0';
+    if (cloneCenter) cloneCenter.style.opacity = '0';
+
+    // 2. Set background white and drop blur
+    hudMaster.style.background = '#ffffff';
+    hudMaster.style.backdropFilter = 'none';
+    hudMaster.style.webkitBackdropFilter = 'none';
+
+    // 3. EXPLICITLY elevate and trigger the platform's native loader
+    let nativeLoader = document.getElementById('loader') || document.querySelector('.loader-screen');
+    if (!nativeLoader) {
+      nativeLoader = createLoader();
+    }
+    if (nativeLoader) {
+      nativeLoader.style.zIndex = '999999'; // Force it above the HUD
+      nativeLoader.style.display = 'flex';
+      nativeLoader.classList.remove('hidden');
+    }
+
+    // 4. Wait 0.8s, then execute routing and destroy HUD & hide loader
+    setTimeout(() => {
+      const wilayaCode = wilaya.code;
+      store.setState({ selectedWilaya: wilaya });
+
+      // 1. Trigger the routing
+      window.location.hash = `#/wilaya/${wilayaCode}`;
+
+      // 2. DESTROY the HUD overlay so it stops blocking the screen
+      const hudOverlay = document.getElementById('hud-master-overlay') || document.getElementById('hud-overlay');
+      if (hudOverlay) hudOverlay.remove();
+      if (hudMaster) hudMaster.remove();
+      isHUDActive = false;
+
+      // 3. HIDE the native loader and reset its inline styles
+      if (nativeLoader) {
+        nativeLoader.classList.add('hidden');
+        nativeLoader.style.display = 'none';
+        nativeLoader.style.zIndex = '';
+      }
+
+      // 4. UNLOCK the body scroll
+      document.body.classList.remove('modal-open');
+    }, 800);
+  }
+
   // Reversal: Smoothly close HUD and zoom back out to national view
   function reverseHUDToNational(hudMaster) {
-    if (hudEscHandler) {
-      document.removeEventListener('keydown', hudEscHandler);
-      hudEscHandler = null;
-    }
-
-    isHUDActive = false;
-    if (document.body && document.body.classList) {
+    hudMaster.style.opacity = '0';
+    setTimeout(() => {
+      hudMaster.remove();
+      isHUDActive = false;
       document.body.classList.remove('modal-open');
-    }
+    }, 300);
 
-    if (hudMaster) {
-      hudMaster.style.transition = 'opacity 0.22s ease';
-      hudMaster.style.opacity = '0';
-      setTimeout(() => {
-        if (hudMaster && hudMaster.parentNode) {
-          hudMaster.parentNode.removeChild(hudMaster);
-        }
-      }, 220);
-    }
-
-    animateViewBox(BASE_VB, 450);
+    animateViewBox(BASE_VB, 550);
   }
 
   // Reactive language change
