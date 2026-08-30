@@ -37,6 +37,15 @@ export default async function handler(req) {
 
     const body = await req.json();
     const query = body.query || (body.messages && body.messages[body.messages.length - 1]?.content) || 'مرحبا';
+
+    // Enforce 2000 character security limit
+    if (typeof query === 'string' && query.length > 2000) {
+      return new Response(JSON.stringify({ error: 'Query too long. Maximum allowed length is 2000 characters.' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     const context = body.context;
 
     // Compose strict system prompt with isolated context

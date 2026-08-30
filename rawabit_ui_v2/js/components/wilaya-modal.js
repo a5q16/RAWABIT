@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Rawabit v2 — Cinematic Wilaya Intermediate Screen ("Antigravity" Experience)
  * Features:
  * 1. Full-Screen Backdrop Blur (backdrop-filter: blur(20px))
@@ -15,6 +15,7 @@ import { t } from '../i18n.js';
 import { navigate } from '../router.js';
 
 let activeModalOverlay = null;
+let activeKeyHandler = null;
 
 /**
  * Open the Cinematic Wilaya Intermediate Screen
@@ -212,15 +213,19 @@ export async function openWilayaIntermediateScreen(wilayaOrCode) {
   const backdrop = overlay.querySelector('#wilaya-modal-backdrop');
   backdrop.addEventListener('click', () => closeWilayaIntermediateScreen(true));
 
-  const keyHandler = (e) => {
+  if (activeKeyHandler) {
+    document.removeEventListener('keydown', activeKeyHandler);
+    activeKeyHandler = null;
+  }
+
+  activeKeyHandler = (e) => {
     if (e.key === 'Escape') {
       closeWilayaIntermediateScreen(true);
-      document.removeEventListener('keydown', keyHandler);
     } else if (e.key === 'Enter' && !e.target.closest('button')) {
       btnEnter.click();
     }
   };
-  document.addEventListener('keydown', keyHandler);
+  document.addEventListener('keydown', activeKeyHandler);
 }
 
 /**
@@ -293,6 +298,11 @@ async function hydrateWilayaData(overlay, wilayaCode, lang) {
  * Close the Wilaya Intermediate Screen smoothly
  */
 export function closeWilayaIntermediateScreen(animate = true) {
+  if (activeKeyHandler) {
+    document.removeEventListener('keydown', activeKeyHandler);
+    activeKeyHandler = null;
+  }
+
   if (!activeModalOverlay) return;
 
   const overlay = activeModalOverlay;

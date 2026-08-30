@@ -13,6 +13,7 @@ import { generateLuxuryAvatar } from '../data/profiles-data.js';
 
 let activeOverlay = null;
 let activeResizeHandler = null;
+let activeEscHandler = null;
 
 /**
  * Extract Verified Sourcing & Contact Channels from Profile Data
@@ -352,13 +353,17 @@ export function openMindMap(profile, originCard = null) {
   });
 
   // Dismiss on Escape key
-  const escHandler = (e) => {
+  if (activeEscHandler) {
+    document.removeEventListener('keydown', activeEscHandler);
+    activeEscHandler = null;
+  }
+
+  activeEscHandler = (e) => {
     if (e.key === 'Escape') {
       closeMindMap(true);
-      document.removeEventListener('keydown', escHandler);
     }
   };
-  document.addEventListener('keydown', escHandler);
+  document.addEventListener('keydown', activeEscHandler);
 
   // Resize handler for responsive line redraw
   activeResizeHandler = () => {
@@ -449,6 +454,11 @@ function drawConnectorLines() {
  */
 export function closeMindMap(animate = true) {
   if (!activeOverlay) return;
+
+  if (activeEscHandler) {
+    document.removeEventListener('keydown', activeEscHandler);
+    activeEscHandler = null;
+  }
 
   if (activeResizeHandler) {
     window.removeEventListener('resize', activeResizeHandler);

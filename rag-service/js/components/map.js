@@ -608,13 +608,17 @@ export function renderMap(container) {
       }
     });
 
-    const escHandler = (e) => {
+    if (hudEscHandler) {
+      document.removeEventListener('keydown', hudEscHandler);
+      hudEscHandler = null;
+    }
+
+    hudEscHandler = (e) => {
       if (e.key === 'Escape' && isHUDActive) {
         reverseHUDToNational(hudMaster);
-        document.removeEventListener('keydown', escHandler);
       }
     };
-    document.addEventListener('keydown', escHandler);
+    document.addEventListener('keydown', hudEscHandler);
   }
 
   // Reveal 4 HUD Cards with spring animation
@@ -631,6 +635,11 @@ export function renderMap(container) {
 
   // ── Click 2: "Breathe Out" Exit & Native Loader Elevation ──
   function executeBreatheOutTransition(hudMaster, wilaya) {
+    if (hudEscHandler) {
+      document.removeEventListener('keydown', hudEscHandler);
+      hudEscHandler = null;
+    }
+
     const cards = hudMaster.querySelectorAll('.hud-card');
     const tetherCanvas = hudMaster.querySelector('#hud-tether-canvas');
     const topText = hudMaster.querySelector('.hud-top-text');
@@ -690,6 +699,11 @@ export function renderMap(container) {
 
   // Reversal: Smoothly close HUD and zoom back out to national view
   function reverseHUDToNational(hudMaster) {
+    if (hudEscHandler) {
+      document.removeEventListener('keydown', hudEscHandler);
+      hudEscHandler = null;
+    }
+
     hudMaster.style.opacity = '0';
     setTimeout(() => {
       hudMaster.remove();

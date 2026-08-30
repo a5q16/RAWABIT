@@ -531,14 +531,18 @@ function scrollToBottom() {
 }
 
 /**
- * Robust HTML / Markdown Parser utilizing marked.js CDN with fallback
+ * Robust HTML / Markdown Parser utilizing marked.js & DOMPurify Sanitizer
  */
 function formatMarkdown(md) {
   if (!md) return '';
 
   if (typeof window !== 'undefined' && window.marked && typeof window.marked.parse === 'function') {
     try {
-      return window.marked.parse(md, { gfm: true, breaks: true });
+      const rawHtml = window.marked.parse(md, { gfm: true, breaks: true });
+      if (typeof window.DOMPurify !== 'undefined' && typeof window.DOMPurify.sanitize === 'function') {
+        return window.DOMPurify.sanitize(rawHtml);
+      }
+      return rawHtml;
     } catch (e) {
       console.warn('marked.parse error:', e);
     }
@@ -549,6 +553,10 @@ function formatMarkdown(md) {
   html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
   html = html.replace(/`(.*?)`/g, '<code>$1</code>');
   html = html.replace(/\n\n/g, '<br/><br/>').replace(/\n/g, '<br/>');
+  
+  if (typeof window !== 'undefined' && window.DOMPurify && typeof window.DOMPurify.sanitize === 'function') {
+    return window.DOMPurify.sanitize(html);
+  }
   return html;
 }
 
