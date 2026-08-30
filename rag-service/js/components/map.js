@@ -1,10 +1,9 @@
 ﻿/**
- * Rawabit v2 — Interactive Algeria Map with Clone-based Antigravity HUD
- * 1. Base Map: 1:1 Google Maps Panning, Crisp Visible Borders (stroke: #cbd5e1, stroke-width: 1px)
- * 2. Antigravity HUD: Clones clicked Wilaya path into a fixed full-screen blurred overlay on document.body
- * 3. Data Tethers: 2 SVG dashed lines connecting center to floating glassmorphism cards
- * 4. Interaction: Click background to close; click cloned shape to enter wilaya
- * Strictly Vanilla JS · 60FPS
+ * Rawabit v2 — Algeria Interactive Map
+ * 1. Base Map: 1:1 Google Maps Panning, Crisp 1px Borders, Elegant Tethered Hover Tooltip
+ * 2. Bulletproof Drag vs Click: Mousedown/Mousemove with 5px distance threshold
+ * 3. Safe Sci-Fi HUD: Fixed blur glass, cloned path aligned with exact viewBox, tether lines, and glassmorphic stats cards
+ * 4. Interaction: Click background to close; click glowing clone to enter Wilaya
  */
 
 import { MAP_VIEWBOX, WILAYAS } from './map-paths.js';
@@ -20,14 +19,15 @@ export function renderMap(container) {
   if (!container) return;
   container.innerHTML = '';
 
-  // State
+  // ── State Variables ──
   let vb = { ...BASE_VB };
-  let isPanning = false;
-  let startPointerX = 0;
-  let startPointerY = 0;
-  let startVbX = 0;
-  let startVbY = 0;
-  let totalDragDist = 0;
+  let isMouseDown = false;
+  let isMapDragging = false;
+  let dragStartX = 0;
+  let dragStartY = 0;
+  let lastMouseX = 0;
+  let lastMouseY = 0;
+  let isHovering = false;
 
   // ── 1. Create Main SVG Canvas ──
   const svg = document.createElementNS(SVG_NS, 'svg');
@@ -41,7 +41,62 @@ export function renderMap(container) {
     svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
   }
 
-  // ── 2. Render All Wilaya Paths with crisp borders ──
+  // ── 2. Create Tether Tooltip Layer ──
+  const tetherLayer = document.createElementNS(SVG_NS, 'svg');
+  tetherLayer.setAttribute('id', 'tether-layer');
+  tetherLayer.setAttribute('style', 'position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; overflow: visible; opacity: 0; transition: opacity 0.2s ease;');
+  tetherLayer.innerHTML = `
+    <line id="tether-line" stroke="#00875A" stroke-width="2" stroke-dasharray="3 3"/>
+    <circle id="tether-dot" r="5" fill="#FFFFFF" stroke="#00875A" stroke-width="2"/>
+  `;
+  container.appendChild(tetherLayer);
+
+  const tetherLine = tetherLayer.querySelector('#tether-line');
+  const tetherDot = tetherLayer.querySelector('#tether-dot');
+
+  // Floating Tether Tooltip Div
+  const tooltip = document.createElement('div');
+  tooltip.setAttribute('id', 'wilaya-tooltip');
+  tooltip.className = 'map-tether-tooltip';
+  tooltip.setAttribute('style', 'position: absolute; opacity: 0; pointer-events: none; z-index: 35; background: #FFFFFF; padding: 10px 18px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); font-weight: 800; font-family: inherit; color: #0F172A; border: 1.5px solid rgba(0,135,90,0.3); transition: opacity 0.2s ease; white-space: nowrap;');
+  container.appendChild(tooltip);
+
+  function updateTooltipPosition(clientX, clientY) {
+    const rect = container.getBoundingClientRect();
+    const mouseX = clientX - rect.left;
+    const mouseY = clientY - rect.top;
+
+    const tipW = tooltip.offsetWidth || 150;
+    const tipH = tooltip.offsetHeight || 42;
+
+    let posX = mouseX + 35;
+    let posY = mouseY - 55;
+
+    if (posX + tipW > rect.width - 15) {
+      posX = mouseX - tipW - 35;
+    }
+    if (posY < 15) {
+      posY = mouseY + 25;
+    }
+
+    tooltip.style.left = `${posX}px`;
+    tooltip.style.top = `${posY}px`;
+
+    if (tetherDot && tetherLine) {
+      tetherDot.setAttribute('cx', mouseX);
+      tetherDot.setAttribute('cy', mouseY);
+
+      const anchorX = (posX < mouseX) ? (posX + tipW) : posX;
+      const anchorY = posY + tipH / 2;
+
+      tetherLine.setAttribute('x1', mouseX);
+      tetherLine.setAttribute('y1', mouseY);
+      tetherLine.setAttribute('x2', anchorX);
+      tetherLine.setAttribute('y2', anchorY);
+    }
+  }
+
+  // ── 3. Render All Wilaya Paths with crisp borders ──
   WILAYAS.forEach(wilaya => {
     const g = document.createElementNS(SVG_NS, 'g');
     g.classList.add('wilaya-group');
@@ -55,90 +110,87 @@ export function renderMap(container) {
     g.appendChild(path);
     svg.appendChild(g);
 
-    // Hover tooltip
+    // Hover with thin connecting tether line
     path.addEventListener('mouseenter', (e) => {
-      if (isPanning) return;
+      if (isMapDragging) return;
       const lang = store.state.lang;
       const name = lang === 'ar' ? (wilaya.nameAr || wilaya.name) : (lang === 'en' ? (wilaya.nameEn || wilaya.name) : (wilaya.nameFr || wilaya.name));
-      hoverTooltip.textContent = `${wilaya.code} · ${name}`;
-      hoverTooltip.style.opacity = '1';
-      positionHoverTooltip(e.clientX, e.clientY);
+      isHovering = true;
+      tooltip.innerHTML = `<span style="color:#00875A; font-weight:900; margin-inline-end:6px;">${wilaya.code}</span> ${name}`;
+      tooltip.style.opacity = '1';
+      tetherLayer.style.opacity = '1';
+      updateTooltipPosition(e.clientX, e.clientY);
     });
 
     path.addEventListener('mouseleave', () => {
-      hoverTooltip.style.opacity = '0';
+      isHovering = false;
+      tooltip.style.opacity = '0';
+      tetherLayer.style.opacity = '0';
     });
 
-    // Click: Open Antigravity HUD Overlay via Cloned Path
+    // Path Click Handler
     path.addEventListener('click', (e) => {
       e.stopPropagation();
-      if (totalDragDist >= 5) return;
-      openAntigravityHUD(wilaya, path);
+      if (isMapDragging) return; // Ignore drags
+      triggerSciFiHUD(path, wilaya);
     });
   });
 
   container.appendChild(svg);
 
-  // ── 3. Hover Tooltip ──
-  const hoverTooltip = document.createElement('div');
-  hoverTooltip.className = 'map-hover-tooltip';
-  container.appendChild(hoverTooltip);
-
-  function positionHoverTooltip(clientX, clientY) {
-    const contRect = container.getBoundingClientRect();
-    let posX = clientX - contRect.left + 16;
-    let posY = clientY - contRect.top - 36;
-
-    if (posX + 160 > contRect.width) posX = clientX - contRect.left - 170;
-    if (posY < 10) posY = clientY - contRect.top + 20;
-
-    hoverTooltip.style.left = `${posX}px`;
-    hoverTooltip.style.top = `${posY}px`;
-  }
-
+  // Mousemove for hover tooltip update
   container.addEventListener('mousemove', (e) => {
-    if (!isPanning) {
-      positionHoverTooltip(e.clientX, e.clientY);
+    if (isHovering && !isMapDragging) {
+      updateTooltipPosition(e.clientX, e.clientY);
     }
   });
 
-  // ── 4. Natural 1:1 Pan Physics (Google Maps style) ──
-  svg.addEventListener('pointerdown', (e) => {
+  // ── 4. Bulletproof Click vs Drag Panning Logic ──
+  svg.addEventListener('mousedown', (e) => {
     if (e.button !== 0) return;
-    isPanning = true;
-    totalDragDist = 0;
-    startPointerX = e.clientX;
-    startPointerY = e.clientY;
-    startVbX = vb.x;
-    startVbY = vb.y;
-
-    svg.classList.add('is-dragging');
-    try { svg.setPointerCapture(e.pointerId); } catch (err) {}
+    isMouseDown = true;
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+    lastMouseX = e.clientX;
+    lastMouseY = e.clientY;
+    isMapDragging = false;
   });
 
-  svg.addEventListener('pointermove', (e) => {
-    if (!isPanning) return;
-    const dx = e.clientX - startPointerX;
-    const dy = e.clientY - startPointerY;
-    totalDragDist += Math.hypot(e.movementX || 0, e.movementY || 0);
+  svg.addEventListener('mousemove', (e) => {
+    if (!isMouseDown) return;
+    const dist = Math.hypot(e.clientX - dragStartX, e.clientY - dragStartY);
+    if (dist > 5) {
+      isMapDragging = true;
+      svg.classList.add('is-dragging');
+      if (isHovering) {
+        tooltip.style.opacity = '0';
+        tetherLayer.style.opacity = '0';
+      }
 
-    const rect = svg.getBoundingClientRect();
-    vb.x = startVbX - (dx / rect.width) * vb.w;
-    vb.y = startVbY - (dy / rect.height) * vb.h;
-    applyViewBox();
+      // 1:1 ViewBox Panning
+      const dx = e.clientX - lastMouseX;
+      const dy = e.clientY - lastMouseY;
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+
+      const rect = svg.getBoundingClientRect();
+      vb.x -= (dx / rect.width) * vb.w;
+      vb.y -= (dy / rect.height) * vb.h;
+      applyViewBox();
+    }
   });
 
-  function stopPanning(e) {
-    if (!isPanning) return;
-    isPanning = false;
+  window.addEventListener('mouseup', () => {
+    if (!isMouseDown) return;
+    isMouseDown = false;
     svg.classList.remove('is-dragging');
-    try { svg.releasePointerCapture(e.pointerId); } catch (err) {}
-  }
+    // Keep isMapDragging true momentarily to let click handler evaluate and ignore
+    setTimeout(() => {
+      isMapDragging = false;
+    }, 50);
+  });
 
-  svg.addEventListener('pointerup', stopPanning);
-  svg.addEventListener('pointercancel', stopPanning);
-
-  // ── 5. Natural Wheel Zoom ──
+  // ── 5. Smooth Wheel Zoom (Centered at Cursor) ──
   svg.addEventListener('wheel', (e) => {
     e.preventDefault();
     const rect = svg.getBoundingClientRect();
@@ -158,7 +210,7 @@ export function renderMap(container) {
     applyViewBox();
   }, { passive: false });
 
-  // ── 6. Floating Wilaya Search Bar ──
+  // ── 6. Floating Search Bar ──
   const searchBarWrap = document.createElement('div');
   searchBarWrap.className = 'map-floating-search-bar';
   searchBarWrap.innerHTML = `
@@ -233,7 +285,7 @@ export function renderMap(container) {
             searchDropdown.style.display = 'none';
             searchInput.value = '';
             searchClear.style.display = 'none';
-            openAntigravityHUD(targetW, pathEl);
+            triggerSciFiHUD(pathEl, targetW);
           }
         });
       });
@@ -249,7 +301,7 @@ export function renderMap(container) {
     });
   }
 
-  // ── 7. Controls ──
+  // ── 7. Map Controls ──
   const controls = document.createElement('div');
   controls.className = 'map-controls';
   controls.innerHTML = `
@@ -283,150 +335,129 @@ export function renderMap(container) {
   });
 
   // ══════════════════════════════════════════════════════════════
-  // ANTIGRAVITY HUD (EXACT CLONE-BASED OVERLAY TECHNIQUE)
+  // 8. THE SCI-FI HUD (SAFE CLONE METHOD)
   // ══════════════════════════════════════════════════════════════
-  function openAntigravityHUD(wilaya, pathEl) {
-    // Remove existing overlay if any
-    const existing = document.getElementById('hud-overlay');
-    if (existing) existing.remove();
+  function triggerSciFiHUD(pathEl, wilayaData) {
+    // Remove existing HUD elements if present
+    const oldGlass = document.getElementById('hud-glass');
+    const oldSvg = document.getElementById('hud-svg');
+    const oldCard1 = document.getElementById('hud-card-info');
+    const oldCard2 = document.getElementById('hud-card-cta');
+    if (oldGlass) oldGlass.remove();
+    if (oldSvg) oldSvg.remove();
+    if (oldCard1) oldCard1.remove();
+    if (oldCard2) oldCard2.remove();
+
+    tooltip.style.opacity = '0';
+    tetherLayer.style.opacity = '0';
+
+    // Step 1: Append #hud-glass overlay to body
+    const hudGlass = document.createElement('div');
+    hudGlass.id = 'hud-glass';
+    hudGlass.style.cssText = 'position: fixed; inset: 0; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); background: rgba(248, 250, 252, 0.75); z-index: 1000; cursor: pointer; opacity: 0; transition: opacity 0.3s ease;';
+    document.body.appendChild(hudGlass);
+
+    // Step 2: Create #hud-svg over the exact screen viewport
+    const mapRect = svg.getBoundingClientRect();
+    const hudSvg = document.createElementNS(SVG_NS, 'svg');
+    hudSvg.id = 'hud-svg';
+    hudSvg.setAttribute('viewBox', svg.getAttribute('viewBox'));
+    hudSvg.setAttribute('preserveAspectRatio', svg.getAttribute('preserveAspectRatio') || 'xMidYMid meet');
+    hudSvg.style.cssText = `position: fixed; left: ${mapRect.left}px; top: ${mapRect.top}px; width: ${mapRect.width}px; height: ${mapRect.height}px; z-index: 1001; pointer-events: none; overflow: visible;`;
+    document.body.appendChild(hudSvg);
+
+    // Step 3: Clone pathEl and apply glowing Antigravity styling
+    const clone = pathEl.cloneNode(true);
+    clone.style.cssText = 'fill: #059669; stroke: #34D399; stroke-width: 2px; vector-effect: non-scaling-stroke; filter: drop-shadow(0 0 30px #34D399); transform-origin: center; transform: scale(1.05); pointer-events: auto; cursor: pointer; transition: all 0.4s ease;';
+    hudSvg.appendChild(clone);
+
+    // Step 4: Calculate pathEl.getBoundingClientRect() and position HTML cards & SVG tether lines
+    const pRect = pathEl.getBoundingClientRect();
+    const centerX = pRect.left + pRect.width / 2;
+    const centerY = pRect.top + pRect.height / 2;
 
     const lang = store.state.lang;
-    const displayName = lang === 'ar' ? (wilaya.nameAr || wilaya.name) : (lang === 'en' ? (wilaya.nameEn || wilaya.name) : (wilaya.nameFr || wilaya.name));
+    const displayName = lang === 'ar' ? (wilayaData.nameAr || wilayaData.name) : (lang === 'en' ? (wilayaData.nameEn || wilayaData.name) : (wilayaData.nameFr || wilayaData.name));
 
-    // STEP A: Create fixed full-screen blurred overlay
-    const overlay = document.createElement('div');
-    overlay.id = 'hud-overlay';
-    overlay.style.cssText = 'position: fixed; inset: 0; z-index: 9999; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); background: rgba(248, 250, 252, 0.75); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.4s ease;';
-
-    // Calculate ViewBox for the cloned path
-    const bbox = pathEl.getBBox();
-    const pad = Math.max(bbox.width, bbox.height) * 0.25;
-    const cloneVb = `${bbox.x - pad} ${bbox.y - pad} ${bbox.width + pad * 2} ${bbox.height + pad * 2}`;
-
-    // STEP B: Wrapper for Cloned SVG Shape and Tethers
-    overlay.innerHTML = `
-      <div class="hud-stage-wrap" style="position: relative; width: 640px; height: 500px; max-width: 92vw; max-height: 85vh; display: flex; align-items: center; justify-content: center;">
-        
-        <!-- Tether Lines SVG Layer -->
-        <svg id="hud-tethers-layer" style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: 10;">
-          <line id="tether-line-1" stroke="#059669" stroke-width="1.5" stroke-dasharray="4" opacity="0" style="transition: opacity 0.4s ease;"/>
-          <line id="tether-line-2" stroke="#059669" stroke-width="1.5" stroke-dasharray="4" opacity="0" style="transition: opacity 0.4s ease;"/>
-        </svg>
-
-        <!-- Center Cloned SVG Container -->
-        <div id="hud-clone-container" style="position: relative; z-index: 20; width: 260px; height: 260px; display: flex; align-items: center; justify-content: center;">
-          <svg id="hud-clone-svg" viewBox="${cloneVb}" style="width: 100%; height: 100%; overflow: visible;"></svg>
-        </div>
-
-        <!-- Floating Glassmorphism Cards -->
-        <div class="hud-card" id="hud-card-info" style="top: 30px; right: 20px; z-index: 30;">
-          <h3 style="margin: 0 0 6px; font-size: 1.25rem; font-weight: 800; color: #0F172A;">${displayName} <span style="font-size: 0.85rem; color: #059669;">(${wilaya.code})</span></h3>
-          <p style="margin: 0; font-size: 0.9rem; font-weight: 700; color: #475569;">Verified Talents: <span id="hud-talent-count" style="color: #059669; font-weight: 900;">...</span></p>
-        </div>
-
-        <div class="hud-card cta-card" id="hud-card-cta" style="bottom: 30px; right: 20px; z-index: 30; cursor: pointer;">
-          <span style="font-size: 0.92rem; font-weight: 800; color: #059669;">✨ Click shape again to enter →</span>
-        </div>
-
-      </div>
+    // Card 1 (Info Card)
+    const cardInfo = document.createElement('div');
+    cardInfo.className = 'hud-card';
+    cardInfo.id = 'hud-card-info';
+    cardInfo.style.cssText = `position: fixed; left: ${Math.min(centerX + 60, window.innerWidth - 280)}px; top: ${Math.max(centerY - 100, 40)}px; z-index: 1002; opacity: 0; transform: translateY(10px); transition: all 0.35s ease;`;
+    cardInfo.innerHTML = `
+      <h3 style="margin: 0 0 6px; font-size: 1.2rem; font-weight: 800; color: #0F172A;">${displayName} <span style="font-size: 0.85rem; color: #059669;">(${wilayaData.code})</span></h3>
+      <p style="margin: 0; font-size: 0.9rem; font-weight: 700; color: #475569;">Verified Talents: <span id="hud-talent-count" style="color: #059669; font-weight: 900;">...</span></p>
     `;
+    document.body.appendChild(cardInfo);
 
-    // STEP C: Deep CLONE the clicked Wilaya's SVG path
-    const cloneSvg = overlay.querySelector('#hud-clone-svg');
-    const clonedPath = pathEl.cloneNode(true);
+    // Card 2 (CTA Card)
+    const cardCta = document.createElement('div');
+    cardCta.className = 'hud-card cta-card';
+    cardCta.id = 'hud-card-cta';
+    cardCta.style.cssText = `position: fixed; left: ${Math.min(centerX + 60, window.innerWidth - 280)}px; top: ${Math.min(centerY + 30, window.innerHeight - 90)}px; z-index: 1002; cursor: pointer; opacity: 0; transform: translateY(10px); transition: all 0.35s ease;`;
+    cardCta.innerHTML = `
+      <span style="font-size: 0.92rem; font-weight: 800; color: #059669;">✨ Click shape again to enter →</span>
+    `;
+    document.body.appendChild(cardCta);
 
-    // STEP D: Apply the "Antigravity" styles to the CLONE
-    clonedPath.style.cssText = 'fill: #059669; stroke: #34D399; stroke-width: 2px; filter: drop-shadow(0 20px 40px rgba(5, 150, 105, 0.5)); transform: scale(1.1) translateY(-10px); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer;';
-    clonedPath.setAttribute('id', `cloned-wilaya-${wilaya.code}`);
-    cloneSvg.appendChild(clonedPath);
-
-    document.body.appendChild(overlay);
-
-    // Fade in overlay smoothly
-    requestAnimationFrame(() => {
-      overlay.style.opacity = '1';
-      drawTetherLines(overlay);
-    });
-
-    // Fetch and hydrate real Supabase count
-    getProfilesByWilaya(wilaya.code).then(res => {
-      const countEl = overlay.querySelector('#hud-talent-count');
+    // Fetch live Supabase talents count
+    getProfilesByWilaya(wilayaData.code).then(res => {
+      const countEl = cardInfo.querySelector('#hud-talent-count');
       if (countEl) countEl.textContent = Array.isArray(res) ? res.length : '30+';
     }).catch(() => {
-      const countEl = overlay.querySelector('#hud-talent-count');
+      const countEl = cardInfo.querySelector('#hud-talent-count');
       if (countEl) countEl.textContent = '30+';
     });
 
-    // ── Interaction: Click on Cloned Wilaya Path or CTA card -> Enter Mode ──
-    function handleEnter(e) {
-      e.stopPropagation();
-      overlay.style.opacity = '0';
+    // Fade in HUD
+    requestAnimationFrame(() => {
+      hudGlass.style.opacity = '1';
+      cardInfo.style.opacity = '1';
+      cardInfo.style.transform = 'translateY(0)';
+      cardCta.style.opacity = '1';
+      cardCta.style.transform = 'translateY(0)';
+    });
+
+    // Step 5: Interaction logic
+    function closeHUD() {
+      hudGlass.style.opacity = '0';
+      cardInfo.style.opacity = '0';
+      cardCta.style.opacity = '0';
       setTimeout(() => {
-        overlay.remove();
-        store.setState({ selectedWilaya: wilaya });
-        navigate(`#/wilaya/${wilaya.code}`);
+        hudGlass.remove();
+        hudSvg.remove();
+        cardInfo.remove();
+        cardCta.remove();
       }, 300);
     }
 
-    clonedPath.addEventListener('click', handleEnter);
-    const ctaCard = overlay.querySelector('#hud-card-cta');
-    if (ctaCard) ctaCard.addEventListener('click', handleEnter);
+    function routeToWilaya(e) {
+      e.stopPropagation();
+      hudGlass.style.opacity = '0';
+      cardInfo.style.opacity = '0';
+      cardCta.style.opacity = '0';
+      setTimeout(() => {
+        hudGlass.remove();
+        hudSvg.remove();
+        cardInfo.remove();
+        cardCta.remove();
+        store.setState({ selectedWilaya: wilayaData });
+        navigate(`#/wilaya/${wilayaData.code}`);
+      }, 300);
+    }
 
-    // ── Interaction: Click on Background -> Smoothly close and remove ──
-    overlay.addEventListener('click', (e) => {
-      if (e.target === overlay || e.target.id === 'hud-tethers-layer' || e.target.classList.contains('hud-stage-wrap')) {
-        overlay.style.opacity = '0';
-        setTimeout(() => overlay.remove(), 350);
-      }
-    });
+    hudGlass.addEventListener('click', closeHUD);
+    clone.addEventListener('click', routeToWilaya);
+    cardCta.addEventListener('click', routeToWilaya);
 
-    // Escape key closes HUD
-    const escHandler = (e) => {
+    // Escape listener
+    const escListener = (e) => {
       if (e.key === 'Escape') {
-        overlay.style.opacity = '0';
-        setTimeout(() => overlay.remove(), 350);
-        document.removeEventListener('keydown', escHandler);
+        closeHUD();
+        document.removeEventListener('keydown', escListener);
       }
     };
-    document.addEventListener('keydown', escHandler);
-  }
-
-  // Draw the 2 SVG lines from the center of the cloned shape to the cards
-  function drawTetherLines(overlay) {
-    const stage = overlay.querySelector('.hud-stage-wrap');
-    const clone = overlay.querySelector('#hud-clone-container');
-    const card1 = overlay.querySelector('#hud-card-info');
-    const card2 = overlay.querySelector('#hud-card-cta');
-    const line1 = overlay.querySelector('#tether-line-1');
-    const line2 = overlay.querySelector('#tether-line-2');
-
-    if (!stage || !clone || !card1 || !card2 || !line1 || !line2) return;
-
-    const sRect = stage.getBoundingClientRect();
-    const cRect = clone.getBoundingClientRect();
-    const c1Rect = card1.getBoundingClientRect();
-    const c2Rect = card2.getBoundingClientRect();
-
-    const originX = cRect.left - sRect.left + cRect.width / 2;
-    const originY = cRect.top - sRect.top + cRect.height / 2;
-
-    // Line 1 to Card 1 (Top-Right)
-    const target1X = c1Rect.left - sRect.left;
-    const target1Y = c1Rect.top - sRect.top + c1Rect.height / 2;
-    line1.setAttribute('x1', originX);
-    line1.setAttribute('y1', originY);
-    line1.setAttribute('x2', target1X);
-    line1.setAttribute('y2', target1Y);
-    line1.style.opacity = '1';
-
-    // Line 2 to Card 2 (Bottom-Right)
-    const target2X = c2Rect.left - sRect.left;
-    const target2Y = c2Rect.top - sRect.top + c2Rect.height / 2;
-    line2.setAttribute('x1', originX);
-    line2.setAttribute('y1', originY);
-    line2.setAttribute('x2', target2X);
-    line2.setAttribute('y2', target2Y);
-    line2.style.opacity = '1';
+    document.addEventListener('keydown', escListener);
   }
 
   // Reactive language change
