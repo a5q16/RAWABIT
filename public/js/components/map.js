@@ -594,16 +594,44 @@ export function renderMap(container) {
       reveal4HUDCards(hudMaster);
     }, 500);
 
-    // ── Wire Click 2: "Breathe Out" Exit & Native Loader Elevation ──
-    function executeClick2BreatheOut(e) {
+    // ── Wire Click 2: Direct, Fail-Safe Entry to Wilaya Page ──
+    function executeClick2Enter(e) {
       if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
-      executeBreatheOutTransition(hudMaster, wilaya);
+
+      // 1. Remove keyboard listener
+      if (hudEscHandler) {
+        document.removeEventListener('keydown', hudEscHandler);
+        hudEscHandler = null;
+      }
+
+      // 2. Unlock scroll and deactivate HUD state
+      isHUDActive = false;
+      if (document.body && document.body.classList) {
+        document.body.classList.remove('modal-open');
+      }
+
+      // 3. Smoothly fade out HUD and remove
+      if (hudMaster) {
+        hudMaster.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+        hudMaster.style.opacity = '0';
+        hudMaster.style.transform = 'scale(1.02)';
+        setTimeout(() => {
+          if (hudMaster && hudMaster.parentNode) {
+            hudMaster.parentNode.removeChild(hudMaster);
+          }
+        }, 200);
+      }
+
+      // 4. Update store and navigate immediately
+      const wilayaCode = wilaya.code;
+      store.setState({ selectedWilaya: wilaya });
+      window.location.hash = `#/wilaya/${wilayaCode}`;
     }
 
     const centerClone = hudMaster.querySelector('.hud-center-clone');
-    if (centerClone) centerClone.addEventListener('click', executeClick2BreatheOut);
-    if (clonedPath) clonedPath.addEventListener('click', executeClick2BreatheOut);
-    hudMaster.querySelectorAll('.hud-card').forEach(c => c.addEventListener('click', executeClick2BreatheOut));
+    if (centerClone) centerClone.addEventListener('click', executeClick2Enter);
+    if (clonedPath) clonedPath.addEventListener('click', executeClick2Enter);
+    hudMaster.querySelectorAll('.hud-card').forEach(c => c.addEventListener('click', executeClick2Enter));
 
     // ── Wire Reversal: Clicking backdrop or empty space ──
     hudMaster.addEventListener('click', (e) => {
@@ -641,84 +669,6 @@ export function renderMap(container) {
     });
   }
 
-  // ── Click 2: "Breathe Out" Exit & Native Loader Elevation ──
-  function executeBreatheOutTransition(hudMaster, wilaya) {
-    if (hudEscHandler) {
-      document.removeEventListener('keydown', hudEscHandler);
-      hudEscHandler = null;
-    }
-
-    if (!hudMaster || !wilaya) {
-      if (wilaya) window.location.hash = `#/wilaya/${wilaya.code}`;
-      return;
-    }
-
-    const cards = hudMaster.querySelectorAll('.hud-card');
-    const tetherCanvas = hudMaster.querySelector('#hud-tether-canvas');
-    const topText = hudMaster.querySelector('.hud-top-text');
-    const cloneCenter = hudMaster.querySelector('.hud-center-clone');
-
-    // 1. Fade out cards, lines, top typography, and glowing Wilaya clone
-    cards.forEach(c => {
-      if (c) {
-        c.style.transition = 'all 0.25s ease';
-        c.style.transform = 'scale(0.95)';
-        c.style.opacity = '0';
-      }
-    });
-    if (tetherCanvas) tetherCanvas.style.opacity = '0';
-    if (topText) topText.style.opacity = '0';
-    if (cloneCenter) cloneCenter.style.opacity = '0';
-
-    // 2. Set background white and drop blur
-    hudMaster.style.background = '#ffffff';
-    hudMaster.style.backdropFilter = 'none';
-    hudMaster.style.webkitBackdropFilter = 'none';
-
-    // 3. EXPLICITLY elevate and trigger the platform's native loader
-    let nativeLoader = document.getElementById('loader') || document.querySelector('.loader-screen');
-    if (!nativeLoader) {
-      nativeLoader = createLoader();
-    }
-    if (nativeLoader) {
-      nativeLoader.style.zIndex = '999999';
-      nativeLoader.style.display = 'flex';
-      nativeLoader.classList.remove('hidden');
-    }
-
-    // 4. Wait 0.6s, then execute routing and destroy HUD & hide loader
-    setTimeout(() => {
-      try {
-        const wilayaCode = wilaya.code;
-        store.setState({ selectedWilaya: wilaya });
-
-        // 1. Trigger the routing
-        window.location.hash = `#/wilaya/${wilayaCode}`;
-
-        // 2. DESTROY the HUD overlay so it stops blocking the screen
-        const hudOverlay = document.getElementById('hud-master-overlay') || document.getElementById('hud-overlay');
-        if (hudOverlay && hudOverlay.parentNode) hudOverlay.parentNode.removeChild(hudOverlay);
-        if (hudMaster && hudMaster.parentNode) hudMaster.parentNode.removeChild(hudMaster);
-        isHUDActive = false;
-
-        // 3. HIDE the native loader and reset its inline styles
-        hideLoader();
-
-        // 4. UNLOCK the body scroll
-        if (document.body && document.body.classList) {
-          document.body.classList.remove('modal-open');
-        }
-      } catch (err) {
-        console.error('Routing transition error:', err);
-        window.location.hash = `#/wilaya/${wilaya.code}`;
-        hideLoader();
-        if (document.body && document.body.classList) {
-          document.body.classList.remove('modal-open');
-        }
-      }
-    }, 600);
-  }
-
   // Reversal: Smoothly close HUD and zoom back out to national view
   function reverseHUDToNational(hudMaster) {
     if (hudEscHandler) {
@@ -726,25 +676,22 @@ export function renderMap(container) {
       hudEscHandler = null;
     }
 
+    isHUDActive = false;
+    if (document.body && document.body.classList) {
+      document.body.classList.remove('modal-open');
+    }
+
     if (hudMaster) {
+      hudMaster.style.transition = 'opacity 0.22s ease';
       hudMaster.style.opacity = '0';
       setTimeout(() => {
         if (hudMaster && hudMaster.parentNode) {
           hudMaster.parentNode.removeChild(hudMaster);
         }
-        isHUDActive = false;
-        if (document.body && document.body.classList) {
-          document.body.classList.remove('modal-open');
-        }
-      }, 250);
-    } else {
-      isHUDActive = false;
-      if (document.body && document.body.classList) {
-        document.body.classList.remove('modal-open');
-      }
+      }, 220);
     }
 
-    animateViewBox(BASE_VB, 550);
+    animateViewBox(BASE_VB, 450);
   }
 
   // Reactive language change

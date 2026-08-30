@@ -108,7 +108,11 @@ export function initRouter() {
                 _currentParams = params;
                 
                 const updateView = () => {
-                    route.handler(params);
+                    try {
+                        route.handler(params);
+                    } catch (err) {
+                        console.error('Route handler error:', err);
+                    }
                     // Update store.state.view based on the matched pattern
                     let viewName = 'home';
                     if (route.pattern !== '#/') {
@@ -117,9 +121,13 @@ export function initRouter() {
                     store.setState({ view: viewName });
                 };
 
-                if (document.startViewTransition) {
-                    document.startViewTransition(updateView);
-                } else {
+                try {
+                    if (document.startViewTransition) {
+                        document.startViewTransition(updateView);
+                    } else {
+                        updateView();
+                    }
+                } catch (e) {
                     updateView();
                 }
                 
