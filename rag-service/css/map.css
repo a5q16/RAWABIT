@@ -1,32 +1,30 @@
-/* ==========================================================================
-   HIGH-PERFORMANCE ALGERIA SVG MAP — 60FPS GPU ACCELERATED
-   Strictly Light Theme · Zero Lag · Tethered Tooltip · Saudi-Gov-Tech
+﻿/* ==========================================================================
+   CINEMATIC ANTIGRAVITY ALGERIA SVG MAP — 60FPS GPU ACCELERATED
+   100% 1:1 Google Maps Panning · Frosted Glass Isolation · Optic Tethers
    ========================================================================== */
 
 .map-card-wrapper {
   position: relative;
   width: 100%;
-  height: 640px;
-  min-height: 640px;
-  background: var(--color-surface);
+  height: 680px;
+  min-height: 680px;
+  background: #FFFFFF;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.08);
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: box-shadow var(--transition-fast);
+  transition: box-shadow 0.3s ease;
 }
 
 .map-card-wrapper:hover {
-  box-shadow: var(--shadow-xl);
+  box-shadow: 0 28px 64px rgba(0, 0, 0, 0.12);
 }
 
 /* ── SVG ROOT CANVAS ── */
 .map-svg {
-  position: relative;
-  z-index: 42;
   width: 100%;
   height: 100%;
   display: block;
@@ -35,263 +33,82 @@
   cursor: grab;
   outline: none;
   background: transparent;
-  pointer-events: auto;
 }
 
 .map-svg.is-dragging {
   cursor: grabbing !important;
 }
 
-/* ── MAP ROOT TRANSFORM GROUP (GPU ACCELERATED) ── */
-#map-group {
-  transform-origin: 0 0;
-  will-change: transform;
-  /* ZERO CSS transition by default for 60fps pan/zoom */
-}
-
-/* Added ONLY during click-to-center / programmatic zoom */
-#map-group.smooth-zoom {
-  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-/* ── WILAYA SVG PATHS (CRISP BORDERS & CLEAN EMPTY LOOK) ── */
+/* ── WILAYA SVG PATHS (CRISP BORDERS & LUXURY HOVER) ── */
 .wilaya-group {
   cursor: pointer;
   outline: none;
 }
 
 .wilaya-path {
-  fill: #F4F5F7;
-  stroke: #d1d5db;
-  stroke-width: 1.5px;
+  fill: #F1F5F9;
+  stroke: #CBD5E1;
+  stroke-width: 0.08;
   vector-effect: non-scaling-stroke;
   stroke-linejoin: round;
   stroke-linecap: round;
-  transition: fill 0.16s ease, stroke 0.16s ease, opacity 0.3s ease;
+  transition: fill 0.2s cubic-bezier(0.16, 1, 0.3, 1), stroke 0.2s cubic-bezier(0.16, 1, 0.3, 1), filter 0.2s ease;
 }
 
 .wilaya-group:hover .wilaya-path {
-  fill: var(--color-accent) !important; /* #00875A */
-  stroke: var(--color-accent) !important;
-  stroke-width: 2px;
+  fill: #00875A !important;
+  stroke: #34D399 !important;
+  filter: drop-shadow(0 0 8px rgba(0, 135, 90, 0.65));
 }
 
-.wilaya-group.active .wilaya-path,
-.wilaya-path.active {
-  fill: var(--color-accent) !important;
-  stroke: #FFFFFF !important;
-  stroke-width: 2.5px;
-}
-
-.wilaya-path.faded {
-  opacity: 0.12;
-  pointer-events: none;
-}
-
-/* ── 2-SECOND FLASHING BORDER ON CLICK (.is-selected-flash) ── */
-@keyframes pulseSelectedBorder {
-  0% {
-    stroke: #00875A;
-    stroke-width: 2px;
-    fill: rgba(0, 135, 90, 0.12);
-    filter: drop-shadow(0 0 4px rgba(0, 135, 90, 0.3));
-  }
-  100% {
-    stroke: #34d399;
-    stroke-width: 4px;
-    fill: rgba(0, 135, 90, 0.24);
-    filter: drop-shadow(0 0 10px rgba(0, 135, 90, 0.65));
-  }
-}
-
-.is-selected-flash {
-  animation: pulseSelectedBorder 0.8s ease-in-out infinite alternate !important;
-}
-
-/* ── TETHERED SMART TOOLTIP LAYER & CARD (SOLID WHITE LINE & WHITE DOT) ── */
-#tether-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 9999;
-  pointer-events: none;
-  overflow: visible;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-#tether-line {
-  stroke: #FFFFFF;
-  stroke-width: 2;
-  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4));
-}
-
-#tether-dot {
-  fill: #FFFFFF;
-  stroke: #00875A;
-  stroke-width: 1.5;
-  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4));
-}
-
-#wilaya-tooltip {
+/* ── HOVER TOOLTIP ── */
+.map-hover-tooltip {
   position: absolute;
   opacity: 0;
   pointer-events: none;
-  z-index: 10000;
-  background: #FFFFFF;
-  padding: 10px 20px;
+  z-index: 60;
+  background: rgba(15, 23, 42, 0.92);
+  color: #FFFFFF;
+  padding: 8px 16px;
   border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  font-weight: bold;
-  font-family: var(--font-primary), 'Tajawal', sans-serif;
-  color: #111111;
-  border: 1px solid rgba(0, 135, 90, 0.2);
-  transition: opacity 0.2s ease;
+  font-size: 0.88rem;
+  font-weight: 800;
+  font-family: inherit;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(52, 211, 153, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: opacity 0.15s ease;
   white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
-/* ── FLOATING LUXURY MAP CONTROLS ── */
-.map-controls {
-  position: absolute;
-  bottom: 24px;
-  inset-inline-end: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  z-index: 40;
-}
-
-.map-ctrl-btn {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-md);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-text);
-  transition: all var(--transition-fast);
-}
-
-.map-ctrl-btn:hover {
-  background: var(--color-accent-light);
-  color: var(--color-accent);
-  border-color: var(--color-accent);
-  transform: scale(1.08);
-  box-shadow: var(--shadow-lg);
-}
-
-.map-ctrl-btn:active {
-  transform: scale(0.96);
-}
-
-/* ── MAP STATUS HINT ── */
-.map-nav-hint {
-  position: absolute;
-  top: 20px;
-  inset-inline-start: 20px;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
-  padding: 6px 16px;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--color-text-secondary);
-  pointer-events: none;
-  z-index: 30;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.map-nav-hint-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--color-accent);
-}
-
-/* ── FADE OVERLAY DURING TRANSITION ── */
-.map-fade-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(250, 250, 250, 0.95);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 350ms ease;
-  z-index: 90;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.map-fade-overlay.active {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-@media (max-width: 768px) {
-  .map-card-wrapper {
-    height: 480px;
-    min-height: 480px;
-  }
-
-  .map-controls {
-    bottom: 16px;
-    inset-inline-end: 16px;
-  }
-
-  .map-ctrl-btn {
-    width: 38px;
-    height: 38px;
-  }
-
-  .map-nav-hint {
-    display: none;
-  }
-}
-
-/* ==========================================================================
-   FLOATING WILAYA TEXT SEARCH (Above the Map)
-   ========================================================================== */
+/* ── FLOATING WILAYA SEARCH BAR ── */
 .map-floating-search-bar {
   position: absolute;
-  top: 20px;
+  top: 24px;
   inset-inline-start: 24px;
-  z-index: 40;
+  z-index: 70;
   width: calc(100% - 48px);
-  max-width: 360px;
+  max-width: 380px;
 }
 
 .map-search-box {
   position: relative;
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1.5px solid rgba(0, 135, 90, 0.2);
+  border: 1.5px solid rgba(0, 135, 90, 0.25);
   border-radius: var(--radius-full);
-  padding: 6px 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 135, 90, 0.06);
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  padding: 8px 18px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08), 0 2px 10px rgba(0, 135, 90, 0.06);
+  transition: all 0.2s ease;
 }
 
 .map-search-box:focus-within {
   border-color: var(--color-accent);
-  box-shadow: 0 12px 32px rgba(0, 135, 90, 0.16), 0 0 0 3px rgba(0, 135, 90, 0.12);
+  box-shadow: 0 12px 36px rgba(0, 135, 90, 0.2), 0 0 0 3px rgba(52, 211, 153, 0.2);
   background: #FFFFFF;
 }
 
@@ -299,7 +116,7 @@
   color: var(--color-accent);
   display: flex;
   align-items: center;
-  margin-inline-end: 10px;
+  margin-inline-end: 12px;
   flex-shrink: 0;
 }
 
@@ -308,8 +125,8 @@
   border: none;
   background: transparent;
   font-family: inherit;
-  font-size: 0.9rem;
-  font-weight: 600;
+  font-size: 0.92rem;
+  font-weight: 700;
   color: var(--color-text);
   outline: none;
 }
@@ -322,20 +139,20 @@
 .map-search-clear-btn {
   background: rgba(0, 0, 0, 0.06);
   border: none;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   color: #64748B;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  transition: all 0.15s ease;
 }
 
 .map-search-clear-btn:hover {
   background: rgba(0, 0, 0, 0.12);
-  color: #1E293B;
+  color: #0F172A;
 }
 
 .map-search-dropdown {
@@ -344,13 +161,13 @@
   inset-inline-start: 0;
   width: 100%;
   background: #FFFFFF;
-  border-radius: 16px;
-  border: 1px solid rgba(0, 135, 90, 0.18);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+  border-radius: 18px;
+  border: 1.5px solid rgba(0, 135, 90, 0.2);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.16);
   padding: 8px;
   max-height: 280px;
   overflow-y: auto;
-  z-index: 50;
+  z-index: 80;
   animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
@@ -359,24 +176,22 @@
   align-items: center;
   gap: 12px;
   padding: 10px 14px;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
-  transition: background var(--transition-fast);
+  transition: background 0.15s ease;
 }
 
-.map-search-item:hover,
-.map-search-item:focus {
+.map-search-item:hover {
   background: #F0FDF4;
-  outline: none;
 }
 
 .map-item-code {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 8px;
   background: var(--color-accent-light);
   color: var(--color-accent);
-  font-weight: 800;
+  font-weight: 900;
   font-size: 0.85rem;
   display: flex;
   align-items: center;
@@ -391,8 +206,8 @@
 }
 
 .map-item-name {
-  font-weight: 700;
-  font-size: 0.92rem;
+  font-weight: 800;
+  font-size: 0.94rem;
   color: var(--color-text);
 }
 
@@ -404,7 +219,7 @@
 .map-item-arrow {
   color: #94A3B8;
   opacity: 0;
-  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  transition: all 0.2s ease;
 }
 
 .map-search-item:hover .map-item-arrow {
@@ -419,340 +234,419 @@
 .map-search-empty {
   padding: 16px;
   text-align: center;
-  font-size: 0.88rem;
+  font-size: 0.9rem;
   color: #64748B;
 }
 
-/* ==========================================================================
-   THE WILAYA INTERMEDIATE SCREEN (Cinematic Full-Screen Modal)
-   ========================================================================== */
-.wilaya-modal-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 10000;
+/* ── FLOATING MAP CONTROLS ── */
+.map-controls {
+  position: absolute;
+  bottom: 24px;
+  inset-inline-end: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 70;
+}
+
+.map-ctrl-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.wilaya-modal-backdrop {
+.map-ctrl-btn:hover {
+  background: #FFFFFF;
+  color: var(--color-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0, 135, 90, 0.16);
+}
+
+/* ==========================================================================
+   CINEMATIC ISOLATION STAGE (Frosted Void, Antigravity Float & Optical Tethers)
+   ========================================================================== */
+
+.cinematic-isolation-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(2, 28, 22, 0.78);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.wilaya-modal-dialog {
-  position: relative;
-  z-index: 10;
-  width: 100%;
-  max-width: 860px;
-  background: #FFFFFF;
-  border-radius: 28px;
-  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.35), 0 0 0 1.5px rgba(217, 119, 6, 0.25);
-  border: 1.5px solid rgba(0, 135, 90, 0.2);
-  padding: 40px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, rgba(2, 28, 22, 0.65) 0%, rgba(1, 15, 12, 0.94) 100%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
 }
 
-.wilaya-modal-close-btn {
-  position: absolute;
-  top: 20px;
-  inset-inline-end: 20px;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: #F1F5F9;
-  color: #475569;
-  border: none;
+.cinematic-isolation-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all var(--transition-fast);
-  z-index: 20;
 }
 
-.wilaya-modal-close-btn:hover {
-  background: #E2E8F0;
-  color: #0F172A;
-  transform: rotate(90deg);
+.cinematic-isolation-overlay.is-closing {
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
-.wilaya-modal-grid {
-  display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 36px;
-  align-items: center;
+.cinematic-isolation-overlay.is-leaving {
+  opacity: 0;
+  transform: scale(1.04);
+  transition: opacity 0.35s ease, transform 0.35s ease;
 }
 
-/* Antigravity Floating SVG Shape */
-.wilaya-shape-column {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: radial-gradient(circle, rgba(0, 135, 90, 0.12) 0%, rgba(245, 158, 11, 0.05) 60%, transparent 80%);
-  border-radius: 20px;
-  padding: 24px 16px;
-  min-height: 320px;
-}
-
-.wilaya-shape-glow {
+/* ── OPTICAL TETHER LINES SVG CANVAS ── */
+.tether-svg-canvas {
   position: absolute;
-  width: 180px;
-  height: 180px;
-  background: radial-gradient(circle, rgba(52, 211, 153, 0.35) 0%, rgba(217, 119, 6, 0.2) 60%, transparent 80%);
-  filter: blur(24px);
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 105;
+  overflow: visible;
+}
+
+.optic-tether-line {
+  stroke-dasharray: 600;
+  stroke-dashoffset: 600;
+  animation: drawOptic 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes drawOptic {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.center-beacon-ring {
+  animation: beaconPulse 2s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+  transform-origin: center;
+}
+
+@keyframes beaconPulse {
+  0% {
+    r: 7;
+    opacity: 0.9;
+  }
+  100% {
+    r: 32;
+    opacity: 0;
+  }
+}
+
+/* ── ISOLATED ANTIGRAVITY WILAYA SHAPE ── */
+.isolated-wilaya-stage {
+  position: relative;
+  z-index: 110;
+  width: 260px;
+  height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.isolated-wilaya-stage:hover {
+  transform: scale(1.05);
+}
+
+.antigravity-float-node {
+  animation: antigravityFloating 4.5s ease-in-out infinite;
+}
+
+@keyframes antigravityFloating {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(0.8deg);
+  }
+}
+
+.shape-ambient-glow {
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(52, 211, 153, 0.45) 0%, rgba(217, 119, 6, 0.2) 60%, transparent 80%);
+  filter: blur(28px);
   pointer-events: none;
   animation: pulseGlow 4s ease-in-out infinite alternate;
 }
 
 @keyframes pulseGlow {
   0% { transform: scale(0.85); opacity: 0.6; }
-  100% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1.2); opacity: 1; }
 }
 
-.wilaya-shape-container {
-  width: 220px;
-  height: 220px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  filter: drop-shadow(0 14px 28px rgba(0, 135, 90, 0.35));
-}
-
-.antigravity-floating {
-  animation: antigravityFloat 4.5s ease-in-out infinite;
-}
-
-@keyframes antigravityFloat {
-  0% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-12px) rotate(0.8deg);
-  }
-  100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-}
-
-.wilaya-cloned-svg {
+.isolated-shape-svg {
   width: 100%;
   height: 100%;
   overflow: visible;
+  filter: drop-shadow(0 16px 36px rgba(0, 135, 90, 0.8));
 }
 
-.antigravity-path {
+.isolated-shape-svg path {
   stroke-linejoin: round;
   stroke-linecap: round;
-  transition: all 0.3s ease;
 }
 
-.wilaya-shape-badge {
+/* ── GLASSMORPHISM HUD FLOATING DATA CARDS ── */
+.hud-floating-card {
+  position: absolute;
+  pointer-events: auto;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 24px;
+  border: 1.5px solid rgba(0, 135, 90, 0.3);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.32), 0 0 0 1px rgba(255, 255, 255, 0.8);
+  padding: 18px 22px;
+  text-align: start;
+  cursor: default;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  animation: hudCardSpring 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.hud-floating-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.38), 0 0 0 2px rgba(52, 211, 153, 0.6);
+}
+
+@keyframes hudCardSpring {
+  0% {
+    opacity: 0;
+    transform: translateY(16px) scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Card 1: Identity Node (Top-Left) */
+.hud-card-identity {
+  top: 40px;
+  inset-inline-start: 40px;
+  min-width: 220px;
+  max-width: 290px;
+}
+
+.hud-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.hud-code-pill {
+  background: var(--color-accent-light);
+  color: var(--color-accent);
+  font-weight: 900;
+  font-size: 0.85rem;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+}
+
+.hud-sovereignty-badge {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  background: #FFFFFF;
-  padding: 6px 14px;
-  border-radius: var(--radius-full);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  border: 1px solid rgba(0, 135, 90, 0.2);
-  margin-top: 14px;
-}
-
-.shape-badge-code {
+  gap: 6px;
+  font-size: 0.72rem;
   font-weight: 800;
-  font-size: 0.88rem;
-  color: var(--color-accent);
+  color: #64748B;
 }
 
-/* Info Column */
-.wilaya-info-column {
+.hud-green-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(0, 135, 90, 0.25);
+}
+
+.hud-wilaya-title {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--color-text);
+  line-height: 1.15;
+  margin-bottom: 3px;
+}
+
+.hud-wilaya-subtitle {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #64748B;
+}
+
+/* Card 2: Intelligence & Real Supabase Stats (Top-Right) */
+.hud-card-intelligence {
+  top: 40px;
+  inset-inline-end: 40px;
+  min-width: 220px;
+  max-width: 300px;
+}
+
+.hud-stats-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.hud-stat-number {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--color-accent);
+  line-height: 1;
+}
+
+.hud-stat-meta {
   display: flex;
   flex-direction: column;
 }
 
-.wilaya-header-meta {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 8px;
-}
-
-.wilaya-badge-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--color-accent-light);
-  color: var(--color-accent);
-  padding: 4px 12px;
-  border-radius: var(--radius-full);
+.hud-stat-label {
   font-size: 0.82rem;
   font-weight: 700;
+  color: var(--color-text-secondary);
 }
 
-.wilaya-secondary-title {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #64748B;
+.hud-tier-pill {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #D97706;
 }
 
-.wilaya-main-title {
-  font-size: 2.2rem;
-  font-weight: 900;
-  color: var(--color-text);
-  line-height: 1.15;
-  margin-bottom: 6px;
+.hud-domains-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
-.wilaya-subtitle {
-  font-size: 0.92rem;
-  color: #64748B;
-  margin-bottom: 22px;
-  line-height: 1.5;
+.hud-domain-chip {
+  background: #F0FDF4;
+  border: 1px solid rgba(0, 135, 90, 0.2);
+  color: var(--color-accent);
+  font-size: 0.74rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
 }
 
-.wilaya-stats-cards {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  margin-bottom: 22px;
+.domain-skeleton {
+  width: 60px;
+  height: 18px;
+  background: #E2E8F0;
+  border-radius: var(--radius-full);
 }
 
-.wilaya-stat-box {
+/* Card 3: Interactive CTA Action Node (Bottom-Center) */
+.hud-card-cta {
+  bottom: 36px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  background: #F8FAFC;
-  border: 1px solid #E2E8F0;
-  border-radius: 16px;
-  padding: 14px;
+  gap: 14px;
+  background: linear-gradient(135deg, #022C22 0%, #064E3B 100%);
+  color: #FFFFFF;
+  border: 1.5px solid #34D399;
+  box-shadow: 0 20px 48px rgba(2, 44, 34, 0.5), 0 0 24px rgba(52, 211, 153, 0.4);
+  cursor: pointer;
+  padding: 16px 26px;
+  border-radius: 28px;
 }
 
-.stat-box-icon {
-  width: 44px;
-  height: 44px;
+.hud-card-cta:hover {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 26px 56px rgba(2, 44, 34, 0.6), 0 0 32px rgba(52, 211, 153, 0.6);
+}
+
+.hud-radar-wrap {
+  position: relative;
+  width: 40px;
+  height: 40px;
   border-radius: 12px;
-  background: var(--color-accent-light);
-  color: var(--color-accent);
+  background: rgba(255, 255, 255, 0.15);
+  color: #34D399;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.stat-box-icon.stat-icon-gold {
-  background: #FEF3C7;
-  color: #D97706;
+.hud-radar-ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: 16px;
+  border: 1.5px solid #34D399;
+  animation: radarRings 2s infinite;
+  pointer-events: none;
 }
 
-.stat-box-num {
-  font-size: 1.4rem;
-  font-weight: 900;
-  color: var(--color-text);
-  line-height: 1.1;
+@keyframes radarRings {
+  0% { transform: scale(0.9); opacity: 0.9; }
+  100% { transform: scale(1.45); opacity: 0; }
 }
 
-.stat-box-num.text-gold {
-  color: #B45309;
-}
-
-.stat-box-label {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: #64748B;
-  margin-top: 2px;
-}
-
-.wilaya-domains-preview {
-  margin-bottom: 26px;
-}
-
-.domains-preview-heading {
-  font-size: 0.82rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: #64748B;
-  margin-bottom: 10px;
-}
-
-.domains-pills-row {
+.hud-cta-content {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  flex-direction: column;
 }
 
-.wilaya-domain-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: #FFFFFF;
-  border: 1px solid #E2E8F0;
-  padding: 5px 12px;
-  border-radius: var(--radius-full);
+.hud-cta-prompt {
   font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.85);
   font-weight: 600;
-  color: #334155;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
-.wilaya-domain-pill .pill-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--color-accent);
-}
-
-.wilaya-modal-actions {
-  display: flex;
-  gap: 12px;
-}
-
-.btn-enter-wilaya {
-  flex: 1.6;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 13px 24px;
+.hud-cta-link {
   font-size: 0.98rem;
-  font-weight: 800;
-}
-
-.btn-back-map {
-  flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 13px 20px;
-  font-size: 0.92rem;
-  font-weight: 700;
+  font-weight: 900;
+  color: #34D399;
 }
 
 @media (max-width: 768px) {
-  .wilaya-modal-grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
+  .map-card-wrapper {
+    height: 540px;
+    min-height: 540px;
   }
-  .wilaya-shape-column {
-    min-height: 200px;
-    padding: 12px;
+  .hud-card-identity {
+    top: 20px;
+    inset-inline-start: 16px;
+    max-width: 170px;
+    padding: 12px 14px;
   }
-  .wilaya-shape-container {
-    width: 150px;
-    height: 150px;
+  .hud-card-intelligence {
+    top: 20px;
+    inset-inline-end: 16px;
+    max-width: 170px;
+    padding: 12px 14px;
   }
-  .wilaya-main-title {
-    font-size: 1.7rem;
+  .hud-wilaya-title {
+    font-size: 1.15rem;
   }
-  .wilaya-modal-actions {
-    flex-direction: column;
+  .hud-stat-number {
+    font-size: 1.6rem;
+  }
+  .hud-card-cta {
+    bottom: 20px;
+    padding: 12px 18px;
   }
 }
 
@@ -920,283 +814,4 @@
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
-}
-
-/* ── SCI-FI HUD FOCUSED WILAYA STYLING ── */
-.wilaya-path.is-hud-focused {
-  fill: #00875A !important;
-  stroke: #34D399 !important;
-  stroke-width: 3px !important;
-  pointer-events: auto !important;
-  cursor: pointer !important;
-  filter: drop-shadow(0 0 16px rgba(52, 211, 153, 0.95)) drop-shadow(0 0 32px rgba(0, 135, 90, 0.75)) !important;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
-
-/* ==========================================================================
-   SCI-FI HUD IN-PLACE SVG NODE EXPANSION & DATA TETHERING
-   ========================================================================== */
-
-/* ── HUD AMBIENT BLURRED BACKDROP ── */
-.map-hud-backdrop {
-  position: absolute;
-  inset: 0;
-  z-index: 40;
-  pointer-events: none;
-  opacity: 0;
-  background: radial-gradient(circle at center, rgba(2, 28, 22, 0.35) 0%, rgba(2, 28, 22, 0.68) 100%);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.map-hud-backdrop.active {
-  opacity: 1;
-  pointer-events: auto;
-  cursor: pointer;
-}
-
-/* ── HUD TETHER SVG CANVAS ── */
-.map-hud-tether-svg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 45;
-  overflow: visible;
-}
-
-.hud-tether-path {
-  stroke-dasharray: 400;
-  stroke-dashoffset: 400;
-  animation: hudDrawTether 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes hudDrawTether {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-.hud-beacon-pulse {
-  animation: hudBeaconRings 2s cubic-bezier(0.25, 1, 0.5, 1) infinite;
-  transform-origin: center;
-}
-
-@keyframes hudBeaconRings {
-  0% {
-    r: 7;
-    opacity: 0.8;
-  }
-  100% {
-    r: 28;
-    opacity: 0;
-  }
-}
-
-/* ── HUD FLOATING CARDS LAYER ── */
-.map-hud-cards-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 50;
-}
-
-.hud-card {
-  position: absolute;
-  pointer-events: auto;
-  background: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  border-radius: 20px;
-  border: 1.5px solid rgba(0, 135, 90, 0.28);
-  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(255, 255, 255, 0.8);
-  padding: 16px 20px;
-  min-width: 200px;
-  max-width: 280px;
-  text-align: start;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.hud-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 24px 54px rgba(0, 0, 0, 0.28), 0 0 0 2px rgba(52, 211, 153, 0.5);
-}
-
-.hud-fade-in {
-  animation: hudCardEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes hudCardEnter {
-  0% {
-    opacity: 0;
-    transform: translateY(12px) scale(0.95);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-/* Card 1: Identity */
-.hud-node-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-
-.hud-code-badge {
-  background: var(--color-accent-light);
-  color: var(--color-accent);
-  font-weight: 900;
-  font-size: 0.85rem;
-  padding: 3px 10px;
-  border-radius: var(--radius-full);
-}
-
-.hud-sovereign-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: #64748B;
-}
-
-.hud-pulse-ring {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--color-accent);
-  box-shadow: 0 0 0 3px rgba(0, 135, 90, 0.25);
-  animation: pulseDot 1.8s infinite;
-}
-
-.hud-wilaya-name {
-  font-size: 1.35rem;
-  font-weight: 900;
-  color: var(--color-text);
-  line-height: 1.2;
-  margin-bottom: 2px;
-}
-
-.hud-secondary-name {
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: #64748B;
-}
-
-/* Card 2: Intelligence */
-.hud-stat-headline {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-.hud-talent-num {
-  font-size: 1.8rem;
-  font-weight: 900;
-  color: var(--color-accent);
-  line-height: 1;
-}
-
-.hud-stat-desc {
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--color-text-secondary);
-}
-
-.hud-domains-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.hud-domain-chip {
-  background: #F0FDF4;
-  border: 1px solid rgba(0, 135, 90, 0.2);
-  color: var(--color-accent);
-  font-size: 0.74rem;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: var(--radius-full);
-}
-
-.hud-chip-skeleton {
-  width: 60px;
-  height: 18px;
-  background: #E2E8F0;
-  border-radius: var(--radius-full);
-  animation: pulseGlow 1.5s infinite alternate;
-}
-
-/* Card 3: Interactive Action CTA */
-.hud-card-cta {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: linear-gradient(135deg, #022C22 0%, #064E3B 100%);
-  color: #FFFFFF;
-  border: 1.5px solid #34D399;
-  box-shadow: 0 16px 40px rgba(2, 44, 34, 0.4), 0 0 20px rgba(52, 211, 153, 0.35);
-  cursor: pointer;
-}
-
-.hud-card-cta:hover {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 20px 48px rgba(2, 44, 34, 0.5), 0 0 28px rgba(52, 211, 153, 0.55);
-}
-
-.hud-cta-icon-wrap {
-  position: relative;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.15);
-  color: #34D399;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.hud-radar-pulse {
-  position: absolute;
-  inset: -4px;
-  border-radius: 14px;
-  border: 1.5px solid #34D399;
-  animation: radarPulse 2s infinite;
-  pointer-events: none;
-}
-
-@keyframes radarPulse {
-  0% { transform: scale(0.9); opacity: 0.9; }
-  100% { transform: scale(1.4); opacity: 0; }
-}
-
-.hud-cta-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.hud-cta-title {
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.82);
-  font-weight: 600;
-}
-
-.hud-cta-action {
-  font-size: 0.92rem;
-  font-weight: 800;
-  color: #34D399;
-  display: flex;
-  align-items: center;
-  gap: 4px;
 }
