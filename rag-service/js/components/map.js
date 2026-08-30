@@ -662,13 +662,29 @@ export function renderMap(container) {
       nativeLoader.classList.remove('hidden');
     }
 
-    // 4. Wait 0.8s, then execute routing to renderProfiles(wilayaCode) and unlock scroll
+    // 4. Wait 0.8s, then execute routing and destroy HUD & hide loader
     setTimeout(() => {
-      hudMaster.remove();
-      isHUDActive = false;
-      document.body.classList.remove('modal-open');
+      const wilayaCode = wilaya.code;
       store.setState({ selectedWilaya: wilaya });
-      navigate(`#/wilaya/${wilaya.code}`);
+
+      // 1. Trigger the routing
+      window.location.hash = `#/wilaya/${wilayaCode}`;
+
+      // 2. DESTROY the HUD overlay so it stops blocking the screen
+      const hudOverlay = document.getElementById('hud-master-overlay') || document.getElementById('hud-overlay');
+      if (hudOverlay) hudOverlay.remove();
+      if (hudMaster) hudMaster.remove();
+      isHUDActive = false;
+
+      // 3. HIDE the native loader and reset its inline styles
+      if (nativeLoader) {
+        nativeLoader.classList.add('hidden');
+        nativeLoader.style.display = 'none';
+        nativeLoader.style.zIndex = '';
+      }
+
+      // 4. UNLOCK the body scroll
+      document.body.classList.remove('modal-open');
     }, 800);
   }
 
