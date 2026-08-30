@@ -720,7 +720,7 @@ export function dismissProactiveAiOverlay() {
   // Set a 5-minute cooldown so it never annoys the user repeatedly
   promptCooldownUntil = Date.now() + (5 * 60 * 1000);
   stopHesitationTracker();
-}
+
   setTimeout(() => {
     if (el && el.parentNode) {
       el.parentNode.removeChild(el);
