@@ -459,19 +459,85 @@ body.modal-open {
    ========================================================================== */
 .smart-search-dropdown {
   position: absolute;
-  top: calc(100% + 10px);
+  top: calc(100% + 12px);
   inset-inline-start: 0;
   width: 100%;
-  background: #FFFFFF;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   border-radius: 20px;
-  border: 1.5px solid rgba(0, 135, 90, 0.2);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.16), 0 4px 16px rgba(0, 135, 90, 0.08);
-  padding: 12px;
-  max-height: 440px;
+  border: 1.5px solid rgba(5, 150, 105, 0.25);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.14), 0 4px 20px rgba(5, 150, 105, 0.1);
+  padding: 16px;
+  max-height: 480px;
   overflow-y: auto;
-  z-index: 100;
+  z-index: 9999;
   text-align: start;
   animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Category Filter Tabs / Chips */
+.smart-palette-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  overflow-x: auto;
+}
+
+.palette-tab-btn {
+  background: #F1F5F9;
+  color: #475569;
+  border: 1px solid transparent;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.palette-tab-btn:hover {
+  background: #E2E8F0;
+  color: #0F172A;
+}
+
+.palette-tab-btn.active {
+  background: #00875A;
+  color: #FFFFFF;
+  border-color: #00875A;
+  box-shadow: 0 2px 8px rgba(0, 135, 90, 0.3);
+}
+
+.ai-suggest {
+  cursor: pointer;
+  font-weight: bold;
+  color: #059669;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: #F0FDF4;
+  border: 1.5px solid rgba(5, 150, 105, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(5, 150, 105, 0.08);
+}
+
+.ai-suggest:hover,
+.ai-suggest.is-focused {
+  background: #DCFCE7;
+  border-color: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.18);
 }
 
 .smart-search-ai-item {

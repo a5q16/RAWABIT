@@ -83,12 +83,11 @@ export function renderHome() {
               autocomplete="off"
             />
 
-            <button type="submit" class="ai-search-btn" id="home-search-btn">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <button type="submit" class="ai-search-btn" id="home-search-btn" aria-label="Search">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
-              <span data-i18n="search.btn">${t('search.btn')}</span>
             </button>
           </form>
 

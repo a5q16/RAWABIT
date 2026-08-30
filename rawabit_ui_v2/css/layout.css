@@ -364,21 +364,19 @@
 }
 
 .ai-search-btn {
-  padding: 0 32px;
+  width: 50px;
   height: 50px;
+  padding: 0;
   background: var(--color-accent);
   color: white;
   border-radius: var(--radius-sm);
-  font-weight: 700;
-  font-size: 1rem;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
   border: none;
   cursor: pointer;
   box-shadow: 0 4px 16px var(--color-accent-glow);
   transition: all var(--transition-fast);
-  white-space: nowrap;
   flex-shrink: 0;
 }
 

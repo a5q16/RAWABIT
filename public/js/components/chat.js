@@ -1,6 +1,6 @@
 /**
- * Rawabit v2 — AI Assistant Chat Drawer Component with Context Isolation
- * Luxury Saudi-Gov Tech Aesthetic · Real Groq/FastAPI SSE Streaming · Context Isolated
+ * Rawabit v2 — AI Assistant Chat Drawer Component with Context Isolation & Marked.js HTML Parser
+ * Luxury Saudi-Gov Tech Aesthetic · Real Groq/FastAPI SSE Streaming · 100% Strict Localization
  */
 
 import { t } from '../i18n.js';
@@ -12,6 +12,9 @@ let currentContext = null;
 let currentSessionKey = null; // Bound to profile.id / wilayaCode / 'global'
 let activeMessages = []; // Isolated session messages
 let isStreaming = false;
+
+const USER_AVATAR_SVG = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+const AI_AVATAR_SVG = `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/></svg>`;
 
 /**
  * Resolves the AI API URL across Vite, Webpack, window.ENV, and defaults
@@ -45,9 +48,7 @@ function createChatDrawerDOM() {
     <header class="ai-drawer-header">
       <div class="ai-drawer-title-wrap">
         <div class="ai-drawer-icon">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-            <path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/>
-          </svg>
+          ${AI_AVATAR_SVG}
         </div>
         <div>
           <h2 class="ai-drawer-heading" id="ai-drawer-heading">المساعد الذكي</h2>
@@ -119,7 +120,7 @@ function createChatDrawerDOM() {
 }
 
 /**
- * Open the AI Chat Drawer with strict context isolation
+ * Open the AI Chat Drawer with strict context isolation & RTL support
  * @param {Object} context - Optional metadata (profile, search query, or wilaya guidance)
  */
 export function openAIChat(context = null) {
@@ -127,10 +128,11 @@ export function openAIChat(context = null) {
   currentContext = context;
 
   const lang = store.state.lang;
+  const isRtl = lang === 'ar';
+  drawerElement.setAttribute('dir', isRtl ? 'rtl' : 'ltr');
   updateHeaderTranslations(lang);
 
-  // ── FIX 1: Strict Context Isolation ──
-  // Compute session key based on active profile / context
+  // ── Strict Context Isolation ──
   const newSessionKey = context?.profile?.id 
     ? `profile-${context.profile.id}` 
     : (context?.wilayaCode ? `wilaya-${context.wilayaCode}` : 'global-session');
@@ -152,6 +154,7 @@ export function openAIChat(context = null) {
     const p = context.profile;
     const name = (lang === 'ar' && p.nameAr) ? p.nameAr : (lang === 'fr' && p.nameFr ? p.nameFr : p.name);
     const title = (lang === 'ar' && p.titleAr) ? p.titleAr : (lang === 'fr' && p.titleFr ? p.titleFr : p.title);
+    const reliabilityLabel = lang === 'ar' ? 'موثوقية' : (lang === 'fr' ? 'fiabilité' : 'reliability');
     
     contextStrip.innerHTML = `
       <div class="ai-context-badge">
@@ -159,7 +162,7 @@ export function openAIChat(context = null) {
           <div class="ctx-name">${name}</div>
           <div class="ctx-title">${title}</div>
         </div>
-        <span style="font-weight: 800; font-size: 0.85rem; color: var(--color-accent);">${p.reliability || 99}% موثوقية</span>
+        <span style="font-weight: 800; font-size: 0.85rem; color: #00875A;">${p.reliability || 99}% ${reliabilityLabel}</span>
       </div>
     `;
     contextStrip.style.display = 'block';
@@ -272,7 +275,10 @@ function appendUserMessage(text) {
   const msgDiv = document.createElement('div');
   msgDiv.className = 'ai-msg ai-msg-user animate-fade-in';
   msgDiv.innerHTML = `
-    <div class="ai-msg-bubble user-bubble">${escapeHtml(text)}</div>
+    <div class="ai-msg-avatar">${USER_AVATAR_SVG}</div>
+    <div class="ai-msg-body">
+      <div class="ai-msg-bubble user-bubble">${escapeHtml(text)}</div>
+    </div>
   `;
   container.appendChild(msgDiv);
   scrollToBottom();
@@ -298,7 +304,7 @@ function appendStaticAIMessage(text, chips = []) {
   }
 
   msgDiv.innerHTML = `
-    <div class="ai-msg-avatar">ر</div>
+    <div class="ai-msg-avatar">${AI_AVATAR_SVG}</div>
     <div class="ai-msg-body">
       <div class="ai-msg-bubble ai-bubble">${formatMarkdown(text)}</div>
       ${chipsHtml}
@@ -331,13 +337,16 @@ async function handleUserMessage(queryText) {
 
   const container = drawerElement.querySelector('#ai-chat-messages');
   const substatus = drawerElement.querySelector('#ai-drawer-substatus');
-  if (substatus) substatus.textContent = 'جارٍ التحليل والتوليد...';
+  const lang = store.state.lang;
+  if (substatus) {
+    substatus.textContent = lang === 'ar' ? 'جارٍ التحليل والتوليد...' : (lang === 'fr' ? 'Génération en cours...' : 'Analyzing & generating...');
+  }
 
   // Create stream bubble
   const streamMsgDiv = document.createElement('div');
   streamMsgDiv.className = 'ai-msg ai-msg-assistant animate-fade-in';
   streamMsgDiv.innerHTML = `
-    <div class="ai-msg-avatar">ر</div>
+    <div class="ai-msg-avatar">${AI_AVATAR_SVG}</div>
     <div class="ai-msg-body">
       <div class="ai-msg-bubble ai-bubble streaming" id="active-stream-bubble">
         <span class="ai-typing-indicator">
@@ -386,7 +395,7 @@ async function handleUserMessage(queryText) {
     });
 
     if (!response.ok) {
-      throw new Error(`API returned status ${response.status}`);
+      throw new Error(`API status ${response.status}`);
     }
 
     const reader = response.body.getReader();
@@ -399,7 +408,7 @@ async function handleUserMessage(queryText) {
 
       buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split('\n');
-      buffer = lines.pop(); // Keep incomplete line
+      buffer = lines.pop();
 
       for (const line of lines) {
         const trimmed = line.trim();
@@ -422,7 +431,6 @@ async function handleUserMessage(queryText) {
               scrollToBottom();
             }
           } catch {
-            // Handle plain string token streaming
             if (!hasReceivedTokens) {
               hasReceivedTokens = true;
               bubble.innerHTML = '';
@@ -436,19 +444,21 @@ async function handleUserMessage(queryText) {
     }
 
     if (!hasReceivedTokens && !accumulatedText) {
-      accumulatedText = t('chat.defaultResponse') || 'تمت معالجة استفسارك بنجاح وفق سجلات المنصة المعتمدة.';
+      accumulatedText = t('chat.defaultResponse') || (lang === 'ar' ? 'تمت معالجة استفسارك بنجاح وفق سجلات المنصة المعتمدة.' : 'Your query was processed successfully according to official records.');
       bubble.innerHTML = formatMarkdown(accumulatedText);
     }
 
     activeMessages.push({ role: 'assistant', content: accumulatedText });
 
   } catch (err) {
-    bubble.innerHTML = `<span style="color:#DC2626;">تعذر استلام الرد المباشر: ${escapeHtml(err.message)}</span>`;
+    bubble.innerHTML = `<span style="color:#DC2626;">${lang === 'ar' ? 'تعذر استلام الرد المباشر' : 'Unable to receive direct stream'}: ${escapeHtml(err.message)}</span>`;
   } finally {
     isStreaming = false;
     bubble.classList.remove('streaming');
     bubble.removeAttribute('id');
-    if (substatus) substatus.textContent = 'جاهز للإجابة الفورية';
+    if (substatus) {
+      substatus.textContent = lang === 'ar' ? 'جاهز للإجابة الفورية' : (lang === 'fr' ? 'Prêt pour réponse' : 'Ready for instant query');
+    }
     scrollToBottom();
   }
 }
@@ -464,19 +474,24 @@ function scrollToBottom() {
 }
 
 /**
- * Simple markdown formatter for bold, code, and bullet lists
+ * Robust HTML / Markdown Parser utilizing marked.js CDN with fallback
  */
 function formatMarkdown(md) {
   if (!md) return '';
+
+  if (typeof window !== 'undefined' && window.marked && typeof window.marked.parse === 'function') {
+    try {
+      return window.marked.parse(md, { gfm: true, breaks: true });
+    } catch (e) {
+      console.warn('marked.parse error:', e);
+    }
+  }
+
+  // Fallback if marked is still loading
   let html = escapeHtml(md);
-
-  // Bold
   html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-  // Inline code
   html = html.replace(/`(.*?)`/g, '<code>$1</code>');
-  // Line breaks
   html = html.replace(/\n\n/g, '<br/><br/>').replace(/\n/g, '<br/>');
-
   return html;
 }
 
