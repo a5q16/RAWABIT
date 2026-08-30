@@ -179,6 +179,10 @@ export function openAIChat(context = null) {
   backdropElement.classList.add('active');
   drawerElement.classList.add('active');
 
+  // Contextual Awareness: Fade out FAB when chat drawer is open
+  const fab = document.querySelector('#global-ai-fab');
+  if (fab) fab.classList.add('drawer-open');
+
   // If initialQuery is provided from smart search, auto-send it
   if (context && context.initialQuery) {
     const q = context.initialQuery.trim();
@@ -203,6 +207,50 @@ export function closeAIChat() {
   drawerElement.classList.remove('active');
   backdropElement.classList.remove('active');
   popOverlay();
+
+  // Contextual Awareness: Fade FAB back in when drawer closes
+  const fab = document.querySelector('#global-ai-fab');
+  if (fab) fab.classList.remove('drawer-open');
+}
+
+let globalFabInstance = null;
+
+/**
+ * Creates and mounts the Global Floating AI Button (FAB)
+ */
+export function createGlobalAIFab() {
+  if (globalFabInstance && document.body.contains(globalFabInstance)) return globalFabInstance;
+
+  const lang = store.state.lang;
+  const fabLabel = lang === 'ar' ? 'المساعد الذكي' : (lang === 'fr' ? 'Assistant IA' : 'AI Assistant');
+
+  const fab = document.createElement('button');
+  fab.className = 'global-ai-fab animate-fade-in';
+  fab.id = 'global-ai-fab';
+  fab.setAttribute('aria-label', fabLabel);
+  fab.setAttribute('title', fabLabel);
+
+  fab.innerHTML = `
+    <div class="fab-inner">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+        <path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/>
+      </svg>
+      <span class="fab-label" id="fab-label-text">${fabLabel}</span>
+    </div>
+  `;
+
+  fab.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (isOverlayActive('ai-chat')) {
+      closeAIChat();
+    } else {
+      openAIChat();
+    }
+  });
+
+  document.body.appendChild(fab);
+  globalFabInstance = fab;
+  return fab;
 }
 
 /**
@@ -212,6 +260,15 @@ function updateHeaderTranslations(lang) {
   const heading = drawerElement.querySelector('#ai-drawer-heading');
   const substatus = drawerElement.querySelector('#ai-drawer-substatus');
   const input = drawerElement.querySelector('#ai-chat-input');
+  const fabLabel = document.querySelector('#fab-label-text');
+  const fab = document.querySelector('#global-ai-fab');
+
+  const labelText = lang === 'ar' ? 'المساعد الذكي' : (lang === 'fr' ? 'Assistant IA' : 'AI Assistant');
+  if (fabLabel) fabLabel.textContent = labelText;
+  if (fab) {
+    fab.setAttribute('aria-label', labelText);
+    fab.setAttribute('title', labelText);
+  }
 
   if (lang === 'en') {
     if (heading) heading.textContent = 'Smart Assistant';

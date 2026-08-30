@@ -1328,3 +1328,78 @@ a.info-ci-val:hover {
   }
 }
 
+/* ==========================================================================
+   GLOBAL FLOATING AI ACTION BUTTON (FAB)
+   ========================================================================== */
+.global-ai-fab {
+  position: fixed;
+  bottom: 28px;
+  inset-inline-end: 28px;
+  z-index: 900;
+  background: linear-gradient(135deg, #00875A 0%, #059669 100%);
+  color: #FFFFFF;
+  border: 1.5px solid rgba(52, 211, 153, 0.45);
+  border-radius: 9999px;
+  padding: 12px 22px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 8px 28px rgba(0, 135, 90, 0.38), 0 0 16px rgba(52, 211, 153, 0.2);
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  outline: none;
+  font-family: inherit;
+  font-weight: 800;
+  font-size: 0.95rem;
+  animation: fabGlowPulse 3.5s infinite ease-in-out;
+}
+
+.global-ai-fab .fab-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.global-ai-fab:hover {
+  transform: translateY(-3px) scale(1.04);
+  box-shadow: 0 12px 36px rgba(0, 135, 90, 0.5), 0 0 28px rgba(52, 211, 153, 0.4);
+  background: linear-gradient(135deg, #059669 0%, #10B981 100%);
+}
+
+.global-ai-fab:active {
+  transform: translateY(-1px) scale(0.98);
+}
+
+@keyframes fabGlowPulse {
+  0%, 100% {
+    box-shadow: 0 8px 28px rgba(0, 135, 90, 0.38), 0 0 16px rgba(52, 211, 153, 0.2);
+  }
+  50% {
+    box-shadow: 0 12px 36px rgba(0, 135, 90, 0.55), 0 0 28px rgba(52, 211, 153, 0.45);
+  }
+}
+
+/* Contextual Awareness: Fade out when chat drawer is open */
+.global-ai-fab.drawer-open {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: scale(0.85) translateY(16px) !important;
+}
+
+@media (max-width: 640px) {
+  .global-ai-fab {
+    bottom: 20px;
+    inset-inline-end: 20px;
+    padding: 12px;
+    border-radius: 50%;
+    width: 52px;
+    height: 52px;
+    justify-content: center;
+  }
+  .global-ai-fab .fab-label {
+    display: none;
+  }
+}
+

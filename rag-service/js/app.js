@@ -17,6 +17,7 @@ import { renderProfiles } from './components/profiles.js';
 import { renderAbout, renderWhy, renderContact } from './components/pages.js';
 import { getPlatformStats } from './data/profiles-data.js';
 import { initSmartSearch } from './components/smart-search.js';
+import { createGlobalAIFab } from './components/chat.js';
 
 /**
  * Render the Minimalist Homepage Layout
@@ -309,6 +310,9 @@ async function init() {
   // Render full-screen 3-card language switcher overlay
   const langOverlay = createLanguageOverlay();
   document.body.appendChild(langOverlay);
+
+  // Mount Global Floating AI Action Button (FAB)
+  createGlobalAIFab();
 
   // Initialize i18n
   initI18n();
