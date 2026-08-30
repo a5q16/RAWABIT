@@ -20,8 +20,33 @@ export function getCurrentParams() {
 
 export function initRouter() {
     const handleHashChange = () => {
-        let rawHash = window.location.hash || '#/';
-        
+        // ── Global Cleanup Routine: Destroy orphaned overlays & unlock body scroll on route change/back button ──
+        const overlaySelectors = [
+            '#hud-master-overlay',
+            '#hud-overlay',
+            '#mindmap-overlay',
+            '.wilaya-modal-overlay'
+        ];
+        overlaySelectors.forEach(sel => {
+            document.querySelectorAll(sel).forEach(el => el.remove());
+        });
+
+        // Close active AI chat drawer & backdrop
+        const chatDrawer = document.getElementById('ai-drawer-panel');
+        const chatBackdrop = document.getElementById('ai-drawer-backdrop');
+        if (chatDrawer && chatDrawer.classList.contains('active')) {
+            chatDrawer.classList.remove('active');
+        }
+        if (chatBackdrop && chatBackdrop.classList.contains('active')) {
+            chatBackdrop.classList.remove('active');
+        }
+
+        // Force unlock body scroll and reset store overlay stack
+        if (typeof document !== 'undefined' && document.body) {
+            document.body.classList.remove('modal-open');
+        }
+        store.setState({ overlayStack: [] });
+
         // Handle in-page smooth scrolling anchors on home page
         if (['#ai-search', '#map-section', '#features', '#stats', '#hero'].includes(rawHash)) {
             const targetEl = document.querySelector(rawHash);
