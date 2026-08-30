@@ -37,7 +37,7 @@ export const TRANSLATIONS = {
     'search.talentsHeading': 'الكفاءات والخبراء المعتمدون',
     'search.noMatches': 'لا توجد نتائج مباشرة، يمكنك استشارة الذكاء الاصطناعي أعلاه',
 
-    // Map Intro Section
+    // Map Intro Section & Sci-Fi HUD
     'map.title': 'أو ابحث عن الكفاءة المرادة حسب الولايات بواسطة الخريطة التفاعلية',
     'map.subtitle': 'قم باختيار الولاية المراد معرفة كفاءتها',
     'map.placeholder': 'جاري تحميل الخريطة التفاعلية للـ 58 ولاية...',
@@ -46,9 +46,13 @@ export const TRANSLATIONS = {
     'map.enterWilaya': 'استكشاف كفاءات الولاية',
     'map.backToMap': 'العودة للخريطة',
     'map.modalSubtitle': 'السجل الرقمي المعتمد للكفاءات والخبرات',
-    'map.verifiedTalentsInWilaya': 'كفاءة موثقة في هذه الولاية',
-    'map.wilayaCodeLabel': 'الرمز الرسمي للولاية:',
-    'map.topDomainsInWilaya': 'أبرز مجالات الخبرة في الولاية:',
+    'map.verifiedTalentsInWilaya': 'كفاءة موثقة',
+    'map.wilayaCodeLabel': 'الرمز الرسمي:',
+    'map.topDomainsInWilaya': 'أبرز مجالات الخبرة:',
+    'hud.enterPrompt': 'انقر على مجسم الولاية مجدداً للدخول',
+    'hud.clickToEnter': 'استكشاف الكفاءات الآن ←',
+    'hud.sovereignIndex': 'السجل الرقمي السيادي للكفاءات',
+    'hud.resetHint': 'انقر بالخارج للعودة للخريطة الكاملة',
 
     // Features Section
     'features.title': 'ما الذي يميز منصة روابط؟',
@@ -250,7 +254,7 @@ export const TRANSLATIONS = {
     'search.talentsHeading': 'Verified Talents & Experts',
     'search.noMatches': 'No direct matches found. Try asking AI above.',
 
-    // Map Intro Section
+    // Map Intro Section & Sci-Fi HUD
     'map.title': 'Or explore desired competencies by wilaya via the interactive map',
     'map.subtitle': 'Select the wilaya you wish to explore',
     'map.placeholder': 'Loading interactive 58 wilayas map...',
@@ -259,9 +263,13 @@ export const TRANSLATIONS = {
     'map.enterWilaya': 'Enter Wilaya',
     'map.backToMap': 'Back to Map',
     'map.modalSubtitle': 'Official Digital Index of Competencies & Experts',
-    'map.verifiedTalentsInWilaya': 'Verified Talents in this Wilaya',
+    'map.verifiedTalentsInWilaya': 'Verified Talents',
     'map.wilayaCodeLabel': 'Official Code:',
     'map.topDomainsInWilaya': 'Top Competency Domains:',
+    'hud.enterPrompt': 'Click the map shape again to enter',
+    'hud.clickToEnter': 'Explore Talents Now →',
+    'hud.sovereignIndex': 'Official National Talent Registry',
+    'hud.resetHint': 'Click outside to reset map view',
 
     // Features Section
     'features.title': 'What makes Rawabit unique?',
@@ -463,7 +471,7 @@ export const TRANSLATIONS = {
     'search.talentsHeading': 'Compétences & Experts Agréés',
     'search.noMatches': 'Aucune correspondance directe. Consultez l’IA ci-dessus.',
 
-    // Map Intro Section
+    // Map Intro Section & Sci-Fi HUD
     'map.title': 'Ou recherchez la compétence souhaitée par wilaya grâce à la carte interactive',
     'map.subtitle': 'Sélectionnez la wilaya dont vous souhaitez découvrir les compétences',
     'map.placeholder': 'Chargement de la carte interactive des 58 wilayas...',
@@ -472,9 +480,13 @@ export const TRANSLATIONS = {
     'map.enterWilaya': 'Explorer la Wilaya',
     'map.backToMap': 'Retour à la Carte',
     'map.modalSubtitle': 'Répertoire Numérique Officiel des Compétences & Experts',
-    'map.verifiedTalentsInWilaya': 'Compétences vérifiées dans cette wilaya',
-    'map.wilayaCodeLabel': 'Code Officiel de la Wilaya :',
+    'map.verifiedTalentsInWilaya': 'Compétences vérifiées',
+    'map.wilayaCodeLabel': 'Code Officiel :',
     'map.topDomainsInWilaya': 'Principaux Domaines d’Expertise :',
+    'hud.enterPrompt': 'Cliquez à nouveau sur la wilaya pour entrer',
+    'hud.clickToEnter': 'Explorer les compétences →',
+    'hud.sovereignIndex': 'Registre National Souverain',
+    'hud.resetHint': 'Cliquez en dehors pour réinitialiser la vue',
 
     // Features Section
     'features.title': 'Qu’est-ce qui rend Rawabit unique ?',

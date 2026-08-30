@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Rawabit v2 — True Smart Search Engine & Intelligent Floating Dropdown
  * 1. Pinned Top AI Action Prompt ("✨ Ask AI about: [query]") -> Directly streams Groq AI
  * 2. Instant Matching Wilayas -> Opens Cinematic Wilaya Intermediate Screen
@@ -156,14 +156,26 @@ export function initSmartSearch(formEl, inputEl) {
       });
     }
 
-    // 2. Wilaya Clicks -> Open Cinematic Intermediate Screen
+    // 2. Wilaya Clicks -> Trigger In-Place SVG Expansion on Map or Route
     dropdown.querySelectorAll('.smart-wilaya-item').forEach(item => {
       item.addEventListener('click', () => {
         const code = item.dataset.code;
         const target = WILAYAS.find(w => w.code === code);
         if (target) {
           closeDropdown();
-          openWilayaIntermediateScreen(target);
+          const mapStateEl = document.querySelector(`.wilaya-group[data-code="${code}"] .wilaya-path`);
+          if (mapStateEl) {
+            const mapContainer = document.querySelector('#map-container');
+            if (mapContainer) {
+              mapContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            setTimeout(() => {
+              mapStateEl.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+            }, 350);
+          } else {
+            store.setState({ selectedWilaya: target });
+            navigate(`#/wilaya/${code}`);
+          }
         }
       });
     });

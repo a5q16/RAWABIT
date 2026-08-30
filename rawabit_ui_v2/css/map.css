@@ -918,3 +918,280 @@
   object-fit: cover;
   flex-shrink: 0;
 }
+
+/* ── SCI-FI HUD FOCUSED WILAYA STYLING ── */
+.wilaya-path.is-hud-focused {
+  fill: #00875A !important;
+  stroke: #34D399 !important;
+  stroke-width: 3px !important;
+  filter: drop-shadow(0 0 16px rgba(52, 211, 153, 0.95)) drop-shadow(0 0 32px rgba(0, 135, 90, 0.75)) !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* ==========================================================================
+   SCI-FI HUD IN-PLACE SVG NODE EXPANSION & DATA TETHERING
+   ========================================================================== */
+
+/* ── HUD AMBIENT BLURRED BACKDROP ── */
+.map-hud-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(circle at center, rgba(2, 28, 22, 0.35) 0%, rgba(2, 28, 22, 0.68) 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.map-hud-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+/* ── HUD TETHER SVG CANVAS ── */
+.map-hud-tether-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 45;
+  overflow: visible;
+}
+
+.hud-tether-path {
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
+  animation: hudDrawTether 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes hudDrawTether {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.hud-beacon-pulse {
+  animation: hudBeaconRings 2s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+  transform-origin: center;
+}
+
+@keyframes hudBeaconRings {
+  0% {
+    r: 7;
+    opacity: 0.8;
+  }
+  100% {
+    r: 28;
+    opacity: 0;
+  }
+}
+
+/* ── HUD FLOATING CARDS LAYER ── */
+.map-hud-cards-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.hud-card {
+  position: absolute;
+  pointer-events: auto;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-radius: 20px;
+  border: 1.5px solid rgba(0, 135, 90, 0.28);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(255, 255, 255, 0.8);
+  padding: 16px 20px;
+  min-width: 200px;
+  max-width: 280px;
+  text-align: start;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hud-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 24px 54px rgba(0, 0, 0, 0.28), 0 0 0 2px rgba(52, 211, 153, 0.5);
+}
+
+.hud-fade-in {
+  animation: hudCardEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes hudCardEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Card 1: Identity */
+.hud-node-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.hud-code-badge {
+  background: var(--color-accent-light);
+  color: var(--color-accent);
+  font-weight: 900;
+  font-size: 0.85rem;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+}
+
+.hud-sovereign-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #64748B;
+}
+
+.hud-pulse-ring {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(0, 135, 90, 0.25);
+  animation: pulseDot 1.8s infinite;
+}
+
+.hud-wilaya-name {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: var(--color-text);
+  line-height: 1.2;
+  margin-bottom: 2px;
+}
+
+.hud-secondary-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #64748B;
+}
+
+/* Card 2: Intelligence */
+.hud-stat-headline {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.hud-talent-num {
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--color-accent);
+  line-height: 1;
+}
+
+.hud-stat-desc {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+
+.hud-domains-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.hud-domain-chip {
+  background: #F0FDF4;
+  border: 1px solid rgba(0, 135, 90, 0.2);
+  color: var(--color-accent);
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+}
+
+.hud-chip-skeleton {
+  width: 60px;
+  height: 18px;
+  background: #E2E8F0;
+  border-radius: var(--radius-full);
+  animation: pulseGlow 1.5s infinite alternate;
+}
+
+/* Card 3: Interactive Action CTA */
+.hud-card-cta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, #022C22 0%, #064E3B 100%);
+  color: #FFFFFF;
+  border: 1.5px solid #34D399;
+  box-shadow: 0 16px 40px rgba(2, 44, 34, 0.4), 0 0 20px rgba(52, 211, 153, 0.35);
+  cursor: pointer;
+}
+
+.hud-card-cta:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 20px 48px rgba(2, 44, 34, 0.5), 0 0 28px rgba(52, 211, 153, 0.55);
+}
+
+.hud-cta-icon-wrap {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #34D399;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hud-radar-pulse {
+  position: absolute;
+  inset: -4px;
+  border-radius: 14px;
+  border: 1.5px solid #34D399;
+  animation: radarPulse 2s infinite;
+  pointer-events: none;
+}
+
+@keyframes radarPulse {
+  0% { transform: scale(0.9); opacity: 0.9; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+.hud-cta-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.hud-cta-title {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.82);
+  font-weight: 600;
+}
+
+.hud-cta-action {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #34D399;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
