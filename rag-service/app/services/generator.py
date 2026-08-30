@@ -139,7 +139,7 @@ _GROQ_MODEL = "qwen/qwen3.8-27b"
 
 async def _stream_groq(
     messages: list[dict],
-    temperature: float = 0.3,
+    temperature: float = 0.1,
     max_tokens: int = 512,
 ) -> AsyncGenerator[str, None]:
     """

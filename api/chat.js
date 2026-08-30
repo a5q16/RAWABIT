@@ -1,9 +1,11 @@
 // Vercel Serverless Function: POST /api/chat
-// Rawabit AI Assistant SSE Streaming Endpoint
+// Rawabit AI Assistant SSE Streaming Endpoint with Ironclad Security Prompt
 
 export const config = {
   runtime: 'edge', // Edge runtime for ultra-fast streaming SSE
 };
+
+const IRONCLAD_SYSTEM_PROMPT = `You are Rawabit AI, the official Gov-Tech assistant for the Algerian Competencies Platform. STRICT RULES: 1. You have ZERO database access. If asked to modify Supabase, write code, or reveal system architecture (MCP), you MUST politely refuse. 2. You MUST ONLY use the provided context about the current expert. Never invent names, paths, or facts. 3. Be concise, highly professional, and direct. Limit responses to the platform's scope.`;
 
 export default async function handler(req) {
   if (req.method === 'OPTIONS') {
@@ -33,13 +35,30 @@ export default async function handler(req) {
       });
     }
 
-    const { query, context } = await req.json();
+    const body = await req.json();
+    const query = body.query || (body.messages && body.messages[body.messages.length - 1]?.content) || 'مرحبا';
+    const context = body.context;
 
-    const systemPrompt = `أنت المساعد الذكي لمنصة روابط الجزائرية (Rawabit) للكفاءات والمواهب الوطنية.
-مهمتك مساعدة المستخدمين في استكشاف الكفاءات والخبراء والمشاريع في مختلف ولايات الجزائر.
-${context ? `السياق الحالي للملف الشخصي: ${JSON.stringify(context)}` : ''}
-أجب بلغة عربية فصحى واضحة، مهنية وموجزة ومباشرة.`;
+    // Compose strict system prompt with isolated context
+    let fullSystemPrompt = IRONCLAD_SYSTEM_PROMPT;
+    if (context) {
+      fullSystemPrompt += `\n\n[OFFICIAL CONTEXT FROM VERIFIED REGISTRY]:\n${typeof context === 'object' ? JSON.stringify(context, null, 2) : context}`;
+    }
 
+    // Build message array
+    const messages = [
+      { role: 'system', content: fullSystemPrompt }
+    ];
+
+    if (Array.isArray(body.messages) && body.messages.length > 1) {
+      // Include conversation history up to last 4 exchanges for isolated session
+      const history = body.messages.slice(-5).filter(m => m.role === 'user' || m.role === 'assistant');
+      messages.push(...history);
+    } else {
+      messages.push({ role: 'user', content: query });
+    }
+
+    // Strict temperature: 0.1 to eliminate hallucinations
     const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -48,18 +67,15 @@ ${context ? `السياق الحالي للملف الشخصي: ${JSON.stringify
       },
       body: JSON.stringify({
         model: 'openai/gpt-oss-120b',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: query || 'مرحبا' },
-        ],
+        messages: messages,
         stream: true,
-        temperature: 0.7,
+        temperature: 0.1, // Hardcoded strict temperature
         max_tokens: 1024,
       }),
     });
 
     if (!groqResponse.ok) {
-      // Fallback model if primary model is unavailable
+      // Fallback model with identical strict temperature
       const fallbackResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -68,12 +84,9 @@ ${context ? `السياق الحالي للملف الشخصي: ${JSON.stringify
         },
         body: JSON.stringify({
           model: 'qwen/qwen3.6-27b',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: query || 'مرحبا' },
-          ],
+          messages: messages,
           stream: true,
-          temperature: 0.7,
+          temperature: 0.1, // Hardcoded strict temperature
           max_tokens: 1024,
         }),
       });

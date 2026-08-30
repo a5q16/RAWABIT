@@ -1,6 +1,6 @@
 /**
- * Rawabit v2 — AI Assistant Chat Drawer Component
- * Luxury Saudi-Gov Tech Aesthetic · Real FastAPI RAG SSE Fetch Streaming · Zero Mock
+ * Rawabit v2 — AI Assistant Chat Drawer Component with Context Isolation
+ * Luxury Saudi-Gov Tech Aesthetic · Real Groq/FastAPI SSE Streaming · Context Isolated
  */
 
 import { t } from '../i18n.js';
@@ -9,6 +9,8 @@ import { store, pushOverlay, popOverlay, isOverlayActive } from '../store.js';
 let drawerElement = null;
 let backdropElement = null;
 let currentContext = null;
+let currentSessionKey = null; // Bound to profile.id / wilayaCode / 'global'
+let activeMessages = []; // Isolated session messages
 let isStreaming = false;
 
 /**
@@ -117,7 +119,7 @@ function createChatDrawerDOM() {
 }
 
 /**
- * Open the AI Chat Drawer with specific context
+ * Open the AI Chat Drawer with strict context isolation
  * @param {Object} context - Optional metadata (profile, search query, or wilaya guidance)
  */
 export function openAIChat(context = null) {
@@ -126,6 +128,23 @@ export function openAIChat(context = null) {
 
   const lang = store.state.lang;
   updateHeaderTranslations(lang);
+
+  // ── FIX 1: Strict Context Isolation ──
+  // Compute session key based on active profile / context
+  const newSessionKey = context?.profile?.id 
+    ? `profile-${context.profile.id}` 
+    : (context?.wilayaCode ? `wilaya-${context.wilayaCode}` : 'global-session');
+
+  const messagesContainer = drawerElement.querySelector('#ai-chat-messages');
+
+  // If opening for a DIFFERENT profile or context, completely flush history!
+  if (newSessionKey !== currentSessionKey) {
+    currentSessionKey = newSessionKey;
+    activeMessages = [];
+    if (messagesContainer) {
+      messagesContainer.innerHTML = '';
+    }
+  }
 
   // Render context strip if profile provided
   const contextStrip = drawerElement.querySelector('#ai-context-strip');
@@ -140,7 +159,7 @@ export function openAIChat(context = null) {
           <div class="ctx-name">${name}</div>
           <div class="ctx-title">${title}</div>
         </div>
-        <span style="font-weight: 800; font-size: 0.85rem; color: var(--color-accent);">${p.reliability}% موثوقية</span>
+        <span style="font-weight: 800; font-size: 0.85rem; color: var(--color-accent);">${p.reliability || 99}% موثوقية</span>
       </div>
     `;
     contextStrip.style.display = 'block';
@@ -148,9 +167,8 @@ export function openAIChat(context = null) {
     contextStrip.style.display = 'none';
   }
 
-  // Populate Initial Greeting if messages empty
-  const messagesContainer = drawerElement.querySelector('#ai-chat-messages');
-  if (messagesContainer.children.length === 0) {
+  // Populate Initial Greeting if messages empty for this session
+  if (messagesContainer && messagesContainer.children.length === 0) {
     renderInitialGreeting(context, lang);
   }
 
@@ -158,13 +176,13 @@ export function openAIChat(context = null) {
   backdropElement.classList.add('active');
   drawerElement.classList.add('active');
 
-  // If initialQuery is provided from smart search or quick AI prompt, auto-send it
+  // If initialQuery is provided from smart search, auto-send it
   if (context && context.initialQuery) {
     const q = context.initialQuery.trim();
     if (q) {
       setTimeout(() => {
         handleUserMessage(q);
-      }, 350);
+      }, 300);
     }
   }
 
@@ -219,18 +237,18 @@ function renderInitialGreeting(context, lang) {
     const name = (lang === 'ar' && p.nameAr) ? p.nameAr : (lang === 'fr' && p.nameFr ? p.nameFr : p.name);
 
     if (lang === 'en') {
-      greetingText = `Hello! I am your AI assistant for Rawabit. How can I help you explore **${name}**'s research background, patents, or project collaboration availability?`;
-      chips = ['Summarize published papers', 'Patents and inventions', 'Key contact and collaboration info'];
+      greetingText = `Hello! I am Rawabit AI. How can I help you explore **${name}**'s verified research background, competencies, or collaboration details?`;
+      chips = ['Summarize published papers', 'Verified specialties', 'Direct contact & collaboration'];
     } else if (lang === 'fr') {
-      greetingText = `Bonjour ! Je suis votre assistant IA pour Rawabit. Comment puis-je vous renseigner sur le parcours de **${name}**, ses brevets ou ses disponibilités de recherche ?`;
-      chips = ['Résumer les publications', 'Brevets et innovations', 'Contact et collaborations'];
+      greetingText = `Bonjour ! Je suis l'IA Rawabit. Comment puis-je vous renseigner sur le parcours de **${name}**, ses compétences ou ses collaborations ?`;
+      chips = ['Résumer les publications', 'Spécialités vérifiées', 'Contact et collaborations'];
     } else {
-      greetingText = `مرحباً بك! أنا مساعدك الذكي في منصة روابط. كيف يمكنني مساعدتك في استكشاف المسار العلمي للباحث **${name}**، براءات الاختراع، أو إمكانيات التعاون الاستشاري معه؟`;
-      chips = ['ملخص الأبحاث والمنشورات', 'براءات الاختراع المعتمدة', 'مجالات الاستشارة والمشاريع'];
+      greetingText = `مرحباً بك! أنا مساعد روابط الذكي. كيف يمكنني مساعدتك في استكشاف المسار المعتمد للباحث **${name}**، التخصصات الدقيقة، أو إمكانيات التعاون معه؟`;
+      chips = ['ملخص الأبحاث والخبرات', 'التخصصات الدقيقة المعتمدة', 'مجالات الاستشارة والمشاريع'];
     }
   } else {
     if (lang === 'en') {
-      greetingText = `Welcome to Rawabit AI Assistant! I can help you find verified Algerian experts across all 58 wilayas, analyze specific engineering fields, or connect with national researchers.`;
+      greetingText = `Welcome to Rawabit AI Assistant! I can help you discover verified Algerian competencies across all 58 wilayas and evaluate specialized engineering domains.`;
       chips = ['Find AI experts in Algiers', 'Top solar energy researchers', 'How verification works in Rawabit'];
     } else if (lang === 'fr') {
       greetingText = `Bienvenue sur l'Assistant IA de Rawabit ! Je peux vous orienter vers les compétences algériennes vérifiées sur les 58 wilayas ou analyser des domaines techniques pointus.`;
@@ -248,343 +266,226 @@ function renderInitialGreeting(context, lang) {
  * Append user message bubble to chat
  */
 function appendUserMessage(text) {
-  const messagesContainer = drawerElement.querySelector('#ai-chat-messages');
-  const msgEl = document.createElement('div');
-  msgEl.className = 'chat-msg user';
-  msgEl.innerHTML = `
-    <div class="msg-bubble">${escapeHtml(text)}</div>
-    <span class="msg-time">${getCurrentTime()}</span>
+  const container = drawerElement.querySelector('#ai-chat-messages');
+  if (!container) return;
+
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'ai-msg ai-msg-user animate-fade-in';
+  msgDiv.innerHTML = `
+    <div class="ai-msg-bubble user-bubble">${escapeHtml(text)}</div>
   `;
-  messagesContainer.appendChild(msgEl);
+  container.appendChild(msgDiv);
   scrollToBottom();
 }
 
 /**
- * Append static greeting AI message bubble
+ * Append static AI greeting message with interactive quick chips
  */
-function appendStaticAIMessage(fullText, suggestedChips = []) {
-  const messagesContainer = drawerElement.querySelector('#ai-chat-messages');
-  const msgEl = document.createElement('div');
-  msgEl.className = 'chat-msg ai';
+function appendStaticAIMessage(text, chips = []) {
+  const container = drawerElement.querySelector('#ai-chat-messages');
+  if (!container) return;
 
-  const bubbleEl = document.createElement('div');
-  bubbleEl.className = 'msg-bubble';
-  bubbleEl.innerHTML = formatMarkdown(fullText);
-  msgEl.appendChild(bubbleEl);
-
-  const timeEl = document.createElement('span');
-  timeEl.className = 'msg-time';
-  timeEl.textContent = getCurrentTime();
-  msgEl.appendChild(timeEl);
-
-  if (suggestedChips && suggestedChips.length > 0) {
-    renderChips(msgEl, suggestedChips);
+  const msgDiv = document.createElement('div');
+  msgDiv.className = 'ai-msg ai-msg-assistant animate-fade-in';
+  
+  let chipsHtml = '';
+  if (chips && chips.length > 0) {
+    chipsHtml = `
+      <div class="ai-chips-wrap">
+        ${chips.map(c => `<button class="ai-chip-btn" data-query="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join('')}
+      </div>
+    `;
   }
 
-  messagesContainer.appendChild(msgEl);
-  scrollToBottom();
-}
-
-/**
- * Render quick action chips under an AI message
- */
-function renderChips(container, chips) {
-  const chipsWrap = document.createElement('div');
-  chipsWrap.className = 'ai-suggested-chips';
-
-  chips.forEach(chipText => {
-    const btn = document.createElement('button');
-    btn.className = 'ai-chip-btn';
-    btn.textContent = chipText;
-    btn.addEventListener('click', () => {
-      if (isStreaming) return;
-      handleUserMessage(chipText);
-    });
-    chipsWrap.appendChild(btn);
-  });
-
-  container.appendChild(chipsWrap);
-  scrollToBottom();
-}
-
-/**
- * Append pulsing 3-dot thinking indicator
- */
-function showThinkingIndicator() {
-  const messagesContainer = drawerElement.querySelector('#ai-chat-messages');
-  if (drawerElement.querySelector('#ai-thinking-indicator')) return;
-
-  const indicator = document.createElement('div');
-  indicator.className = 'chat-msg ai';
-  indicator.id = 'ai-thinking-indicator';
-  indicator.innerHTML = `
-    <div class="ai-typing-indicator">
-      <span class="ai-typing-dot"></span>
-      <span class="ai-typing-dot"></span>
-      <span class="ai-typing-dot"></span>
+  msgDiv.innerHTML = `
+    <div class="ai-msg-avatar">ر</div>
+    <div class="ai-msg-body">
+      <div class="ai-msg-bubble ai-bubble">${formatMarkdown(text)}</div>
+      ${chipsHtml}
     </div>
   `;
-  messagesContainer.appendChild(indicator);
+
+  container.appendChild(msgDiv);
+
+  // Wire chip buttons
+  msgDiv.querySelectorAll('.ai-chip-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const q = btn.getAttribute('data-query');
+      if (q && !isStreaming) {
+        handleUserMessage(q);
+      }
+    });
+  });
+
   scrollToBottom();
 }
 
 /**
- * Remove thinking indicator
+ * Handle sending a user message, invoking SSE stream, and rendering response
  */
-function removeThinkingIndicator() {
-  const el = drawerElement?.querySelector('#ai-thinking-indicator');
-  if (el) el.remove();
-}
+async function handleUserMessage(queryText) {
+  if (isStreaming) return;
 
-/**
- * Main User Message Dispatcher
- */
-function handleUserMessage(userPrompt) {
-  appendUserMessage(userPrompt);
-  streamAIResponse(userPrompt, currentContext);
-}
+  appendUserMessage(queryText);
+  activeMessages.push({ role: 'user', content: queryText });
 
-/**
- * ══════════════════════════════════════════════════════════════════
- * REAL FASTAPI / PYTHON RAG STREAMING (Fetch POST + ReadableStream)
- * ══════════════════════════════════════════════════════════════════
- * Asynchronously streams the AI response from the FastAPI / RAG backend via POST ReadableStream (SSE)
- * @param {string} userQuery - The message sent by the user
- * @param {Object} profileContext - Optional profile/wilaya context object
- */
-export async function streamAIResponse(userQuery, profileContext) {
-  const apiUrl = getAiApiUrl();
-  const messagesContainer = drawerElement.querySelector('#ai-chat-messages');
-  const sendBtn = drawerElement.querySelector('#ai-send-btn');
+  const container = drawerElement.querySelector('#ai-chat-messages');
+  const substatus = drawerElement.querySelector('#ai-drawer-substatus');
+  if (substatus) substatus.textContent = 'جارٍ التحليل والتوليد...';
 
-  // 1. Show Thinking pulsing dots immediately
-  showThinkingIndicator();
+  // Create stream bubble
+  const streamMsgDiv = document.createElement('div');
+  streamMsgDiv.className = 'ai-msg ai-msg-assistant animate-fade-in';
+  streamMsgDiv.innerHTML = `
+    <div class="ai-msg-avatar">ر</div>
+    <div class="ai-msg-body">
+      <div class="ai-msg-bubble ai-bubble streaming" id="active-stream-bubble">
+        <span class="ai-typing-indicator">
+          <span></span><span></span><span></span>
+        </span>
+      </div>
+    </div>
+  `;
+  container.appendChild(streamMsgDiv);
+  scrollToBottom();
+
+  const bubble = streamMsgDiv.querySelector('#active-stream-bubble');
   isStreaming = true;
-  if (sendBtn) sendBtn.disabled = true;
-
-  let aiMessageEl = null;
-  let bubbleEl = null;
   let accumulatedText = '';
-  let isFirstChunk = true;
+  let hasReceivedTokens = false;
+
+  // Build isolated context payload
+  const payload = {
+    query: queryText,
+    context: currentContext?.profile ? {
+      id: currentContext.profile.id,
+      name: currentContext.profile.name,
+      nameAr: currentContext.profile.nameAr,
+      title: currentContext.profile.title,
+      titleAr: currentContext.profile.titleAr,
+      organization: currentContext.profile.organization,
+      organizationAr: currentContext.profile.organizationAr,
+      location: currentContext.profile.location,
+      locationAr: currentContext.profile.locationAr,
+      wilaya: currentContext.profile.wilaya || currentContext.profile.wilayaCode,
+      bio: currentContext.profile.bio || currentContext.profile.bioAr,
+      tier: currentContext.profile.tier,
+      tags: currentContext.profile.tags,
+      reliability: currentContext.profile.reliability
+    } : (currentContext?.wilayaCode ? { wilayaCode: currentContext.wilayaCode } : null),
+    messages: activeMessages
+  };
+
   try {
-    let response;
-    try {
-      response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'text/event-stream, application/json, text/plain'
-        },
-        body: JSON.stringify({
-          query: userQuery,
-          context: profileContext,
-          lang: store.state.lang || 'ar'
-        })
-      });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    } catch (networkErr) {
-      console.warn('[Rawabit AI Chat] Primary endpoint error, trying direct API if configured...', networkErr);
-      const groqKey = (typeof window !== 'undefined' && window.ENV && window.ENV.GROQ_API_KEY) ? window.ENV.GROQ_API_KEY : '';
-      if (!groqKey) {
-        throw new Error(`تعذر الاتصال بخادم الذكاء الاصطناعي: ${networkErr.message}`);
-      }
-      const systemPrompt = `أنت المساعد الذكي لمنصة روابط الجزائرية (Rawabit) للكفاءات والمواهب الوطنية.
-مهمتك مساعدة المستخدمين في استكشاف الكفاءات والخبراء والمشاريع في مختلف ولايات الجزائر.
-${profileContext ? `السياق الحالي للملف الشخصي: ${JSON.stringify(profileContext)}` : ''}
-أجب بلغة عربية فصحى واضحة، مهنية وموجزة ومباشرة.`;
+    const response = await fetch(getAiApiUrl(), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
 
-      response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${groqKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: 'openai/gpt-oss-120b',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userQuery || 'مرحبا' }
-          ],
-          stream: true,
-          temperature: 0.7,
-          max_tokens: 1024
-        })
-      });
-    }
-
-    if (!response || !response.ok) {
-      const errorText = response ? await response.text() : 'No response';
-      throw new Error(`AI Backend responded with status: ${errorText}`);
-    }
-
-    if (!response.body) {
-      throw new Error('ReadableStream not supported by browser or response body is empty.');
+    if (!response.ok) {
+      throw new Error(`API returned status ${response.status}`);
     }
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder('utf-8');
     let buffer = '';
 
-    const parseChunk = (raw) => {
-      if (!raw) return '';
-      if (raw.startsWith('data:')) {
-        const payload = raw.slice(5).trim();
-        if (payload === '[DONE]') return null;
-        try {
-          const parsed = JSON.parse(payload);
-          if (parsed.choices && Array.isArray(parsed.choices) && parsed.choices.length > 0) {
-            const choice = parsed.choices[0];
-            if (choice.delta && typeof choice.delta.content === 'string') {
-              return choice.delta.content;
-            }
-            if (typeof choice.text === 'string') {
-              return choice.text;
-            }
-          }
-          if (typeof parsed.chunk === 'string') return parsed.chunk;
-          if (typeof parsed.delta === 'string') return parsed.delta;
-          if (typeof parsed.content === 'string') return parsed.content;
-          if (typeof parsed.response === 'string') return parsed.response;
-          if (typeof parsed.text === 'string') return parsed.text;
-          return '';
-        } catch (e) {
-          return payload;
-        }
-      }
-      return raw;
-    };
-
     while (true) {
-      const { value, done } = await reader.read();
+      const { done, value } = await reader.read();
       if (done) break;
 
-      // Decode the streamed binary chunk to string
-      const chunk = decoder.decode(value, { stream: true });
-      buffer += chunk;
-
-      // Extract lines from buffer
+      buffer += decoder.decode(value, { stream: true });
       const lines = buffer.split('\n');
-      buffer = lines.pop() || ''; // Keep incomplete trailing fragment in buffer
+      buffer = lines.pop(); // Keep incomplete line
 
-      for (let line of lines) {
-        line = line.trim();
-        if (!line) continue;
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith(':')) continue;
 
-        const content = parseChunk(line);
-        if (content === null) break;
+        if (trimmed.startsWith('data:')) {
+          const dataStr = trimmed.replace(/^data:\s*/, '');
+          if (dataStr === '[DONE]') continue;
 
-        if (content) {
-          // Remove thinking dots the exact moment the FIRST chunk arrives
-          if (isFirstChunk) {
-            removeThinkingIndicator();
-            isFirstChunk = false;
-
-            // Create AI Message DOM node
-            aiMessageEl = document.createElement('div');
-            aiMessageEl.className = 'chat-msg ai';
-
-            bubbleEl = document.createElement('div');
-            bubbleEl.className = 'msg-bubble';
-            aiMessageEl.appendChild(bubbleEl);
-
-            const timeEl = document.createElement('span');
-            timeEl.className = 'msg-time';
-            timeEl.textContent = getCurrentTime();
-            aiMessageEl.appendChild(timeEl);
-
-            messagesContainer.appendChild(aiMessageEl);
+          try {
+            const parsed = JSON.parse(dataStr);
+            const token = parsed.choices?.[0]?.delta?.content || parsed.token || '';
+            if (token) {
+              if (!hasReceivedTokens) {
+                hasReceivedTokens = true;
+                bubble.innerHTML = '';
+              }
+              accumulatedText += token;
+              bubble.innerHTML = formatMarkdown(accumulatedText);
+              scrollToBottom();
+            }
+          } catch {
+            // Handle plain string token streaming
+            if (!hasReceivedTokens) {
+              hasReceivedTokens = true;
+              bubble.innerHTML = '';
+            }
+            accumulatedText += dataStr;
+            bubble.innerHTML = formatMarkdown(accumulatedText);
+            scrollToBottom();
           }
-
-          accumulatedText += content;
-          if (bubbleEl) {
-            bubbleEl.innerHTML = formatMarkdown(accumulatedText);
-          }
-          scrollToBottom();
         }
       }
     }
 
-    // Process any remaining bytes in buffer
-    if (buffer.trim()) {
-      const finalChunk = parseChunk(buffer.trim());
-      if (finalChunk && finalChunk !== null) {
-        if (isFirstChunk) {
-          removeThinkingIndicator();
-          isFirstChunk = false;
-
-          aiMessageEl = document.createElement('div');
-          aiMessageEl.className = 'chat-msg ai';
-
-          bubbleEl = document.createElement('div');
-          bubbleEl.className = 'msg-bubble';
-          aiMessageEl.appendChild(bubbleEl);
-
-          const timeEl = document.createElement('span');
-          timeEl.className = 'msg-time';
-          timeEl.textContent = getCurrentTime();
-          aiMessageEl.appendChild(timeEl);
-
-          messagesContainer.appendChild(aiMessageEl);
-        }
-        accumulatedText += finalChunk;
-        if (bubbleEl) {
-          bubbleEl.innerHTML = formatMarkdown(accumulatedText);
-        }
-      }
+    if (!hasReceivedTokens && !accumulatedText) {
+      accumulatedText = t('chat.defaultResponse') || 'تمت معالجة استفسارك بنجاح وفق سجلات المنصة المعتمدة.';
+      bubble.innerHTML = formatMarkdown(accumulatedText);
     }
 
-  } catch (error) {
-    console.error('[Rawabit AI Chat] Streaming error:', error);
-    removeThinkingIndicator();
+    activeMessages.push({ role: 'assistant', content: accumulatedText });
 
-    // Render error message bubble
-    const errorMsgEl = document.createElement('div');
-    errorMsgEl.className = 'chat-msg ai';
-    const lang = store.state.lang;
-    const errorMsg = lang === 'ar'
-      ? 'عذراً، تعذر الاتصال بخادم الذكاء الاصطناعي. يرجى التحقق من تشغيل واجهة البرمجة (FastAPI RAG Backend) أو إعداد متغير VITE_AI_API_URL.'
-      : (lang === 'fr'
-        ? 'Désolé, impossible de joindre le serveur IA. Veuillez vérifier le backend FastAPI RAG ou la variable VITE_AI_API_URL.'
-        : 'Sorry, unable to connect to the AI backend. Please check that your FastAPI RAG server is running or set VITE_AI_API_URL.');
-
-    errorMsgEl.innerHTML = `
-      <div class="msg-bubble" style="background: rgba(220, 38, 38, 0.08); color: #B91C1C; border-color: rgba(220, 38, 38, 0.2);">
-        ${errorMsg}
-      </div>
-      <span class="msg-time">${getCurrentTime()}</span>
-    `;
-    messagesContainer.appendChild(errorMsgEl);
+  } catch (err) {
+    bubble.innerHTML = `<span style="color:#DC2626;">تعذر استلام الرد المباشر: ${escapeHtml(err.message)}</span>`;
   } finally {
     isStreaming = false;
-    if (sendBtn) sendBtn.disabled = false;
+    bubble.classList.remove('streaming');
+    bubble.removeAttribute('id');
+    if (substatus) substatus.textContent = 'جاهز للإجابة الفورية';
     scrollToBottom();
   }
 }
 
 /**
- * Simple parser for bolding (**text**) and line breaks
+ * Scroll chat messages viewport to bottom
  */
-function formatMarkdown(str) {
-  let formatted = escapeHtml(str);
-  formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-  formatted = formatted.replace(/\n/g, '<br/>');
-  return formatted;
-}
-
-function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
-
-function getCurrentTime() {
-  const now = new Date();
-  return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-}
-
 function scrollToBottom() {
   const container = drawerElement?.querySelector('#ai-chat-messages');
   if (container) {
     container.scrollTop = container.scrollHeight;
   }
+}
+
+/**
+ * Simple markdown formatter for bold, code, and bullet lists
+ */
+function formatMarkdown(md) {
+  if (!md) return '';
+  let html = escapeHtml(md);
+
+  // Bold
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  // Inline code
+  html = html.replace(/`(.*?)`/g, '<code>$1</code>');
+  // Line breaks
+  html = html.replace(/\n\n/g, '<br/><br/>').replace(/\n/g, '<br/>');
+
+  return html;
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }

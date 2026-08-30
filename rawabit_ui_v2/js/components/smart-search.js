@@ -1,8 +1,8 @@
 /**
- * Rawabit v2 — True Smart Search Engine & Intelligent Floating Dropdown
- * 1. Pinned Top AI Action Prompt ("✨ Ask AI about: [query]") -> Directly streams Groq AI
- * 2. Instant Matching Wilayas -> Opens Cinematic Wilaya Intermediate Screen
- * 3. Verified Talents & Domains -> Opens Mind-Map Experience
+ * Rawabit v2 — AI-First True Smart Search Engine & Instant Auto-Suggest Dropdown
+ * 1. Top Suggestion: <div class="ai-suggest" style="cursor:pointer; font-weight:bold; color:#059669;"> Ask AI about: "[query]"</div>
+ * 2. Instant Matching Wilayas & Verified Experts
+ * 3. Immediate AI Chat Drawer Execution on Selection
  * Strictly Vanilla JS · 60FPS Reactive
  */
 
@@ -10,9 +10,10 @@ import { WILAYAS } from './map-paths.js';
 import { openWilayaIntermediateScreen } from './wilaya-modal.js';
 import { openAIChat } from './chat.js';
 import { openMindMap } from './mindmap.js';
-import { getProfilesByWilaya, generateLuxuryAvatar } from '../data/profiles-data.js';
+import { getProfilesByWilaya } from '../data/profiles-data.js';
 import { store } from '../store.js';
 import { t } from '../i18n.js';
+import { navigate } from '../router.js';
 
 let activeDropdown = null;
 let cachedProfiles = [];
@@ -55,6 +56,7 @@ export function initSmartSearch(formEl, inputEl) {
     }
 
     const lang = store.state.lang;
+    const rawQuery = query.trim();
 
     // 1. Matching Wilayas (up to 4)
     const matchingWilayas = WILAYAS.filter(w => {
@@ -75,27 +77,21 @@ export function initSmartSearch(formEl, inputEl) {
     }).slice(0, 3);
 
     dropdown.innerHTML = `
-      <!-- 1. TOP PINNED AI STREAM ACTION -->
-      <div class="smart-search-ai-item" id="smart-search-ai-btn" tabindex="0">
-        <div class="smart-ai-icon-badge">
+      <!-- TOP AI SUGGESTION -->
+      <div class="ai-suggest" id="ai-suggest-top-btn" style="cursor:pointer; font-weight:bold; color:#059669; padding: 12px 16px; border-radius: 12px; background: #F0FDF4; border: 1.5px solid rgba(5, 150, 105, 0.3); display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; transition: all 0.2s ease;">
+        <div style="display: flex; align-items: center; gap: 10px;">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
             <path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/>
           </svg>
+          <span>Ask AI about: "${rawQuery}"</span>
         </div>
-        <div class="smart-ai-text">
-          <div class="smart-ai-title-line">
-            <span>${t('search.askAiPrefix')}</span>
-            <span class="smart-ai-query-tag">"${query.trim()}"</span>
-          </div>
-          <p class="smart-ai-sub-desc">${t('search.aiSuggestionSub')}</p>
-        </div>
-        <span class="smart-ai-chip">AI Stream →</span>
+        <span style="background: rgba(5, 150, 105, 0.15); color: #059669; font-size: 0.76rem; font-weight: 800; padding: 3px 8px; border-radius: 9999px;">AI Chat ↵</span>
       </div>
 
-      <!-- 2. MATCHING WILAYAS -->
+      <!-- MATCHING WILAYAS -->
       ${matchingWilayas.length > 0 ? `
         <div class="smart-search-group">
-          <div class="smart-group-title" data-i18n="search.wilayasHeading">${t('search.wilayasHeading')}</div>
+          <div class="smart-group-title">${t('search.wilayasHeading')}</div>
           <div class="smart-group-items">
             ${matchingWilayas.map(w => {
               const wName = lang === 'ar' ? (w.nameAr || w.name) : (lang === 'en' ? (w.nameEn || w.name) : (w.nameFr || w.name));
@@ -115,10 +111,10 @@ export function initSmartSearch(formEl, inputEl) {
         </div>
       ` : ''}
 
-      <!-- 3. MATCHING TALENTS & EXPERTS -->
+      <!-- MATCHING TALENTS & EXPERTS -->
       ${matchingTalents.length > 0 ? `
         <div class="smart-search-group">
-          <div class="smart-group-title" data-i18n="search.talentsHeading">${t('search.talentsHeading')}</div>
+          <div class="smart-group-title">${t('search.talentsHeading')}</div>
           <div class="smart-group-items">
             ${matchingTalents.map(p => {
               const pName = lang === 'ar' ? (p.nameAr || p.name) : (lang === 'fr' ? p.nameFr : p.name);
@@ -146,8 +142,8 @@ export function initSmartSearch(formEl, inputEl) {
 
     // ── Wire Click Handlers ──
 
-    // 1. AI Button Click -> Open AI Drawer with query prefilled and auto-sent
-    const aiBtn = dropdown.querySelector('#smart-search-ai-btn');
+    // 1. TOP AI Suggestion Click -> Immediately OPEN AI Drawer & Pass initialQuery
+    const aiBtn = dropdown.querySelector('#ai-suggest-top-btn');
     if (aiBtn) {
       aiBtn.addEventListener('click', () => {
         const text = inputEl.value.trim();
@@ -156,31 +152,20 @@ export function initSmartSearch(formEl, inputEl) {
       });
     }
 
-    // 2. Wilaya Clicks -> Trigger In-Place SVG Expansion on Map or Route
+    // 2. Wilaya Clicks -> Route to Wilaya Profiles
     dropdown.querySelectorAll('.smart-wilaya-item').forEach(item => {
       item.addEventListener('click', () => {
         const code = item.dataset.code;
         const target = WILAYAS.find(w => w.code === code);
         if (target) {
           closeDropdown();
-          const mapStateEl = document.querySelector(`.wilaya-group[data-code="${code}"] .wilaya-path`);
-          if (mapStateEl) {
-            const mapContainer = document.querySelector('#map-container');
-            if (mapContainer) {
-              mapContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-            setTimeout(() => {
-              mapStateEl.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-            }, 350);
-          } else {
-            store.setState({ selectedWilaya: target });
-            navigate(`#/wilaya/${code}`);
-          }
+          store.setState({ selectedWilaya: target });
+          navigate(`#/wilaya/${code}`);
         }
       });
     });
 
-    // 3. Talent Clicks -> Open Mind-Map
+    // 3. Talent Clicks -> Open Mind-Map Experience
     dropdown.querySelectorAll('.smart-talent-item').forEach(item => {
       item.addEventListener('click', () => {
         const id = item.dataset.id;
@@ -210,7 +195,7 @@ export function initSmartSearch(formEl, inputEl) {
     const query = inputEl.value.trim();
     if (!query) return;
 
-    // By default, submitting the hero search bar triggers the AI Assistant with that query!
+    // Direct submit on search bar triggers AI Assistant with the query
     closeDropdown();
     openAIChat({ initialQuery: query });
   });
@@ -219,7 +204,7 @@ export function initSmartSearch(formEl, inputEl) {
   inputEl.addEventListener('keydown', (e) => {
     if (dropdown.style.display === 'none') return;
 
-    const items = dropdown.querySelectorAll('.smart-search-ai-item, .smart-wilaya-item, .smart-talent-item');
+    const items = dropdown.querySelectorAll('.ai-suggest, .smart-wilaya-item, .smart-talent-item');
     if (items.length === 0) return;
 
     if (e.key === 'ArrowDown') {
