@@ -1076,26 +1076,147 @@
   box-shadow: 0 10px 28px rgba(0, 135, 90, 0.4);
 }
 
-.btn-linkedin {
+/* ==========================================================================
+   PREMIUM SOURCING TREE (NODE BRANCHING ANIMATION)
+   ========================================================================== */
+
+.sourcing-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  position: relative;
+  margin-top: 6px;
+}
+
+.premium-btn {
   width: 100%;
   padding: 12px 20px;
-  background: #FFFFFF;
-  color: #0A66C2;
-  border: 1.5px solid #0A66C2;
+  background: linear-gradient(135deg, #00875A 0%, #059669 100%);
+  color: #FFFFFF;
+  border: 1.5px solid rgba(52, 211, 153, 0.4);
   border-radius: 14px;
-  font-weight: 700;
+  font-weight: 800;
   font-size: 0.95rem;
+  font-family: inherit;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  box-shadow: 0 6px 20px rgba(0, 135, 90, 0.32);
   transition: all var(--transition-fast);
-  text-decoration: none;
+  cursor: pointer;
+  outline: none;
 }
 
-.btn-linkedin:hover {
-  background: rgba(10, 102, 194, 0.08);
+.premium-btn:hover,
+.premium-btn.active {
+  background: linear-gradient(135deg, #059669 0%, #10B981 100%);
   transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(52, 211, 153, 0.45);
+}
+
+#sourcing-tree-container {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 20px;
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transform: translateY(-10px);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  width: 100%;
+}
+
+#sourcing-tree-container.tree-expanded {
+  opacity: 1;
+  max-height: 250px;
+  transform: translateY(0);
+  overflow: visible;
+}
+
+/* The main vertical line dropping from the button */
+#sourcing-tree-container::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  width: 2px;
+  height: 20px;
+  background: #34D399;
+  transform: translateX(-50%);
+}
+
+/* The horizontal branching line */
+.tree-branch-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-top: 15px;
+}
+
+.tree-branch-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: calc(100% - 80px);
+  height: 2px;
+  background: #34D399;
+  transform: translateX(-50%);
+}
+
+/* If only 1 source, hide the horizontal branch bar */
+.tree-branch-wrapper.single-source::before {
+  display: none;
+}
+
+/* The vertical drops to the cards */
+.source-card {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(2, 44, 34, 0.85);
+  border: 1px solid rgba(52, 211, 153, 0.35);
+  border-radius: 10px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #FFFFFF;
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 700;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  white-space: nowrap;
+}
+
+.source-card::before {
+  content: '';
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  width: 2px;
+  height: 15px;
+  background: #34D399;
+  transform: translateX(-50%);
+}
+
+.source-card:hover {
+  background: rgba(52, 211, 153, 0.25);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(52, 211, 153, 0.45);
+  border-color: #34D399;
+  color: #FFFFFF;
+}
+
+.btn-linkedin {
+  display: none;
 }
 
 /* 4 Satellite Cards (Radial Nodes) */

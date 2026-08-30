@@ -7,11 +7,13 @@
 
 import { getProfilesByWilaya, getAllCategories, generateLuxuryAvatar } from '../data/profiles-data.js';
 import { WILAYAS } from './map-paths.js';
-import { openMindMap } from './mindmap.js';
+import { openMindMap, getProfileSources } from './mindmap.js';
 import { openAIChat } from './chat.js';
 import { t, applyTranslations } from '../i18n.js';
 import { store } from '../store.js';
 import { navigate } from '../router.js';
+
+export { getProfileSources };
 
 let activeDomain = null; // null = Domains Grid, string = Active Domain Profiles Grid
 let searchQuery = '';

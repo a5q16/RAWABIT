@@ -15,6 +15,64 @@ let activeOverlay = null;
 let activeResizeHandler = null;
 
 /**
+ * Extract Verified Sourcing & Contact Channels from Profile Data
+ */
+export function getProfileSources(profile) {
+  const sources = [];
+  const linkedin = profile.contact?.linkedin || profile.linkedin_url || profile.linkedin;
+  const email = profile.contact?.email || profile.email;
+  const github = profile.contact?.github || profile.github_url || profile.github;
+  const website = profile.contact?.website || profile.contact?.portfolio || profile.website_url;
+
+  if (linkedin && linkedin !== '#') {
+    sources.push({
+      type: 'linkedin',
+      label: 'LinkedIn Profile',
+      url: linkedin,
+      icon: `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.25c-.9 0-1.63.73-1.63 1.63s.73 1.63 1.63 1.63 1.63-.73 1.63-1.63-.73-1.63-1.63-1.63z"/></svg>`
+    });
+  }
+
+  if (github && github !== '#') {
+    sources.push({
+      type: 'github',
+      label: 'GitHub Repos',
+      url: github.startsWith('http') ? github : `https://github.com/${github}`,
+      icon: `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>`
+    });
+  }
+
+  if (email && email !== '#') {
+    sources.push({
+      type: 'email',
+      label: 'Direct Email',
+      url: `mailto:${email}`,
+      icon: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`
+    });
+  }
+
+  if (website && website !== '#') {
+    sources.push({
+      type: 'website',
+      label: 'Portfolio / Web',
+      url: website.startsWith('http') ? website : `https://${website}`,
+      icon: `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>`
+    });
+  }
+
+  if (sources.length === 0) {
+    sources.push({
+      type: 'rawabit',
+      label: 'Rawabit Sovereign Registry',
+      url: `#/wilaya/${profile.wilaya || '16'}`,
+      icon: `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>`
+    });
+  }
+
+  return sources;
+}
+
+/**
  * Open the Mind-Map experience for a specific profile
  * @param {Object} profile - Full competency profile data
  * @param {HTMLElement} originCard - The original clicked card element in the grid
@@ -30,6 +88,7 @@ export function openMindMap(profile, originCard = null) {
 
   const lang = store.state.lang;
   const isRtl = lang === 'ar';
+  const sources = getProfileSources(profile);
 
   // ── 1. Create Overlay DOM ──
   const overlay = document.createElement('div');
@@ -208,7 +267,7 @@ export function openMindMap(profile, originCard = null) {
           <p class="center-bio">${displayBio}</p>
         </div>
 
-        <!-- CENTER CARD ACTIONS (Ask AI & LinkedIn) -->
+        <!-- CENTER CARD ACTIONS (Ask AI & Sourcing Tree) -->
         <div class="center-actions-wrap">
           <button class="btn-ask-ai" id="btn-ask-ai">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
@@ -217,12 +276,29 @@ export function openMindMap(profile, originCard = null) {
             <span data-i18n="mindmap.askAi">${t('mindmap.askAi')}</span>
           </button>
 
-          <a class="btn-linkedin" href="${profile.contact?.linkedin || '#'}" target="_blank" rel="noopener noreferrer">
-            <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor">
-              <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.25c-.9 0-1.63.73-1.63 1.63s.73 1.63 1.63 1.63 1.63-.73 1.63-1.63-.73-1.63-1.63-1.63z"/>
-            </svg>
-            <span data-i18n="mindmap.linkedin">${t('mindmap.linkedin')}</span>
-          </a>
+          <div class="sourcing-block">
+            <button id="btn-sourcing" class="premium-btn">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="18" cy="5" r="3"></circle>
+                <circle cx="6" cy="12" r="3"></circle>
+                <circle cx="18" cy="19" r="3"></circle>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+              </svg>
+              <span>Sources & Contact</span>
+            </button>
+
+            <div id="sourcing-tree-container" class="tree-collapsed">
+              <div class="tree-branch-wrapper ${sources.length === 1 ? 'single-source' : ''}">
+                ${sources.map(s => `
+                  <a class="source-card" href="${s.url}" target="_blank" rel="noopener noreferrer">
+                    ${s.icon}
+                    <span>${s.label}</span>
+                  </a>
+                `).join('')}
+              </div>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -248,6 +324,17 @@ export function openMindMap(profile, originCard = null) {
         displayName, 
         displayTitle 
       });
+    });
+  }
+
+  // ── Wire Sourcing & Contact Tree Toggle ──
+  const btnSourcing = overlay.querySelector('#btn-sourcing');
+  const treeContainer = overlay.querySelector('#sourcing-tree-container');
+  if (btnSourcing && treeContainer) {
+    btnSourcing.addEventListener('click', (e) => {
+      e.stopPropagation();
+      treeContainer.classList.toggle('tree-expanded');
+      btnSourcing.classList.toggle('active');
     });
   }
 
