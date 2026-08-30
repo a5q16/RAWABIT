@@ -158,23 +158,32 @@ export const TRANSLATIONS = {
 
     // Profiles Grid View
     'profiles.back': 'العودة للخريطة',
-    'profiles.badge': 'دليل الكفاءات الموثقة',
+    'profiles.badge': 'دليل الكفاءات المعتمدة',
     'profiles.titlePrefix': 'كفاءات ولاية',
     'profiles.verifiedCount': 'كفاءة موثقة',
-    'profiles.avgReliability': 'متوسط الموثوقية',
+    'profiles.avgReliability': 'مستوى الاعتماد',
     'profiles.searchPlaceholder': 'ابحث بالاسم، التخصص، أو الكلمات المفتاحية...',
     'profiles.filterAll': 'الكل',
-    'profiles.reliability': 'موثوقية',
+    'profiles.reliability': 'الاعتماد',
     'profiles.verifiedBadge': 'كفاءة موثقة رسمياً',
     'profiles.exploreMindmap': 'استكشاف الخريطة الذهنية',
-    'profiles.noResults': 'لم يتم العثور على نتائج تطابق بحثك',
+    'profiles.noResults': 'لم يتم العثور على كفاءات تطابق بحثك',
     'profiles.resetFilters': 'إعادة تعيين البحث',
 
+    // 3-Tier Verification System
+    'tier.gold': 'خبير معتمد',
+    'tier.silver': 'كفاءة موثقة',
+    'tier.bronze': 'ملف مسجل',
+    'tier.goldBadge': 'اعتماد رسمي كامل',
+    'tier.silverBadge': 'توثيق أكاديمي/مهني',
+    'tier.bronzeBadge': 'مسجل في السجل',
+
     // Mind-Map Experience
-    'mindmap.askAi': 'اسأل الذكاء الاصطناعي عن الكفاءة',
+    'mindmap.askAi': 'استشارة الذكاء الاصطناعي',
     'mindmap.linkedin': 'الملف الشخصي على لينكد إن',
     'mindmap.verifiedBadge': 'كفاءة موثقة رسمياً',
     'mindmap.close': 'إغلاق',
+    'mindmap.idPrefix': 'معرف التوثيق:',
     'mindmap.tabAcademic': 'المسار الأكاديمي والبحثي',
     'mindmap.tabCompetencies': 'الكفاءات والمهارات المحورية',
     'mindmap.tabCareer': 'المسار المهني والمشاريع',
@@ -187,8 +196,8 @@ export const TRANSLATIONS = {
     'footer.copy': '© 2025 روابط — المنصة الرقمية للكفاءات الجزائرية',
 
     // Proactive Lost User AI Assistant
-    'proactive.heading': 'متردد؟ او تحس بالضياع؟',
-    'proactive.sub': 'مساعدنا الذكي هنا لمساعدتك بشكل دقيق لإرشادك وسط الكفاءات.',
+    'proactive.heading': 'هل تبحث عن تخصص معين؟',
+    'proactive.sub': 'مساعدنا الذكي جاهز لإرشادك مباشرة إلى الكفاءات المناسبة في هذه الولاية.',
     'proactive.btn': 'اسأل المساعد الذكي',
 
     // General
@@ -352,20 +361,29 @@ export const TRANSLATIONS = {
     'profiles.badge': 'Verified Talent Directory',
     'profiles.titlePrefix': 'Competencies in',
     'profiles.verifiedCount': 'Verified Experts',
-    'profiles.avgReliability': 'Average Reliability',
+    'profiles.avgReliability': 'Accreditation Status',
     'profiles.searchPlaceholder': 'Search by name, expertise, or keyword...',
     'profiles.filterAll': 'All',
-    'profiles.reliability': 'Reliability',
+    'profiles.reliability': 'Accreditation',
     'profiles.verifiedBadge': 'Officially Verified Talent',
     'profiles.exploreMindmap': 'Explore Mind-Map',
     'profiles.noResults': 'No matching profiles found',
     'profiles.resetFilters': 'Reset Filters',
 
+    // 3-Tier Verification System
+    'tier.gold': 'Verified Expert',
+    'tier.silver': 'Confirmed Talent',
+    'tier.bronze': 'Registered Profile',
+    'tier.goldBadge': 'Full Official Accreditation',
+    'tier.silverBadge': 'Academic/Career Verified',
+    'tier.bronzeBadge': 'National Index Registered',
+
     // Mind-Map Experience
-    'mindmap.askAi': 'Ask AI about Talent',
+    'mindmap.askAi': 'Consult AI Assistant',
     'mindmap.linkedin': 'LinkedIn Profile',
     'mindmap.verifiedBadge': 'Officially Verified Talent',
     'mindmap.close': 'Close',
+    'mindmap.idPrefix': 'Verification ID:',
     'mindmap.tabAcademic': 'Academic & Research',
     'mindmap.tabCompetencies': 'Core Competencies',
     'mindmap.tabCareer': 'Professional Career',
@@ -378,12 +396,12 @@ export const TRANSLATIONS = {
     'footer.copy': "© 2025 Rawabit — Algeria's Digital Competencies Platform",
 
     // Proactive Lost User AI Assistant
-    'proactive.heading': 'Hesitant? Or feeling lost?',
-    'proactive.sub': 'Our AI assistant is here to guide you accurately through competencies.',
+    'proactive.heading': 'Looking for a specific expertise?',
+    'proactive.sub': 'Our AI assistant is ready to guide you directly to matching competencies in this wilaya.',
     'proactive.btn': 'Ask AI Assistant',
 
     // General
-    'loader.brand': 'روابط'
+    'loader.brand': 'RAWABIT'
   },
 
   fr: {
@@ -540,40 +558,49 @@ export const TRANSLATIONS = {
 
     // Profiles Grid View
     'profiles.back': 'Retour à la carte',
-    'profiles.badge': 'Répertoire des Compétences',
-    'profiles.titlePrefix': 'Compétences à',
-    'profiles.verifiedCount': 'Experts Vérifiés',
-    'profiles.avgReliability': 'Fiabilité Moyenne',
+    'profiles.badge': 'Répertoire des Compétences Agréées',
+    'profiles.titlePrefix': 'Compétences de la Wilaya de',
+    'profiles.verifiedCount': 'Compétences Vérifiées',
+    'profiles.avgReliability': 'Niveau d’Accréditation',
     'profiles.searchPlaceholder': 'Rechercher par nom, spécialité ou mot-clé...',
     'profiles.filterAll': 'Tous',
-    'profiles.reliability': 'Fiabilité',
+    'profiles.reliability': 'Accréditation',
     'profiles.verifiedBadge': 'Compétence Officiellement Vérifiée',
     'profiles.exploreMindmap': 'Explorer la Carte Mentale',
-    'profiles.noResults': 'Aucun profil correspondant',
-    'profiles.resetFilters': 'Réinitialiser',
+    'profiles.noResults': 'Aucune compétence trouvée',
+    'profiles.resetFilters': 'Réinitialiser la Recherche',
+
+    // 3-Tier Verification System
+    'tier.gold': 'Expert Agréé',
+    'tier.silver': 'Compétence Confirmée',
+    'tier.bronze': 'Profil Enregistré',
+    'tier.goldBadge': 'Accréditation Officielle Complète',
+    'tier.silverBadge': 'Parcours Vérifié',
+    'tier.bronzeBadge': 'Inscrit au Registre National',
 
     // Mind-Map Experience
-    'mindmap.askAi': 'Consulter l’IA sur ce profil',
+    'mindmap.askAi': 'Consulter l’Assistant IA',
     'mindmap.linkedin': 'Profil LinkedIn',
     'mindmap.verifiedBadge': 'Compétence Officiellement Vérifiée',
     'mindmap.close': 'Fermer',
+    'mindmap.idPrefix': 'Identifiant d’Accréditation :',
     'mindmap.tabAcademic': 'Parcours Académique & Recherche',
-    'mindmap.tabCompetencies': 'Compétences Clés',
-    'mindmap.tabCareer': 'Parcours Professionnel',
+    'mindmap.tabCompetencies': 'Compétences & Savoir-faire',
+    'mindmap.tabCareer': 'Parcours Professionnel & Projets',
     'mindmap.tabCredentials': 'Accréditations & Brevets',
 
     // Minimalist Footer
     'footer.link1': 'À propos de Rawabit',
     'footer.link2': 'Pourquoi Rawabit & Vision',
     'footer.link3': 'Contacter l’Équipe Rawabit',
-    'footer.copy': '© 2025 Rawabit — Plateforme des Compétences Algériennes',
+    'footer.copy': '© 2025 Rawabit — Plateforme Nationale des Compétences Algériennes',
 
     // Proactive Lost User AI Assistant
-    'proactive.heading': 'Hésitant ? Ou vous vous sentez perdu ?',
-    'proactive.sub': 'Notre assistant IA est là pour vous guider avec précision parmi les compétences.',
+    'proactive.heading': 'Vous recherchez une compétence précise ?',
+    'proactive.sub': 'Notre assistant IA est à votre disposition pour vous orienter vers les compétences de cette wilaya.',
     'proactive.btn': 'Consulter l’Assistant IA',
 
     // General
-    'loader.brand': 'روابط'
+    'loader.brand': 'RAWABIT'
   }
 };

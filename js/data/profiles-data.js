@@ -33,6 +33,50 @@ function getSupabaseHeaders() {
 }
 
 /**
+ * Dynamically generates a high-end luxury SVG geometric monogram avatar.
+ * Pure vector SVG · Zero external dependency · Zero fake stock photos
+ */
+export function generateLuxuryAvatar(name = 'Talent', nameAr = '', category = 'ai') {
+  const parts = String(name).trim().split(/\s+/);
+  let initials = 'DZ';
+  if (parts.length >= 2) {
+    initials = (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  } else if (parts.length === 1 && parts[0].length >= 2) {
+    initials = parts[0].slice(0, 2).toUpperCase();
+  }
+
+  const themes = {
+    ai: { from: '#022c22', via: '#064e3b', to: '#0f766e', accent: '#34d399', ring: '#10b981' },
+    energy: { from: '#1e293b', via: '#334155', to: '#0f766e', accent: '#f59e0b', ring: '#fbbf24' },
+    health: { from: '#134e4a', via: '#0d9488', to: '#115e59', accent: '#2dd4bf', ring: '#5eead4' },
+    robotics: { from: '#0f172a', via: '#1e293b', to: '#334155', accent: '#60a5fa', ring: '#3b82f6' },
+    software: { from: '#022c22', via: '#065f46', to: '#047857', accent: '#6ee7b7', ring: '#10b981' },
+    agri: { from: '#14532d', via: '#166534', to: '#15803d', accent: '#86efac', ring: '#22c55e' }
+  };
+  const theme = themes[category] || themes.ai;
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+    <defs>
+      <linearGradient id="av_grad_${initials}" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="${theme.from}" />
+        <stop offset="50%" stop-color="${theme.via}" />
+        <stop offset="100%" stop-color="${theme.to}" />
+      </linearGradient>
+      <pattern id="pat_${initials}" width="16" height="16" patternUnits="userSpaceOnUse">
+        <circle cx="8" cy="8" r="1.2" fill="${theme.accent}" opacity="0.18" />
+      </pattern>
+    </defs>
+    <rect width="120" height="120" rx="60" fill="url(#av_grad_${initials})" />
+    <rect width="120" height="120" rx="60" fill="url(#pat_${initials})" />
+    <circle cx="60" cy="60" r="54" fill="none" stroke="${theme.ring}" stroke-width="1.8" stroke-dasharray="3 3" opacity="0.45" />
+    <circle cx="60" cy="60" r="48" fill="none" stroke="${theme.accent}" stroke-width="0.8" opacity="0.25" />
+    <text x="60" y="69" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Tajawal', sans-serif" font-size="36" font-weight="800" fill="#FFFFFF" text-anchor="middle" letter-spacing="1.5">${initials}</text>
+  </svg>`;
+
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
+/**
  * Maps raw database rows from Supabase 'person' table into our UI profile schema.
  * @param {Object} row - Raw row from 'person' table (id, first_name, last_name, bio, photo_url, wilaya_id)
  * @returns {Object} Canonical profile entity for UI components
@@ -57,7 +101,6 @@ export function mapPersonToProfile(row) {
     title = firstSentence.length > 80 ? firstSentence.slice(0, 77) + '...' : firstSentence;
   }
 
-  const avatar = row.photo_url || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=240&auto=format&fit=crop&q=80';
   const wilayaId = row.wilaya_id != null ? Number(row.wilaya_id) : 16;
   const wilayaCode = String(wilayaId).padStart(2, '0');
 
@@ -75,6 +118,11 @@ export function mapPersonToProfile(row) {
       category = 'ai';
     }
   }
+
+  // Pure SVG luxury monogram avatar — eliminates cheap fake human photos
+  const avatar = (row.photo_url && !row.photo_url.includes('unsplash.com'))
+    ? row.photo_url
+    : generateLuxuryAvatar(fullName, row.name_ar, category);
 
   const organization = row.organization || (enrichedProf ? enrichedProf.company : 'National Competency Network');
 
@@ -109,6 +157,28 @@ export function mapPersonToProfile(row) {
     { role: title, company: organization, period: '2024 — Present' }
   ]);
 
+  // ── 3-Tier Logical Verification Classification ──
+  const hasAcademic = academicList && academicList.length > 0;
+  const hasProfessional = professionalList && professionalList.length > 0;
+  const hasBio = bio && bio.length >= 20;
+
+  let tier = 'silver';
+  let tierLabel = 'Confirmed Talent';
+  let tierLabelAr = 'كفاءة موثقة';
+  let tierLabelFr = 'Compétence Confirmée';
+
+  if (hasBio && hasAcademic && hasProfessional) {
+    tier = 'gold';
+    tierLabel = 'Verified Expert';
+    tierLabelAr = 'خبير معتمد';
+    tierLabelFr = 'Expert Agréé';
+  } else if (!hasAcademic && !hasProfessional) {
+    tier = 'bronze';
+    tierLabel = 'Registered Profile';
+    tierLabelAr = 'ملف مسجل';
+    tierLabelFr = 'Profil Enregistré';
+  }
+
   return {
     id: row.id,
     wilayaId: wilayaId,
@@ -128,8 +198,11 @@ export function mapPersonToProfile(row) {
     locationAr: row.location_ar || `ولاية ${wilayaCode}`,
     locationFr: row.location_fr || `Wilaya ${wilayaCode}`,
     avatar: avatar,
-    avatarFallback: row.avatar_fallback || (fullName.length >= 2 ? fullName.slice(0, 2).toUpperCase() : 'DZ'),
-    reliability: Number(row.reliability ?? 96),
+    avatarFallback: fullName.length >= 2 ? fullName.slice(0, 2).toUpperCase() : 'DZ',
+    tier: tier,
+    tierLabel: tierLabel,
+    tierLabelAr: tierLabelAr,
+    tierLabelFr: tierLabelFr,
     category: category,
     bio: bio,
     bioAr: row.bio_ar || bio,
@@ -142,7 +215,7 @@ export function mapPersonToProfile(row) {
     ],
     tags: tags.length > 0 ? tags : ['Verified', 'Competency', enrichedAcad?.specialty || 'Expertise'],
     achievements: achievements.length > 0 ? achievements : [
-      { title: `Verified Professional at ${organization}`, year: '2025', badge: 'Certified' }
+      { title: `${tierLabel} at ${organization}`, year: '2025', badge: tier.toUpperCase() }
     ],
     contact: typeof row.contact === 'object' && row.contact !== null ? row.contact : (row.email ? { email: row.email } : {}),
     ...row

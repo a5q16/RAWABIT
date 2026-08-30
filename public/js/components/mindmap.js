@@ -9,6 +9,7 @@
 import { t } from '../i18n.js';
 import { store, pushOverlay, popOverlay } from '../store.js';
 import { openAIChat } from './chat.js';
+import { generateLuxuryAvatar } from '../data/profiles-data.js';
 
 let activeOverlay = null;
 let activeResizeHandler = null;
@@ -23,6 +24,9 @@ export function openMindMap(profile, originCard = null) {
 
   store.setState({ selectedProfile: profile });
   pushOverlay('mindmap');
+  if (typeof document !== 'undefined') {
+    document.body.classList.add('modal-open');
+  }
 
   const lang = store.state.lang;
   const isRtl = lang === 'ar';
@@ -39,13 +43,18 @@ export function openMindMap(profile, originCard = null) {
   const displayLoc = (lang === 'ar' && profile.locationAr) ? profile.locationAr : (lang === 'fr' && profile.locationFr ? profile.locationFr : profile.location);
   const displayBio = (lang === 'ar' && profile.bioAr) ? profile.bioAr : (lang === 'fr' && profile.bioFr ? profile.bioFr : profile.bio);
 
+  const tierClass = profile.tier || 'silver';
+  const tierText = (lang === 'ar' && profile.tierLabelAr) 
+    ? profile.tierLabelAr 
+    : (lang === 'fr' && profile.tierLabelFr ? profile.tierLabelFr : (profile.tierLabel || t(`tier.${tierClass}`)));
+
   overlay.innerHTML = `
     <!-- Top Bar Controls -->
     <div class="mindmap-header-bar" id="mindmap-header-bar">
       <div class="mindmap-title-badge">
         <span class="pulse-dot"></span>
-        <span class="mindmap-badge-text" data-i18n="mindmap.verifiedBadge">${t('mindmap.verifiedBadge')}</span>
-        <span class="mindmap-badge-code">ID: ${profile.contact?.verifiedId || `DZ-${profile.wilayaCode}-2025`}</span>
+        <span class="mindmap-badge-text">${tierText}</span>
+        <span class="mindmap-badge-code">${t('mindmap.idPrefix')} ${profile.contact?.verifiedId || `DZ-${profile.wilayaCode}-2025`}</span>
       </div>
       <button class="mindmap-close-btn" id="mindmap-close-btn" aria-label="${t('mindmap.close')}">
         <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round">
@@ -164,17 +173,21 @@ export function openMindMap(profile, originCard = null) {
       <!-- ── CENTER MAIN PROFILE CARD ── -->
       <div class="mindmap-center-card" id="mindmap-center-card">
         <div class="center-avatar-wrap">
-          <img class="center-avatar" src="${profile.avatar}" alt="${profile.name}" onerror="this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=240&auto=format&fit=crop&q=80'" />
-          <div class="center-verified-badge" title="${t('profiles.reliability')}">
+          <img 
+            class="center-avatar" 
+            src="${profile.avatar}" 
+            alt="${profile.name}" 
+          />
+          <div class="center-verified-badge tier-indicator-${tierClass}" title="${tierText}">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="white">
               <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
             </svg>
           </div>
         </div>
 
-        <div class="center-reliability-tag">
-          <span class="reliability-num">${profile.reliability}%</span>
-          <span class="reliability-label" data-i18n="profiles.reliability">${t('profiles.reliability')}</span>
+        <div class="center-tier-tag tier-${tierClass}" title="${t(`tier.${tierClass}Badge`)}">
+          <span class="pulse-dot"></span>
+          <span class="tier-label">${tierText}</span>
         </div>
 
         <div class="center-info">

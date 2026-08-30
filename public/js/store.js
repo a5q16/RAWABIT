@@ -54,11 +54,19 @@ export const store = createStore({
 });
 
 export function pushOverlay(name) { 
-    store.setState({ overlayStack: [...store.state.overlayStack, name] }); 
+    const nextStack = [...store.state.overlayStack, name];
+    store.setState({ overlayStack: nextStack }); 
+    if (typeof document !== 'undefined' && document.body) {
+        document.body.classList.add('modal-open');
+    }
 }
 
 export function popOverlay() { 
-    store.setState({ overlayStack: store.state.overlayStack.slice(0, -1) }); 
+    const nextStack = store.state.overlayStack.slice(0, -1);
+    store.setState({ overlayStack: nextStack }); 
+    if (typeof document !== 'undefined' && document.body && nextStack.length === 0) {
+        document.body.classList.remove('modal-open');
+    }
 }
 
 export function isOverlayActive(name) { 

@@ -5,7 +5,7 @@
  * Pure Vanilla JS · 60FPS Performance
  */
 
-import { getProfilesByWilaya, getAllCategories } from '../data/profiles-data.js';
+import { getProfilesByWilaya, getAllCategories, generateLuxuryAvatar } from '../data/profiles-data.js';
 import { WILAYAS } from './map-paths.js';
 import { openMindMap } from './mindmap.js';
 import { openAIChat } from './chat.js';
@@ -252,8 +252,29 @@ function renderDynamicStage(profiles, categories) {
 /**
  * ── STEP 1: COMPETENCY DOMAINS GRID (CLEAN TITLE, ZERO CLUTTER) ──
  */
+/**
+ * Tier Badge SVG Icons Helper
+ */
+function getTierBadgeIconSvg(tier) {
+  if (tier === 'gold') {
+    return `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
+  } else if (tier === 'bronze') {
+    return `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>`;
+  }
+  // Silver default
+  return `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>`;
+}
+
+/**
+ * ── STEP 1: COMPETENCY DOMAINS GRID (CLEAN TITLE, ZERO CLUTTER) ──
+ */
 function renderDomainsGrid(container, profiles, categories) {
   const lang = store.state.lang;
+
+  // ── GHOST DOMAINS FIX: Completely filter out any domain with 0 Verified Talents ──
+  const activeCategories = categories.filter(cat => {
+    return profiles.some(p => p.category === cat.id);
+  });
 
   container.innerHTML = `
     <div class="domains-view-wrapper animate-fade-in">
@@ -262,43 +283,54 @@ function renderDomainsGrid(container, profiles, categories) {
         <h2 class="domains-grid-heading" data-i18n="domains.title">${t('domains.title')}</h2>
       </div>
 
-      <div class="domains-cards-grid">
-        ${categories.map((cat, idx) => {
-          const catTitle = (lang === 'ar' && cat.labelAr) ? cat.labelAr : (lang === 'fr' && cat.labelFr ? cat.labelFr : cat.label);
-          const catDesc = (lang === 'ar' && cat.descAr) ? cat.descAr : (lang === 'fr' && cat.descFr ? cat.descFr : cat.desc);
-          
-          // Calculate verified talents in this domain
-          const countInDomain = profiles.filter(p => p.category === cat.id).length;
-          const displayCount = countInDomain;
+      ${activeCategories.length === 0 ? `
+        <div class="empty-profiles-state">
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </div>
+          <h3 data-i18n="profiles.noResults">${t('profiles.noResults')}</h3>
+        </div>
+      ` : `
+        <div class="domains-cards-grid">
+          ${activeCategories.map((cat, idx) => {
+            const catTitle = (lang === 'ar' && cat.labelAr) ? cat.labelAr : (lang === 'fr' && cat.labelFr ? cat.labelFr : cat.label);
+            const catDesc = (lang === 'ar' && cat.descAr) ? cat.descAr : (lang === 'fr' && cat.descFr ? cat.descFr : cat.desc);
+            
+            // Calculate verified talents in this active domain
+            const countInDomain = profiles.filter(p => p.category === cat.id).length;
 
-          return `
-            <article class="domain-card animate-fade-in-up" style="animation-delay: ${idx * 70}ms;" data-domain-id="${cat.id}">
-              
-              <div class="domain-card-icon-box">
-                ${getDomainIconSvg(cat.icon || cat.id)}
-              </div>
-
-              <h3 class="domain-card-title">${catTitle}</h3>
-              <p class="domain-card-desc">${catDesc}</p>
-
-              <div class="domain-card-footer">
-                <span class="domain-stat-pill">
-                  <span class="stat-bullet"></span>
-                  <strong>${displayCount}</strong> ${t('domains.verifiedStat')}
-                </span>
+            return `
+              <article class="domain-card animate-fade-in-up" style="animation-delay: ${idx * 70}ms;" data-domain-id="${cat.id}">
                 
-                <span class="domain-explore-btn">
-                  <span data-i18n="domains.viewProfiles">${t('domains.viewProfiles')}</span>
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="9 18 15 12 9 6"></polyline>
-                  </svg>
-                </span>
-              </div>
+                <div class="domain-card-icon-box">
+                  ${getDomainIconSvg(cat.icon || cat.id)}
+                </div>
 
-            </article>
-          `;
-        }).join('')}
-      </div>
+                <h3 class="domain-card-title">${catTitle}</h3>
+                <p class="domain-card-desc">${catDesc}</p>
+
+                <div class="domain-card-footer">
+                  <span class="domain-stat-pill">
+                    <span class="stat-bullet"></span>
+                    <strong>${countInDomain}</strong> ${t('domains.verifiedStat')}
+                  </span>
+                  
+                  <span class="domain-explore-btn">
+                    <span data-i18n="domains.viewProfiles">${t('domains.viewProfiles')}</span>
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                  </span>
+                </div>
+
+              </article>
+            `;
+          }).join('')}
+        </div>
+      `}
 
     </div>
   `;
@@ -379,6 +411,11 @@ function renderProfilesGrid(container, profiles, categories) {
           const displayOrg = (lang === 'ar' && profile.organizationAr) ? profile.organizationAr : (lang === 'fr' && profile.organizationFr ? profile.organizationFr : profile.organization);
           const displayLoc = (lang === 'ar' && profile.locationAr) ? profile.locationAr : (lang === 'fr' && profile.locationFr ? profile.locationFr : profile.location);
 
+          const tierClass = profile.tier || 'silver';
+          const tierText = (lang === 'ar' && profile.tierLabelAr) 
+            ? profile.tierLabelAr 
+            : (lang === 'fr' && profile.tierLabelFr ? profile.tierLabelFr : (profile.tierLabel || t(`tier.${tierClass}`)));
+
           return `
             <article class="profile-card animate-fade-in-up" style="animation-delay: ${Math.min(index * 60, 360)}ms;" data-id="${profile.id}">
               
@@ -389,18 +426,17 @@ function renderProfilesGrid(container, profiles, categories) {
                     src="${profile.avatar}" 
                     alt="${profile.name}" 
                     loading="lazy"
-                    onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=240&auto=format&fit=crop&q=80';"
                   />
-                  <div class="verified-indicator" title="${t('profiles.reliability')}">
+                  <div class="verified-indicator tier-indicator-${tierClass}" title="${tierText}">
                     <svg viewBox="0 0 24 24" width="12" height="12" fill="white">
                       <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
                     </svg>
                   </div>
                 </div>
 
-                <div class="reliability-badge">
-                  <span class="rel-score">${profile.reliability}%</span>
-                  <span class="rel-label">${t('profiles.reliability')}</span>
+                <div class="tier-badge tier-${tierClass}" title="${t(`tier.${tierClass}Badge`)}">
+                  ${getTierBadgeIconSvg(tierClass)}
+                  <span>${tierText}</span>
                 </div>
               </div>
 
@@ -635,6 +671,9 @@ export function triggerProactiveAiOverlay() {
   `;
 
   document.body.appendChild(overlay);
+  if (typeof document !== 'undefined') {
+    document.body.classList.add('modal-open');
+  }
   if (typeof window !== 'undefined' && window.requestAnimationFrame) {
     window.requestAnimationFrame(() => {
       overlay.classList.add('active');
@@ -673,12 +712,15 @@ export function dismissProactiveAiOverlay() {
   if (!activeProactiveOverlay) return;
   const el = activeProactiveOverlay;
   el.classList.remove('active');
+  if (typeof document !== 'undefined') {
+    document.body.classList.remove('modal-open');
+  }
   activeProactiveOverlay = null;
 
   // Set a 5-minute cooldown so it never annoys the user repeatedly
   promptCooldownUntil = Date.now() + (5 * 60 * 1000);
   stopHesitationTracker();
-
+}
   setTimeout(() => {
     if (el && el.parentNode) {
       el.parentNode.removeChild(el);
