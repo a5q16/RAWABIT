@@ -258,49 +258,32 @@
 }
 
 /* ==========================================================================
-   CINEMATIC CHOREOGRAPHED HUD OVERLAY & 4 CARDS
+   TRUE GLASS BLUR HUD OVERLAY, TOP TYPOGRAPHY & 4 CARDS
    ========================================================================== */
 
 .hud-master-overlay {
   user-select: none;
+  background: rgba(20, 45, 35, 0.2) !important;
+  backdrop-filter: blur(25px) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
 }
 
-/* Top Floating Instruction Banner */
-.hud-top-floating-banner {
-  position: fixed;
-  top: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 30;
-  background: rgba(15, 23, 42, 0.85);
-  color: #FFFFFF;
-  border: 1px solid rgba(52, 211, 153, 0.4);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  padding: 10px 24px;
-  border-radius: var(--radius-full);
-  font-size: 0.92rem;
-  font-weight: 800;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+/* Pure Top Typography */
+.hud-top-typography {
+  text-align: center;
   pointer-events: none;
-  animation: bannerSlideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes bannerSlideDown {
-  0% { opacity: 0; transform: translate(-50%, -15px); }
-  100% { opacity: 1; transform: translate(-50%, 0); }
 }
 
 /* 4 Glassmorphism HUD Floating Cards */
 .hud-card {
   position: fixed;
-  background: rgba(255, 255, 255, 0.94);
+  background: rgba(255, 255, 255, 0.92);
   border: 1.5px solid rgba(5, 150, 105, 0.25);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   padding: 16px 20px;
   border-radius: 18px;
-  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.8);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(255, 255, 255, 0.8);
   text-align: start;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -308,15 +291,15 @@
 
 .hud-card:hover {
   transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3), 0 0 0 2px rgba(52, 211, 153, 0.5);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25), 0 0 0 2px rgba(52, 211, 153, 0.6);
 }
 
 /* Card 1: Wilaya Name (Top-Left) */
 .hud-card-1 {
-  top: 80px;
-  inset-inline-start: 40px;
+  top: 14vh;
+  inset-inline-start: 5vw;
   min-width: 200px;
-  max-width: 270px;
+  max-width: 280px;
 }
 
 .hud-card-badge {
@@ -346,10 +329,10 @@
 
 /* Card 2: Verified Talents (Top-Right) */
 .hud-card-2 {
-  top: 80px;
-  inset-inline-end: 40px;
+  top: 14vh;
+  inset-inline-end: 5vw;
   min-width: 190px;
-  max-width: 260px;
+  max-width: 280px;
 }
 
 .hud-card-label {
@@ -377,8 +360,8 @@
 
 /* Card 3: Available Specialties (Bottom-Left) */
 .hud-card-3 {
-  bottom: 40px;
-  inset-inline-start: 40px;
+  bottom: 8vh;
+  inset-inline-start: 5vw;
   min-width: 220px;
   max-width: 320px;
 }
@@ -402,8 +385,8 @@
 
 /* Card 4: Available Universities (Bottom-Right) */
 .hud-card-4 {
-  bottom: 40px;
-  inset-inline-end: 40px;
+  bottom: 8vh;
+  inset-inline-end: 5vw;
   min-width: 220px;
   max-width: 320px;
 }
@@ -433,43 +416,22 @@
 }
 
 /* ── Minimalist Loading Spinner in Blurred Void ── */
-.hud-breathe-loader {
-  position: fixed;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 50;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-}
-
-.hud-spinner-radar {
-  position: relative;
-  width: 56px;
-  height: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.hud-spin-ring {
+.hud-loader-ring {
   position: absolute;
   inset: 0;
   border-radius: 50%;
   border: 3px solid rgba(52, 211, 153, 0.2);
   border-top-color: #34D399;
-  animation: spinRadar 1s linear infinite;
+  animation: spinRadar 0.9s linear infinite;
 }
 
-.hud-spin-core {
-  width: 14px;
-  height: 14px;
+.hud-loader-core {
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   background: #34D399;
-  box-shadow: 0 0 16px #34D399;
-  animation: pulseCore 1s ease-in-out infinite alternate;
+  box-shadow: 0 0 20px #34D399;
+  animation: pulseCore 0.9s ease-in-out infinite alternate;
 }
 
 @keyframes spinRadar {
@@ -481,48 +443,40 @@
   100% { transform: scale(1.2); opacity: 1; }
 }
 
-.hud-loading-text {
-  font-size: 0.95rem;
-  font-weight: 800;
-  color: #FFFFFF;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-  letter-spacing: 0.02em;
-}
-
 @media (max-width: 768px) {
   .map-card-wrapper {
     height: 540px;
     min-height: 540px;
   }
   .hud-card-1 {
-    top: 65px;
+    top: 15vh;
     inset-inline-start: 16px;
     max-width: 150px;
     padding: 10px 12px;
   }
   .hud-card-2 {
-    top: 65px;
+    top: 15vh;
     inset-inline-end: 16px;
     max-width: 150px;
     padding: 10px 12px;
   }
   .hud-card-3 {
-    bottom: 20px;
+    bottom: 4vh;
     inset-inline-start: 16px;
     max-width: 160px;
     padding: 10px 12px;
   }
   .hud-card-4 {
-    bottom: 20px;
+    bottom: 4vh;
     inset-inline-end: 16px;
     max-width: 160px;
     padding: 10px 12px;
   }
-  .hud-top-floating-banner {
-    font-size: 0.78rem;
-    padding: 6px 14px;
-    width: 90%;
-    text-align: center;
+  .hud-top-typography h2 {
+    font-size: 1.35rem !important;
+  }
+  .hud-top-typography p {
+    font-size: 0.9rem !important;
   }
 }
 

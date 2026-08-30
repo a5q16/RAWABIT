@@ -4,13 +4,13 @@
  * 2. Click 1 Choreography:
  *    - T=0.0s: Smooth Camera Zoom & Center on Wilaya (No blur yet)
  *    - T=0.4s: Wilaya path flashes with emerald pulse
- *    - T=0.5s: Fade in full-screen frosted blur backdrop behind Wilaya
- *    - T=0.7s: Draw 4 SOLID SVG lines from Wilaya boundaries to card positions
- *    - T=1.0s: Fade in 4 HUD Cards (Name, Verified Talents, Specialties, Universities) + Floating top prompt
- * 3. Click 2 "Breathe Out" Exit & Loading:
- *    - Cards & lines smoothly scale down (scale: 0.95) & fade out over 0.4s
- *    - Sleek minimalist Loading Screen fades in center
- *    - After 0.6s, navigates to renderProfiles(wilayaCode)
+ *    - T=0.5s: Fade in true translucent glass blur backdrop (rgba(20, 45, 35, 0.2) + blur(25px)) behind Wilaya
+ *    - T=0.7s: Draw 4 glowing SVG vector lines (stroke: rgba(52, 211, 153, 0.6)) from Wilaya center to 4 cards
+ *    - T=1.0s: Fade in 4 HUD Cards (Name, Verified Talents, Specialties, Universities) + Sleek Top Typography
+ * 3. Click 2 "Breathe Out" Exit & Isolated Loading:
+ *    - T=0.0s: Cards, lines, top typography, and cloned Wilaya scale down & fade out (opacity: 0)
+ *    - T=0.3s: Center Loader appears in the empty blurred void
+ *    - T=0.8s: Navigates cleanly to renderProfiles(wilayaCode)
  * 4. Reversal: Click background -> Smooth fade out & camera zooms out to national view
  */
 
@@ -23,7 +23,7 @@ import { navigate } from '../router.js';
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const BASE_VB = { x: -9.17, y: -37.59, w: 21.66, h: 19.13 };
 
-// Algerian Universities & Academic Centers by Wilaya Code
+// Authentic Algerian Universities & Academic Centers by Wilaya Code
 const WILAYA_ACADEMIC_DATA = {
   '01': { unis: ['Univ Adrar (Ahmed Draia)'], specs: ['Energy & Solar', 'Agronomy', 'Geosciences'] },
   '02': { unis: ['Univ Chlef (Hassiba Benbouali)'], specs: ['Civil Engineering', 'Agronomy', 'Computer Science'] },
@@ -453,7 +453,7 @@ export function renderMap(container) {
       pathEl.classList.add('wilaya-flash-pulse');
     }, 400);
 
-    // ── T = 0.5s: Fade in full-screen frosted blur behind glowing Wilaya ──
+    // ── T = 0.5s: Fade in full-screen translucent frosted blur behind Wilaya ──
     setTimeout(() => {
       mountHUDGlassStage(wilaya, pathEl);
     }, 500);
@@ -468,53 +468,59 @@ export function renderMap(container) {
     const displayName = lang === 'ar' ? (wilaya.nameAr || wilaya.name) : (lang === 'en' ? (wilaya.nameEn || wilaya.name) : (wilaya.nameFr || wilaya.name));
     const secName = (lang !== 'ar' && wilaya.nameAr) ? wilaya.nameAr : (wilaya.nameEn || wilaya.name);
 
+    // Top Typography bilingual labels
+    const topTitle = lang === 'ar' ? 'اضغط على الولاية للدخول' : (lang === 'fr' ? 'Cliquez sur la wilaya pour entrer' : 'Click the Wilaya to Enter');
+    const topSubtitle = lang === 'ar' ? 'أو اضغط في أي مكان للعودة' : (lang === 'fr' ? 'Ou cliquez n\'importe où pour revenir' : 'Or click anywhere to return');
+    const loadingText = lang === 'ar' ? 'جارٍ تحميل دليل الكفاءات المعتمدة...' : (lang === 'fr' ? 'Chargement du répertoire des talents...' : 'Loading Wilaya Talents Directory...');
+
     // Academic & Specialty Data
     const acad = WILAYA_ACADEMIC_DATA[wilaya.code] || {
       unis: [`University of ${wilaya.name}`, 'National Polytechnic Institute'],
       specs: ['Artificial Intelligence', 'Energy Systems', 'Software Engineering', 'Biotechnology']
     };
 
-    // Master container for the HUD
+    // Master container for the HUD (True Glass Blur)
     const hudMaster = document.createElement('div');
     hudMaster.id = 'hud-master-overlay';
     hudMaster.className = 'hud-master-overlay';
-    hudMaster.style.cssText = 'position: fixed; inset: 0; z-index: 9999; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); background: rgba(2, 28, 22, 0.68); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.35s ease; cursor: pointer; overflow: hidden;';
+    hudMaster.style.cssText = 'position: fixed; inset: 0; z-index: 9999; backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); background: rgba(20, 45, 35, 0.2); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.35s ease; cursor: pointer; overflow: hidden;';
 
     // SVG Viewport overlay matching exact map bounds
     const mapRect = svg.getBoundingClientRect();
 
     hudMaster.innerHTML = `
-      <!-- Top Instruction Banner -->
-      <div class="hud-top-floating-banner" id="hud-top-banner">
-        <span>${t('hud.floatingBanner')}</span>
+      <!-- Pure Top Typography -->
+      <div class="hud-top-typography" id="hud-top-typography" style="position: fixed; top: 5vh; left: 0; width: 100%; text-align: center; pointer-events: none; z-index: 30; opacity: 0; transition: opacity 0.5s ease 0.3s;">
+        <h2 style="color: #ffffff; font-size: 2rem; font-weight: 700; letter-spacing: 1px; text-shadow: 0 4px 15px rgba(0,0,0,0.4); margin: 0 0 8px;">${topTitle}</h2>
+        <p style="color: #cbd5e1; font-size: 1.1rem; font-weight: 400; margin: 0; text-shadow: 0 2px 8px rgba(0,0,0,0.3);">${topSubtitle}</p>
       </div>
 
-      <!-- SVG Layer for Solid Tethers and Cloned Glowing Shape -->
-      <svg id="hud-tether-svg" style="position: fixed; left: ${mapRect.left}px; top: ${mapRect.top}px; width: ${mapRect.width}px; height: ${mapRect.height}px; pointer-events: none; overflow: visible; z-index: 10;">
+      <!-- Dedicated Full-Screen Viewport SVG Layer for Glowing Solid Tethers -->
+      <svg id="hud-tether-canvas" style="position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 15; overflow: visible;">
+        <line id="hud-tether-1" stroke="rgba(52, 211, 153, 0.6)" stroke-width="1.5" style="filter: drop-shadow(0 0 8px rgba(52, 211, 153, 0.8)); opacity: 0; transition: opacity 0.5s ease 0.3s;"/>
+        <line id="hud-tether-2" stroke="rgba(52, 211, 153, 0.6)" stroke-width="1.5" style="filter: drop-shadow(0 0 8px rgba(52, 211, 153, 0.8)); opacity: 0; transition: opacity 0.5s ease 0.3s;"/>
+        <line id="hud-tether-3" stroke="rgba(52, 211, 153, 0.6)" stroke-width="1.5" style="filter: drop-shadow(0 0 8px rgba(52, 211, 153, 0.8)); opacity: 0; transition: opacity 0.5s ease 0.3s;"/>
+        <line id="hud-tether-4" stroke="rgba(52, 211, 153, 0.6)" stroke-width="1.5" style="filter: drop-shadow(0 0 8px rgba(52, 211, 153, 0.8)); opacity: 0; transition: opacity 0.5s ease 0.3s;"/>
+      </svg>
+
+      <!-- SVG Layer for Cloned Glowing Wilaya Shape -->
+      <svg id="hud-clone-svg" style="position: fixed; left: ${mapRect.left}px; top: ${mapRect.top}px; width: ${mapRect.width}px; height: ${mapRect.height}px; pointer-events: none; overflow: visible; z-index: 18;">
         <defs>
           <filter id="hud-glow-filter" x="-30%" y="-30%" width="160%" height="160%">
             <feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#34D399" flood-opacity="0.9"/>
             <feDropShadow dx="0" dy="8" stdDeviation="20" flood-color="#00875A" flood-opacity="0.75"/>
           </filter>
         </defs>
-        <!-- 4 Solid Connecting Vector Lines -->
-        <g id="hud-solid-lines" style="opacity: 0; transition: opacity 0.3s ease;">
-          <line id="hud-line-1" stroke="#34D399" stroke-width="1.8"/>
-          <line id="hud-line-2" stroke="#34D399" stroke-width="1.8"/>
-          <line id="hud-line-3" stroke="#34D399" stroke-width="1.8"/>
-          <line id="hud-line-4" stroke="#34D399" stroke-width="1.8"/>
-        </g>
-        <!-- Cloned Glowing Wilaya Path -->
         <g id="hud-clone-wrap" style="pointer-events: auto; cursor: pointer;"></g>
       </svg>
 
-      <!-- Center Minimalist Loading Spinner (Hidden by default) -->
-      <div class="hud-breathe-loader" id="hud-loader" style="display: none; opacity: 0; pointer-events: none;">
-        <div class="hud-spinner-radar">
-          <span class="hud-spin-ring"></span>
-          <span class="hud-spin-core"></span>
+      <!-- Center Minimalist Loading Spinner in Blurred Void (Isolated on Click 2) -->
+      <div class="hud-isolated-loader" id="hud-isolated-loader" style="position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); display: none; flex-direction: column; align-items: center; gap: 20px; z-index: 50; opacity: 0; transition: opacity 0.3s ease; pointer-events: none;">
+        <div style="position: relative; width: 64px; height: 64px; display: flex; align-items: center; justify-content: center;">
+          <span class="hud-loader-ring"></span>
+          <span class="hud-loader-core"></span>
         </div>
-        <div class="hud-loading-text">${t('hud.loadingTalents')}</div>
+        <div style="font-size: 1.05rem; font-weight: 800; color: #FFFFFF; text-shadow: 0 4px 16px rgba(0,0,0,0.5);">${loadingText}</div>
       </div>
 
       <!-- 4 Floating Glassmorphic HUD Cards Layer -->
@@ -555,10 +561,10 @@ export function renderMap(container) {
 
     document.body.appendChild(hudMaster);
 
-    // Setup Cloned Path inside #hud-tether-svg
-    const hudSvg = hudMaster.querySelector('#hud-tether-svg');
-    hudSvg.setAttribute('viewBox', svg.getAttribute('viewBox'));
-    hudSvg.setAttribute('preserveAspectRatio', svg.getAttribute('preserveAspectRatio') || 'xMidYMid meet');
+    // Setup Cloned Path inside #hud-clone-svg
+    const hudCloneSvg = hudMaster.querySelector('#hud-clone-svg');
+    hudCloneSvg.setAttribute('viewBox', svg.getAttribute('viewBox'));
+    hudCloneSvg.setAttribute('preserveAspectRatio', svg.getAttribute('preserveAspectRatio') || 'xMidYMid meet');
 
     const cloneWrap = hudMaster.querySelector('#hud-clone-wrap');
     const clonedPath = pathEl.cloneNode(true);
@@ -566,9 +572,11 @@ export function renderMap(container) {
     clonedPath.setAttribute('id', `hud-clone-path-${wilaya.code}`);
     cloneWrap.appendChild(clonedPath);
 
-    // Fade in blur backdrop
+    // Fade in translucent frosted blur backdrop
     requestAnimationFrame(() => {
       hudMaster.style.opacity = '1';
+      const topTypo = hudMaster.querySelector('#hud-top-typography');
+      if (topTypo) topTypo.style.opacity = '1';
     });
 
     // Fetch and hydrate real Supabase count
@@ -580,7 +588,7 @@ export function renderMap(container) {
       if (countEl) countEl.textContent = '30+';
     });
 
-    // ── T = 0.7s (200ms after blur mount): Draw 4 SOLID SVG lines ──
+    // ── T = 0.7s (200ms after blur mount): Draw 4 Glowing SVG lines ──
     setTimeout(() => {
       draw4SolidTetherLines(hudMaster, pathEl);
     }, 200);
@@ -590,7 +598,7 @@ export function renderMap(container) {
       reveal4HUDCards(hudMaster);
     }, 500);
 
-    // ── Wire Click 2: "Breathe Out" Exit & Loading Screen ──
+    // ── Wire Click 2: "Breathe Out" Exit & Isolated Loading State ──
     function executeClick2BreatheOut(e) {
       e.stopPropagation();
       executeBreatheOutTransition(hudMaster, wilaya);
@@ -601,7 +609,7 @@ export function renderMap(container) {
 
     // ── Wire Reversal: Clicking blurred backdrop or pressing Escape ──
     hudMaster.addEventListener('click', (e) => {
-      if (e.target === hudMaster || e.target.id === 'hud-tether-svg' || e.target.id === 'hud-cards-stage') {
+      if (e.target === hudMaster || e.target.id === 'hud-tether-canvas' || e.target.id === 'hud-cards-stage') {
         reverseHUDToNational(hudMaster);
       }
     });
@@ -615,60 +623,55 @@ export function renderMap(container) {
     document.addEventListener('keydown', escHandler);
   }
 
-  // Draw 4 Solid Vector Lines connecting Wilaya to 4 Card coordinates
+  // Draw 4 Solid Vector Lines connecting Wilaya center to 4 Card coordinates
   function draw4SolidTetherLines(hudMaster, pathEl) {
-    const linesGroup = hudMaster.querySelector('#hud-solid-lines');
+    const l1 = hudMaster.querySelector('#hud-tether-1');
+    const l2 = hudMaster.querySelector('#hud-tether-2');
+    const l3 = hudMaster.querySelector('#hud-tether-3');
+    const l4 = hudMaster.querySelector('#hud-tether-4');
     const c1 = hudMaster.querySelector('#hud-card-1');
     const c2 = hudMaster.querySelector('#hud-card-2');
     const c3 = hudMaster.querySelector('#hud-card-3');
     const c4 = hudMaster.querySelector('#hud-card-4');
-    const l1 = hudMaster.querySelector('#hud-line-1');
-    const l2 = hudMaster.querySelector('#hud-line-2');
-    const l3 = hudMaster.querySelector('#hud-line-3');
-    const l4 = hudMaster.querySelector('#hud-line-4');
 
-    if (!linesGroup || !c1 || !c2 || !c3 || !c4 || !l1 || !l2 || !l3 || !l4) return;
+    if (!l1 || !l2 || !l3 || !l4 || !c1 || !c2 || !c3 || !c4) return;
 
     const pRect = pathEl.getBoundingClientRect();
-    const mapRect = svg.getBoundingClientRect();
-
-    // Origin in HUD SVG coordinate space
-    const originScreenX = pRect.left + pRect.width / 2;
-    const originScreenY = pRect.top + pRect.height / 2;
-
-    const ox = originScreenX - mapRect.left;
-    const oy = originScreenY - mapRect.top;
+    const originX = pRect.left + pRect.width / 2;
+    const originY = pRect.top + pRect.height / 2;
 
     const r1 = c1.getBoundingClientRect();
     const r2 = c2.getBoundingClientRect();
     const r3 = c3.getBoundingClientRect();
     const r4 = c4.getBoundingClientRect();
 
-    // Line 1: To Card 1 (Top-Left)
-    l1.setAttribute('x1', ox);
-    l1.setAttribute('y1', oy);
-    l1.setAttribute('x2', (r1.right - mapRect.left));
-    l1.setAttribute('y2', (r1.bottom - mapRect.top - 10));
+    // Line 1: From center to Card 1 (Top-Left)
+    l1.setAttribute('x1', originX);
+    l1.setAttribute('y1', originY);
+    l1.setAttribute('x2', r1.right);
+    l1.setAttribute('y2', r1.bottom - 12);
+    l1.style.opacity = '1';
 
-    // Line 2: To Card 2 (Top-Right)
-    l2.setAttribute('x1', ox);
-    l2.setAttribute('y1', oy);
-    l2.setAttribute('x2', (r2.left - mapRect.left));
-    l2.setAttribute('y2', (r2.bottom - mapRect.top - 10));
+    // Line 2: From center to Card 2 (Top-Right)
+    l2.setAttribute('x1', originX);
+    l2.setAttribute('y1', originY);
+    l2.setAttribute('x2', r2.left);
+    l2.setAttribute('y2', r2.bottom - 12);
+    l2.style.opacity = '1';
 
-    // Line 3: To Card 3 (Bottom-Left)
-    l3.setAttribute('x1', ox);
-    l3.setAttribute('y1', oy);
-    l3.setAttribute('x2', (r3.right - mapRect.left));
-    l3.setAttribute('y2', (r3.top - mapRect.top + 10));
+    // Line 3: From center to Card 3 (Bottom-Left)
+    l3.setAttribute('x1', originX);
+    l3.setAttribute('y1', originY);
+    l3.setAttribute('x2', r3.right);
+    l3.setAttribute('y2', r3.top + 12);
+    l3.style.opacity = '1';
 
-    // Line 4: To Card 4 (Bottom-Right)
-    l4.setAttribute('x1', ox);
-    l4.setAttribute('y1', oy);
-    l4.setAttribute('x2', (r4.left - mapRect.left));
-    l4.setAttribute('y2', (r4.top - mapRect.top + 10));
-
-    linesGroup.style.opacity = '1';
+    // Line 4: From center to Card 4 (Bottom-Right)
+    l4.setAttribute('x1', originX);
+    l4.setAttribute('y1', originY);
+    l4.setAttribute('x2', r4.left);
+    l4.setAttribute('y2', r4.top + 12);
+    l4.style.opacity = '1';
   }
 
   // Reveal 4 HUD Cards with spring animation
@@ -683,43 +686,45 @@ export function renderMap(container) {
     });
   }
 
-  // ── Click 2: "Breathe Out" Exit & Loading Screen ──
+  // ── Click 2: "Breathe Out" Exit & Isolated Loading Screen ──
   function executeBreatheOutTransition(hudMaster, wilaya) {
     const cards = hudMaster.querySelectorAll('.hud-card');
-    const linesGroup = hudMaster.querySelector('#hud-solid-lines');
-    const topBanner = hudMaster.querySelector('#hud-top-banner');
+    const tetherCanvas = hudMaster.querySelector('#hud-tether-canvas');
+    const topTypo = hudMaster.querySelector('#hud-top-typography');
     const cloneWrap = hudMaster.querySelector('#hud-clone-wrap');
-    const loader = hudMaster.querySelector('#hud-loader');
+    const loader = hudMaster.querySelector('#hud-isolated-loader');
 
-    // 1. Smoothly scale down (scale: 0.95) & fade out cards, lines, banner over 0.4s
+    // 1. T=0.0s: Fade out cards, lines, top typography, and glowing Wilaya clone
     cards.forEach(c => {
-      c.style.transition = 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)';
-      c.style.transform = 'scale(0.94)';
+      c.style.transition = 'all 0.3s ease';
+      c.style.transform = 'scale(0.95)';
       c.style.opacity = '0';
     });
-    if (linesGroup) linesGroup.style.opacity = '0';
-    if (topBanner) {
-      topBanner.style.transition = 'all 0.3s ease';
-      topBanner.style.opacity = '0';
+    if (tetherCanvas) {
+      tetherCanvas.style.transition = 'opacity 0.3s ease';
+      tetherCanvas.style.opacity = '0';
+    }
+    if (topTypo) {
+      topTypo.style.transition = 'all 0.3s ease';
+      topTypo.style.opacity = '0';
     }
     if (cloneWrap) {
-      cloneWrap.style.transition = 'all 0.35s ease';
-      cloneWrap.style.transform = 'scale(0.92)';
+      cloneWrap.style.transition = 'all 0.3s ease';
+      cloneWrap.style.transform = 'scale(0.95)';
       cloneWrap.style.opacity = '0';
     }
 
-    // 2. Fade in sleek minimalist Loading Screen in center of blurred void
+    // 2. T=0.3s: Center Loader appears in the completely empty blurred void
     setTimeout(() => {
       if (loader) {
         loader.style.display = 'flex';
-        loader.style.transition = 'opacity 0.3s ease';
         requestAnimationFrame(() => {
           loader.style.opacity = '1';
         });
       }
-    }, 350);
+    }, 300);
 
-    // 3. AFTER loader appears (0.6s later), execute routing to renderProfiles(wilayaCode)
+    // 3. T=0.8s: Execute routing to renderProfiles(wilayaCode)
     setTimeout(() => {
       hudMaster.style.opacity = '0';
       setTimeout(() => {
@@ -727,8 +732,8 @@ export function renderMap(container) {
         isHUDActive = false;
         store.setState({ selectedWilaya: wilaya });
         navigate(`#/wilaya/${wilaya.code}`);
-      }, 300);
-    }, 950);
+      }, 250);
+    }, 800);
   }
 
   // Reversal: Smoothly close HUD and zoom back out to national view
