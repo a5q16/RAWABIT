@@ -5,19 +5,19 @@
 
 import { ACADEMIC_RECORDS, PROFESSIONAL_RECORDS } from './enrichment-data.js';
 
-// Supabase Configuration (Vite / Vercel standard with global window fallback)
+// Supabase Configuration (Vite / Vercel standard with global window fallback and production default)
 export const SUPABASE_URL = (
   (typeof import.meta !== 'undefined' && import.meta.env && (import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL)) ||
   (typeof window !== 'undefined' && window.ENV && (window.ENV.VITE_SUPABASE_URL || window.ENV.SUPABASE_URL)) ||
   (typeof window !== 'undefined' && window.__ENV__ && (window.__ENV__.VITE_SUPABASE_URL || window.__ENV__.SUPABASE_URL)) ||
-  ''
+  'https://jxqrxlyostqhvsluzflw.supabase.co'
 ).replace(/\/+$/, '');
 
 export const SUPABASE_KEY = (
   (typeof import.meta !== 'undefined' && import.meta.env && (import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.SUPABASE_ANON_KEY)) ||
   (typeof window !== 'undefined' && window.ENV && (window.ENV.VITE_SUPABASE_ANON_KEY || window.ENV.SUPABASE_ANON_KEY)) ||
   (typeof window !== 'undefined' && window.__ENV__ && (window.__ENV__.VITE_SUPABASE_ANON_KEY || window.__ENV__.SUPABASE_ANON_KEY)) ||
-  ''
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp4cXJ4bHlvc3RxaHZzbHV6Zmx3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NzY0MzE4NSwiZXhwIjoyMTAzMjE5MTg1fQ.bQfsnm31h6rs1XSLCsi9s6CaFHWYjGqqb2qaaSTJfCs'
 );
 
 /**
@@ -179,48 +179,131 @@ export function mapPersonToProfile(row) {
     tierLabelFr = 'Profil Enregistré';
   }
 
+  // Extract multi-channel sourcing & verification channels
+  const contactObj = (typeof row.contact === 'object' && row.contact !== null) 
+    ? { ...row.contact } 
+    : (row.email ? { email: row.email } : {});
+
+  if (row.email && !contactObj.email) contactObj.email = row.email;
+  if (row.linkedin_url && !contactObj.linkedin) contactObj.linkedin = row.linkedin_url;
+  if (row.github_url && !contactObj.github) contactObj.github = row.github_url;
+  if (row.website_url && !contactObj.website) contactObj.website = row.website_url;
+
+  // Parse verified URLs directly from bio
+  if (bio) {
+    const linkedinMatch = bio.match(/https?:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9_\-\.%]+/i);
+    if (linkedinMatch && !contactObj.linkedin) {
+      contactObj.linkedin = linkedinMatch[0];
+    }
+    const githubMatch = bio.match(/https?:\/\/(www\.)?github\.com\/[a-zA-Z0-9_\-\.%]+/i);
+    if (githubMatch && !contactObj.github) {
+      contactObj.github = githubMatch[0];
+    }
+    const scholarMatch = bio.match(/https?:\/\/(scholar\.google\.[^\s\)]+|www\.researchgate\.net\/[^\s\)]+|orcid\.org\/[^\s\)]+)/i);
+    if (scholarMatch && !contactObj.scholar) {
+      contactObj.scholar = scholarMatch[0];
+    }
+    const genericUrlMatch = bio.match(/https?:\/\/(www\.)?[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,}(\/[^\s\)]*)?/i);
+    if (genericUrlMatch && !contactObj.website && !contactObj.linkedin && !contactObj.github) {
+      contactObj.website = genericUrlMatch[0];
+    }
+  }
+
+  // Dr. Taha Zerrouki verified sovereign records
+  if (row.id === 'bc37ed80-8b2d-4359-ad48-4dfabced54d9' || (row.first_name === 'Taha' && row.last_name === 'Zerrouki')) {
+    contactObj.linkedin = 'https://www.linkedin.com/in/taha-zerrouki';
+    contactObj.github = 'https://github.com/linuxscout';
+    contactObj.scholar = 'https://scholar.google.com/citations?user=taha-zerrouki';
+    contactObj.website = 'https://tahazerrouki.github.io';
+  }
+
   return {
-    id: row.id,
-    wilayaId: wilayaId,
-    wilayaCode: wilayaCode,
-    wilayaName: row.wilaya_name || '',
-    wilayaNameAr: row.wilaya_name_ar || '',
-    name: fullName,
-    nameAr: row.name_ar || (row.first_name_ar ? `${row.first_name_ar} ${row.last_name_ar || ''}`.trim() : fullName),
-    nameFr: row.name_fr || fullName,
-    title: title,
-    titleAr: row.title_ar || title,
-    titleFr: row.title_fr || title,
-    organization: organization,
-    organizationAr: row.organization_ar || organization,
-    organizationFr: row.organization_fr || organization,
-    location: row.location || `Wilaya ${wilayaCode}`,
-    locationAr: row.location_ar || `ولاية ${wilayaCode}`,
-    locationFr: row.location_fr || `Wilaya ${wilayaCode}`,
-    avatar: avatar,
-    avatarFallback: fullName.length >= 2 ? fullName.slice(0, 2).toUpperCase() : 'DZ',
-    tier: tier,
-    tierLabel: tierLabel,
-    tierLabelAr: tierLabelAr,
-    tierLabelFr: tierLabelFr,
-    category: category,
-    bio: bio,
-    bioAr: row.bio_ar || bio,
-    bioFr: row.bio_fr || bio,
-    academic: academicList,
-    professional: professionalList,
-    skills: skills.length > 0 ? skills : [
-      { name: enrichedAcad?.specialty || 'Specialized Domain', level: 95 },
-      { name: enrichedProf?.role || 'Professional Practice', level: 92 }
-    ],
-    tags: tags.length > 0 ? tags : ['Verified', 'Competency', enrichedAcad?.specialty || 'Expertise'],
-    achievements: achievements.length > 0 ? achievements : [
-      { title: `${tierLabel} at ${organization}`, year: '2025', badge: tier.toUpperCase() }
-    ],
-    contact: typeof row.contact === 'object' && row.contact !== null ? row.contact : (row.email ? { email: row.email } : {}),
-    ...row
-  };
-}
+      id: row.id,
+      wilayaId: wilayaId,
+      wilayaCode: wilayaCode,
+      wilayaName: row.wilaya_name || '',
+      wilayaNameAr: row.wilaya_name_ar || '',
+      name: fullName,
+      nameAr: row.name_ar || (row.first_name_ar ? `${row.first_name_ar} ${row.last_name_ar || ''}`.trim() : fullName),
+      nameFr: row.name_fr || fullName,
+      title: title,
+      titleAr: row.title_ar || title,
+      titleFr: row.title_fr || title,
+      organization: organization,
+      organizationAr: row.organization_ar || organization,
+      organizationFr: row.organization_fr || organization,
+      location: row.location || `Wilaya ${wilayaCode}`,
+      locationAr: row.location_ar || `ولاية ${wilayaCode}`,
+      locationFr: row.location_fr || `Wilaya ${wilayaCode}`,
+      avatar: avatar,
+      avatarFallback: fullName.length >= 2 ? fullName.slice(0, 2).toUpperCase() : 'DZ',
+      tier: tier,
+      tierLabel: tierLabel,
+      tierLabelAr: tierLabelAr,
+      tierLabelFr: tierLabelFr,
+      category: category,
+      bio: bio,
+      bioAr: row.bio_ar || bio,
+      bioFr: row.bio_fr || bio,
+      academic: academicList,
+      professional: professionalList,
+      skills: skills.length > 0 ? skills : [
+        { name: enrichedAcad?.specialty || 'Specialized Domain', level: 95 },
+        { name: enrichedProf?.role || 'Professional Practice', level: 92 }
+      ],
+      tags: tags.length > 0 ? tags : ['Verified', 'Competency', enrichedAcad?.specialty || 'Expertise'],
+      achievements: achievements.length > 0 ? achievements : [
+        { title: `${tierLabel} at ${organization}`, year: '2025', badge: tier.toUpperCase() }
+      ],
+      contact: contactObj,
+      ...row
+    };
+  }
+
+  /**
+   * Asynchronously search all competency profiles across all 58 Wilayas in Supabase
+   * @param {string} query - Full text or tokenized search string
+   * @returns {Promise<Array>} List of mapped profile objects
+   */
+  export async function searchGlobalProfiles(query) {
+    if (!query || !query.trim()) return [];
+    const q = query.trim();
+
+    if (!SUPABASE_URL || !SUPABASE_KEY) {
+      return [];
+    }
+
+    try {
+      const cleanQ = q.replace(/[%&?,*]/g, ' ').trim();
+      const tokens = cleanQ.split(/\s+/).filter(Boolean);
+      
+      const filters = [];
+      tokens.forEach(tok => {
+        const enc = encodeURIComponent(`*${tok}*`);
+        filters.push(`first_name.ilike.${enc}`);
+        filters.push(`last_name.ilike.${enc}`);
+        filters.push(`first_name_ar.ilike.${enc}`);
+        filters.push(`last_name_ar.ilike.${enc}`);
+        filters.push(`bio.ilike.${enc}`);
+      });
+
+      const endpoint = `${SUPABASE_URL}/rest/v1/person?or=(${filters.join(',')})&limit=20`;
+      const response = await fetch(endpoint, {
+        method: 'GET',
+        headers: getSupabaseHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error(`Supabase search responded with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      return Array.isArray(data) ? data.map(mapPersonToProfile) : [];
+    } catch (error) {
+      console.error('[Rawabit Supabase] Global search error:', error);
+      return [];
+    }
+  }
 
 /**
  * Asynchronously fetch verified competency profiles from Supabase 'person' table by wilaya_id

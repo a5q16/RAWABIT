@@ -460,6 +460,16 @@ function renderProfilesGrid(container, profiles, categories) {
                 <div class="card-tags">
                   ${(profile.tags || []).slice(0, 3).map(tg => `<span class="profile-tag">${tg}</span>`).join('')}
                 </div>
+
+                <!-- Verified Multi-Channel Sourcing Tree Indicators -->
+                <div class="card-sourcing-sources" style="display: flex; gap: 6px; margin-top: 10px; align-items: center; flex-wrap: wrap;">
+                  ${getProfileSources(profile).map(s => `
+                    <a href="${s.url}" target="_blank" rel="noopener noreferrer" class="card-source-chip" title="${s.label}" style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 6px; background: rgba(5, 150, 105, 0.08); color: #059669; font-size: 0.72rem; font-weight: 600; text-decoration: none; transition: all 0.2s;" onclick="event.stopPropagation();">
+                      ${s.icon}
+                      <span>${s.label.split(' ')[0]}</span>
+                    </a>
+                  `).join('')}
+                </div>
               </div>
 
               <div class="card-footer">

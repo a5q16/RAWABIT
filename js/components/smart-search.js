@@ -11,19 +11,39 @@
 import { WILAYAS } from './map-paths.js';
 import { openWilayaIntermediateScreen } from './wilaya-modal.js';
 import { openAIChat } from './chat.js';
-import { openMindMap } from './mindmap.js';
-import { getProfilesByWilaya, getAllCategories } from '../data/profiles-data.js';
+import { openMindMap, getProfileSources } from './mindmap.js';
+import { getProfilesByWilaya, getAllCategories, searchGlobalProfiles } from '../data/profiles-data.js';
 import { store } from '../store.js';
 import { t } from '../i18n.js';
 import { navigate } from '../router.js';
 
 let activeDropdown = null;
 let cachedProfiles = [];
+const searchResultsCache = new Map();
 const allCategories = getAllCategories();
 
-// Pre-warm profiles cache for fast instant matching
-getProfilesByWilaya(16).then(res => {
-  if (Array.isArray(res)) cachedProfiles = res;
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+// Pre-warm profiles cache for fast instant matching across key hubs
+Promise.all([
+  getProfilesByWilaya(16),
+  getProfilesByWilaya(10),
+  getProfilesByWilaya(31),
+  getProfilesByWilaya(25)
+]).then(resArrays => {
+  const merged = [];
+  resArrays.forEach(arr => {
+    if (Array.isArray(arr)) merged.push(...arr);
+  });
+  cachedProfiles = merged;
 }).catch(() => {});
 
 /**
@@ -102,7 +122,42 @@ export function initSmartSearch(formEl, inputEl) {
     }
   }
 
-  function renderPalette(query = '') {
+  let debounceTimer = null;
+
+  async function performLiveSearch(query) {
+    if (!query || !query.trim()) return;
+    const q = query.trim();
+
+    if (searchResultsCache.has(q)) {
+      const cached = searchResultsCache.get(q);
+      updateTalentsList(cached, q);
+      return;
+    }
+
+    try {
+      const results = await searchGlobalProfiles(q);
+      if (Array.isArray(results) && results.length > 0) {
+        searchResultsCache.set(q, results);
+        // Merge into global cache
+        results.forEach(r => {
+          if (!cachedProfiles.some(cp => String(cp.id) === String(r.id))) {
+            cachedProfiles.push(r);
+          }
+        });
+        updateTalentsList(results, q);
+      }
+    } catch (err) {
+      console.warn('[SmartSearch] Async search error:', err);
+    }
+  }
+
+  function updateTalentsList(results, query) {
+    if (!activeDropdown || activeDropdown.style.display === 'none') return;
+    if (inputEl.value.trim() !== query.trim()) return;
+    renderPalette(query, results);
+  }
+
+  function renderPalette(query = '', asyncTalents = null) {
     const lang = store.state.lang;
     const isRtl = lang === 'ar';
     dropdown.setAttribute('dir', isRtl ? 'rtl' : 'ltr');
@@ -110,6 +165,7 @@ export function initSmartSearch(formEl, inputEl) {
     const i18n = getLocalizedText();
     const q = query.trim().toLowerCase();
     const rawQuery = query.trim() || (lang === 'ar' ? 'الكفاءات الجزائرية' : (lang === 'fr' ? 'Compétences algériennes' : 'Algerian competencies'));
+    const safeDisplayQuery = escapeHtml(rawQuery);
 
     // 1. Filter matching Wilayas
     const matchingWilayas = WILAYAS.filter(w => {
@@ -122,14 +178,26 @@ export function initSmartSearch(formEl, inputEl) {
       return codeMatch || nameMatch || nameArMatch || nameEnMatch || nameFrMatch;
     }).slice(0, 4);
 
-    // 2. Filter matching Talents
-    const matchingTalents = cachedProfiles.filter(p => {
+    // 2. Filter matching Talents (Combine local cached + async results)
+    let combinedTalents = Array.isArray(asyncTalents) ? [...asyncTalents] : [];
+    
+    // Also search in memory cached profiles
+    const localMatches = cachedProfiles.filter(p => {
       if (!q) return true;
       const nMatch = (p.name && p.name.toLowerCase().includes(q)) || (p.nameAr && p.nameAr.includes(q));
       const tMatch = (p.title && p.title.toLowerCase().includes(q)) || (p.titleAr && p.titleAr.includes(q));
+      const bMatch = p.bio && p.bio.toLowerCase().includes(q);
       const tgMatch = p.tags && p.tags.some(tg => tg.toLowerCase().includes(q));
-      return nMatch || tMatch || tgMatch;
-    }).slice(0, 4);
+      return nMatch || tMatch || bMatch || tgMatch;
+    });
+
+    localMatches.forEach(lp => {
+      if (!combinedTalents.some(ct => String(ct.id) === String(lp.id))) {
+        combinedTalents.push(lp);
+      }
+    });
+
+    const matchingTalents = combinedTalents.slice(0, 6);
 
     // 3. Filter matching Specialties / Domains
     const matchingSpecialties = allCategories.filter(c => {
@@ -185,7 +253,7 @@ export function initSmartSearch(formEl, inputEl) {
             <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
               <path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/>
             </svg>
-            <span>${i18n.askAiPrefix} "${rawQuery}"</span>
+            <span>${i18n.askAiPrefix} "${safeDisplayQuery}"</span>
           </div>
           <span style="background: rgba(5, 150, 105, 0.15); color: #059669; font-size: 0.76rem; font-weight: 800; padding: 3px 8px; border-radius: 9999px;">${i18n.aiActionBadge}</span>
         </div>
@@ -199,16 +267,26 @@ export function initSmartSearch(formEl, inputEl) {
                 const pName = lang === 'ar' ? (p.nameAr || p.name) : (lang === 'fr' ? p.nameFr : p.name);
                 const pTitle = lang === 'ar' ? (p.titleAr || p.title) : (lang === 'fr' ? p.titleFr : p.title);
                 const tierClass = p.tier || 'gold';
+                const sources = getProfileSources(p);
                 return `
-                  <div class="smart-talent-item" data-id="${p.id}" tabindex="0">
-                    <img class="smart-talent-avatar" src="${p.avatar}" alt="${p.name}" />
-                    <div class="smart-talent-info">
-                      <span class="smart-talent-name">${pName}</span>
-                      <span class="smart-talent-title">${pTitle}</span>
+                  <div class="smart-talent-item" data-id="${p.id}" tabindex="0" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; border-radius: 12px; cursor: pointer;">
+                    <div style="display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0;">
+                      <img class="smart-talent-avatar" src="${p.avatar}" alt="${p.name}" style="width: 38px; height: 38px; border-radius: 50%; object-fit: cover; flex-shrink: 0;" />
+                      <div class="smart-talent-info" style="min-width: 0;">
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                          <span class="smart-talent-name" style="font-weight: 700; color: #0F172A; font-size: 0.95rem;">${pName}</span>
+                          <span style="font-size: 0.72rem; color: #059669; background: rgba(5, 150, 105, 0.1); padding: 1px 6px; border-radius: 6px; font-weight: 600;">Wilaya ${p.wilayaCode || '16'}</span>
+                        </div>
+                        <span class="smart-talent-title" style="font-size: 0.78rem; color: #64748B; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${pTitle}</span>
+                      </div>
                     </div>
-                    <span class="tier-badge tier-${tierClass}" style="padding: 3px 8px; font-size: 0.72rem;">
-                      ${p.tierLabel || (lang === 'ar' ? 'معتمد' : 'Verified')}
-                    </span>
+                    <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+                      ${sources.slice(0, 3).map(s => `
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 4px; background: #F1F5F9; color: #475569;" title="${s.label}">
+                          ${s.icon}
+                        </span>
+                      `).join('')}
+                    </div>
                   </div>
                 `;
               }).join('')}
@@ -305,7 +383,7 @@ export function initSmartSearch(formEl, inputEl) {
     dropdown.querySelectorAll('.smart-talent-item').forEach(item => {
       item.addEventListener('click', () => {
         const id = item.dataset.id;
-        const target = cachedProfiles.find(p => String(p.id) === String(id));
+        const target = combinedTalents.find(p => String(p.id) === String(id)) || cachedProfiles.find(p => String(p.id) === String(id));
         if (target) {
           closeDropdown();
           openMindMap(target);
@@ -326,11 +404,22 @@ export function initSmartSearch(formEl, inputEl) {
   // ── Input & Form Event Listeners ──
 
   inputEl.addEventListener('input', (e) => {
-    renderPalette(e.target.value);
+    const val = e.target.value;
+    renderPalette(val);
+
+    clearTimeout(debounceTimer);
+    if (val && val.trim().length >= 2) {
+      debounceTimer = setTimeout(() => {
+        performLiveSearch(val);
+      }, 120);
+    }
   });
 
   inputEl.addEventListener('focus', () => {
     renderPalette(inputEl.value);
+    if (inputEl.value && inputEl.value.trim().length >= 2) {
+      performLiveSearch(inputEl.value);
+    }
   });
 
   formEl.addEventListener('submit', (e) => {

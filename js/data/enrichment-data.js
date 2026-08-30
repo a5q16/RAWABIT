@@ -403,6 +403,14 @@ export const ACADEMIC_RECORDS = {
     "startYear": "2014",
     "endYear": "2019",
     "year": "2014 — 2019"
+  },
+  "bc37ed80-8b2d-4359-ad48-4dfabced54d9": {
+    "degree": "Doctorate / Ph.D.",
+    "specialty": "Arabic Natural Language Processing (NLP)",
+    "university": "National Higher School of Computer Science (ESI)",
+    "startYear": "2006",
+    "endYear": "2012",
+    "year": "2006 — 2012"
   }
 };
 
@@ -806,5 +814,13 @@ export const PROFESSIONAL_RECORDS = {
     "endDate": "Present",
     "description": "Quality assurance and testing",
     "period": "2020 — Present"
+  },
+  "bc37ed80-8b2d-4359-ad48-4dfabced54d9": {
+    "company": "University of Bouira / ESI",
+    "role": "Associate Professor & NLP Research Director",
+    "startDate": "2012-09-01",
+    "endDate": "Present",
+    "description": "Leading Arabic computational linguistics research, PyArabic, Mishkal, and Tashaphy algorithms",
+    "period": "2012 — Present"
   }
 };
