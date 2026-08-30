@@ -48,11 +48,14 @@ export const TRANSLATIONS = {
     'map.modalSubtitle': 'السجل الرقمي المعتمد للكفاءات والخبرات',
     'map.verifiedTalentsInWilaya': 'كفاءة موثقة',
     'map.wilayaCodeLabel': 'الرمز الرسمي:',
-    'map.topDomainsInWilaya': 'أبرز مجالات الخبرة:',
     'hud.enterPrompt': 'انقر على مجسم الولاية مجدداً للدخول',
     'hud.clickToEnter': 'استكشاف الكفاءات الآن ←',
     'hud.sovereignIndex': 'السجل الرقمي السيادي للكفاءات',
     'hud.resetHint': 'انقر بالخارج للعودة للخريطة الكاملة',
+    'hud.floatingBanner': '✨ انقر على الولاية للمتابعة، أو في أي مكان للعودة',
+    'hud.cardSpecialties': 'التخصصات المتاحة',
+    'hud.cardUniversities': 'المراكز والجامعات',
+    'hud.loadingTalents': 'جارٍ تحميل دليل الكفاءات المعتمدة...',
 
     // Features Section
     'features.title': 'ما الذي يميز منصة روابط؟',
@@ -270,6 +273,10 @@ export const TRANSLATIONS = {
     'hud.clickToEnter': 'Explore Talents Now →',
     'hud.sovereignIndex': 'Official National Talent Registry',
     'hud.resetHint': 'Click outside to reset map view',
+    'hud.floatingBanner': '✨ Click the Wilaya to continue, or click anywhere to return',
+    'hud.cardSpecialties': 'Available Specialties',
+    'hud.cardUniversities': 'Available Universities',
+    'hud.loadingTalents': 'Loading Wilaya Talents Directory...',
 
     // Features Section
     'features.title': 'What makes Rawabit unique?',
@@ -487,6 +494,10 @@ export const TRANSLATIONS = {
     'hud.clickToEnter': 'Explorer les compétences →',
     'hud.sovereignIndex': 'Registre National Souverain',
     'hud.resetHint': 'Cliquez en dehors pour réinitialiser la vue',
+    'hud.floatingBanner': '✨ Cliquez sur la wilaya pour continuer, ou n\'importe où pour revenir',
+    'hud.cardSpecialties': 'Spécialités Disponibles',
+    'hud.cardUniversities': 'Universités & Centres',
+    'hud.loadingTalents': 'Chargement du répertoire des talents...',
 
     // Features Section
     'features.title': 'Qu’est-ce qui rend Rawabit unique ?',
