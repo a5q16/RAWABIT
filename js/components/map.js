@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Rawabit v2 — Sci-Fi HUD In-Place SVG Node Expansion Map
  * Features:
  * 1. Focus Mode (Click 1): Camera zooms/centers, other paths fade, clicked path glows,
@@ -239,7 +239,9 @@ export function renderMap(container) {
     // Path Click Handler: Focus Mode (Click 1) vs Enter Mode (Click 2)
     path.addEventListener('click', (e) => {
       e.stopPropagation();
-      if (dragDistance > 6 || isTransitioning) return;
+      if (isTransitioning) return;
+      const distance = Math.hypot(e.clientX - pointerStartX, e.clientY - pointerStartY);
+      if (distance >= 5) return; // Ignore drag gestures
       handleWilayaClick(wilaya, path);
     });
   });
@@ -269,7 +271,8 @@ export function renderMap(container) {
   let isDragging = false;
   let lastScreenX = 0;
   let lastScreenY = 0;
-  let dragDistance = 0;
+  let pointerStartX = 0;
+  let pointerStartY = 0;
 
   function screenToSvgCoords(clientX, clientY) {
     const pt = svg.createSVGPoint();
@@ -290,23 +293,27 @@ export function renderMap(container) {
   svg.addEventListener('pointerdown', (e) => {
     if (e.button !== 0 || isTransitioning || isHudActive) return;
     isDragging = true;
-    dragDistance = 0;
+    pointerStartX = e.clientX;
+    pointerStartY = e.clientY;
     lastScreenX = e.clientX;
     lastScreenY = e.clientY;
     svg.classList.add('is-dragging');
-    svg.setPointerCapture(e.pointerId);
+    try { svg.setPointerCapture(e.pointerId); } catch (err) {}
   });
 
   svg.addEventListener('pointermove', (e) => {
     if (!isDragging || isHudActive) return;
-    const dx = e.clientX - lastScreenX;
-    const dy = e.clientY - lastScreenY;
-    dragDistance += Math.hypot(dx, dy);
+    const rawDx = e.clientX - lastScreenX;
+    const rawDy = e.clientY - lastScreenY;
     lastScreenX = e.clientX;
     lastScreenY = e.clientY;
 
-    translateX += dx;
-    translateY += dy;
+    // Scale-compensated panning with dampening factor
+    const moveX = (rawDx / scale) * 0.4;
+    const moveY = (rawDy / scale) * 0.4;
+
+    translateX += moveX;
+    translateY += moveY;
     applyTransform();
   });
 
@@ -319,6 +326,15 @@ export function renderMap(container) {
 
   svg.addEventListener('pointerup', stopDrag);
   svg.addEventListener('pointercancel', stopDrag);
+
+  // Background Click to Reset Focus Mode
+  svg.addEventListener('click', (e) => {
+    const distance = Math.hypot(e.clientX - pointerStartX, e.clientY - pointerStartY);
+    if (distance >= 5) return;
+    if (isHudActive && (e.target === svg || e.target === mapGroup)) {
+      deactivateFocusMode();
+    }
+  });
 
   // Wheel zoom
   svg.addEventListener('wheel', (e) => {

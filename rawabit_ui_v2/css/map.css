@@ -25,6 +25,8 @@
 
 /* ── SVG ROOT CANVAS ── */
 .map-svg {
+  position: relative;
+  z-index: 42;
   width: 100%;
   height: 100%;
   display: block;
@@ -33,6 +35,7 @@
   cursor: grab;
   outline: none;
   background: transparent;
+  pointer-events: auto;
 }
 
 .map-svg.is-dragging {
@@ -924,6 +927,8 @@
   fill: #00875A !important;
   stroke: #34D399 !important;
   stroke-width: 3px !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
   filter: drop-shadow(0 0 16px rgba(52, 211, 153, 0.95)) drop-shadow(0 0 32px rgba(0, 135, 90, 0.75)) !important;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
