@@ -16,6 +16,7 @@ import { renderMap } from './components/map.js';
 import { renderProfiles } from './components/profiles.js';
 import { renderAbout, renderWhy, renderContact } from './components/pages.js';
 import { getPlatformStats } from './data/profiles-data.js';
+import { initSmartSearch } from './components/smart-search.js';
 
 /**
  * Render the Minimalist Homepage Layout
@@ -253,17 +254,11 @@ export function renderHome() {
   // Apply translations
   applyTranslations();
 
-  // Bind Search submission
+// Bind Smart Search with dynamic AI floating suggestions
   const searchForm = main.querySelector('#home-search-form');
   const searchInput = main.querySelector('#home-search-input');
-  if (searchForm) {
-    searchForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const val = searchInput?.value.trim();
-      if (val) {
-        navigate('#/wilaya/16');
-      }
-    });
+  if (searchForm && searchInput) {
+    initSmartSearch(searchForm, searchInput);
   }
 
   // ── Fetch Real Live Supabase Platform Aggregate Statistics ──

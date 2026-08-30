@@ -5,6 +5,7 @@
  */
 
 import { MAP_VIEWBOX, WILAYAS } from './map-paths.js';
+import { openWilayaIntermediateScreen } from './wilaya-modal.js';
 import { store } from '../store.js';
 import { t } from '../i18n.js';
 import { navigate } from '../router.js';
@@ -57,7 +58,35 @@ export function renderMap(container) {
   wilayaTooltip.setAttribute('style', 'position: absolute; opacity: 0; pointer-events: none; z-index: 10000; background: #fff; padding: 10px 20px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); font-weight: bold; font-family: "Tajawal", sans-serif; color: #111; border: 1px solid rgba(0,135,90,0.2); transition: opacity 0.2s ease; white-space: nowrap;');
   container.appendChild(wilayaTooltip);
 
-  // ── 5. Create Floating Controls ──
+  // ── 5. Floating Wilaya Search Bar directly above Interactive SVG Map ──
+  const searchBarWrap = document.createElement('div');
+  searchBarWrap.className = 'map-floating-search-bar';
+  searchBarWrap.id = 'map-floating-search-bar';
+  searchBarWrap.innerHTML = `
+    <div class="map-search-box">
+      <div class="map-search-icon">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+      </div>
+      <input 
+        type="text" 
+        class="map-search-input" 
+        id="map-wilaya-search-input"
+        placeholder="${t('map.searchPlaceholder')}"
+        data-i18n-placeholder="map.searchPlaceholder"
+        autocomplete="off"
+      />
+      <button class="map-search-clear-btn" id="map-search-clear" style="display: none;" aria-label="Clear">
+        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+    <div class="map-search-dropdown" id="map-search-dropdown" style="display: none;"></div>
+  `;
+  container.appendChild(searchBarWrap);
+
+  // ── 6. Create Floating Map Controls ──
   const controls = document.createElement('div');
   controls.className = 'map-controls';
   controls.innerHTML = `
@@ -81,7 +110,7 @@ export function renderMap(container) {
   `;
   container.appendChild(controls);
 
-  // ── 6. Status / Nav Hint Badge ──
+  // ── 7. Status / Nav Hint Badge ──
   const navHint = document.createElement('div');
   navHint.className = 'map-nav-hint';
   navHint.innerHTML = `
@@ -90,7 +119,7 @@ export function renderMap(container) {
   `;
   container.appendChild(navHint);
 
-  // ── 7. Fade Overlay for Route Transition ──
+  // ── 8. Fade Overlay for Route Transition ──
   const fadeOverlay = document.createElement('div');
   fadeOverlay.className = 'map-fade-overlay';
   fadeOverlay.innerHTML = `
@@ -462,30 +491,106 @@ export function renderMap(container) {
     setTimeout(() => mapGroup.classList.remove('smooth-zoom'), 600);
   });
 
+  // ── Floating Wilaya Search Auto-Suggest Logic ──
+  const searchInput = searchBarWrap.querySelector('#map-wilaya-search-input');
+  const searchClear = searchBarWrap.querySelector('#map-search-clear');
+  const searchDropdown = searchBarWrap.querySelector('#map-search-dropdown');
+
+  function renderMapSearchSuggestions(query) {
+    const q = query.trim().toLowerCase();
+    if (!q) {
+      searchDropdown.style.display = 'none';
+      searchClear.style.display = 'none';
+      return;
+    }
+
+    searchClear.style.display = 'flex';
+    const lang = store.state.lang;
+
+    const matches = WILAYAS.filter(w => {
+      const codeMatch = w.code.includes(q) || String(Number(w.code)) === q;
+      const nameMatch = w.name && w.name.toLowerCase().includes(q);
+      const nameArMatch = w.nameAr && w.nameAr.includes(q);
+      const nameEnMatch = w.nameEn && w.nameEn.toLowerCase().includes(q);
+      const nameFrMatch = w.nameFr && w.nameFr.toLowerCase().includes(q);
+      return codeMatch || nameMatch || nameArMatch || nameEnMatch || nameFrMatch;
+    }).slice(0, 8);
+
+    if (matches.length === 0) {
+      searchDropdown.innerHTML = `
+        <div class="map-search-empty">
+          <span data-i18n="search.noMatches">${t('search.noMatches')}</span>
+        </div>
+      `;
+      searchDropdown.style.display = 'block';
+      return;
+    }
+
+    searchDropdown.innerHTML = matches.map(w => {
+      const wName = lang === 'ar' ? (w.nameAr || w.name) : (lang === 'en' ? (w.nameEn || w.name) : (w.nameFr || w.name));
+      const wSec = (lang !== 'ar' && w.nameAr) ? w.nameAr : (w.nameEn || w.name);
+      return `
+        <div class="map-search-item" data-code="${w.code}" tabindex="0">
+          <span class="map-item-code">${w.code}</span>
+          <div class="map-item-text">
+            <span class="map-item-name">${wName}</span>
+            <span class="map-item-sub">${wSec}</span>
+          </div>
+          <svg class="map-item-arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </div>
+      `;
+    }).join('');
+
+    searchDropdown.style.display = 'block';
+
+    searchDropdown.querySelectorAll('.map-search-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const code = item.dataset.code;
+        const targetWilaya = WILAYAS.find(w => w.code === code);
+        if (targetWilaya) {
+          searchDropdown.style.display = 'none';
+          searchInput.value = '';
+          searchClear.style.display = 'none';
+          openWilayaIntermediateScreen(targetWilaya);
+        }
+      });
+    });
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => renderMapSearchSuggestions(e.target.value));
+    searchInput.addEventListener('focus', () => {
+      if (searchInput.value.trim().length > 0) {
+        renderMapSearchSuggestions(searchInput.value);
+      }
+    });
+  }
+
+  if (searchClear) {
+    searchClear.addEventListener('click', () => {
+      searchInput.value = '';
+      searchDropdown.style.display = 'none';
+      searchClear.style.display = 'none';
+      searchInput.focus();
+    });
+  }
+
+  // Close map search dropdown on outside click
+  document.addEventListener('click', (e) => {
+    if (!searchBarWrap.contains(e.target)) {
+      searchDropdown.style.display = 'none';
+    }
+  });
+
   // ══════════════════════════════════════════════════════════════
-  // 2-SECOND DELAY & FLASHING BORDER ON CLICK
+  // CINEMATIC WILAYA INTERMEDIATE SCREEN TRIGGER ON MAP CLICK
   // ══════════════════════════════════════════════════════════════
   function handleStateClick(targetWilaya, pathEl) {
-    isTransitioning = true;
     isHoveringState = false;
     wilayaTooltip.style.opacity = '0';
     tetherLayer.style.opacity = '0';
 
-    // ── Step A: Immediately smoothly zoom / center the clicked state ──
-    const bbox = pathEl.getBBox();
-    const stateCenterX = bbox.x + bbox.width / 2;
-    const stateCenterY = bbox.y + bbox.height / 2;
-
-    const fitScaleX = (vbW * 0.80) / bbox.width;
-    const fitScaleY = (vbH * 0.80) / bbox.height;
-    const neededScale = Math.min(fitScaleX, fitScaleY);
-    const targetScale = Math.min(Math.max(neededScale, 1.0), 8.0);
-
-    const finalScale = (scale >= targetScale) ? scale : targetScale;
-    const targetTx = vbCenterX - finalScale * stateCenterX;
-    const targetTy = vbCenterY - finalScale * stateCenterY;
-
-    // ── Step B: Immediately apply .is-selected-flash and fade sibling wilayas ──
+    // Highlight selected wilaya path softly
     wilayaPaths.forEach(({ path, wilaya }) => {
       if (wilaya.code !== targetWilaya.code) {
         path.classList.add('faded');
@@ -496,24 +601,8 @@ export function renderMap(container) {
       }
     });
 
-    // Execute smooth GPU camera motion to center
-    mapGroup.classList.add('smooth-zoom');
-    scale = finalScale;
-    translateX = targetTx;
-    translateY = targetTy;
-    applyTransform();
-
-    // ── Step C: STRICT setTimeout of EXACTLY 2000ms (2 Seconds) ──
-    setTimeout(() => {
-      // ── Step D: Inside 2000ms callback, fade out screen & route transition ──
-      fadeOverlay.classList.add('active');
-
-      setTimeout(() => {
-        mapGroup.classList.remove('smooth-zoom');
-        store.setState({ selectedWilaya: targetWilaya });
-        navigate(`#/wilaya/${targetWilaya.code}`);
-      }, 300);
-    }, 2000);
+    // Directly open the Cinematic Wilaya Intermediate Screen modal!
+    openWilayaIntermediateScreen(targetWilaya);
   }
 
   // Reactive language change

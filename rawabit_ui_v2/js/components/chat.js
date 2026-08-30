@@ -158,6 +158,16 @@ export function openAIChat(context = null) {
   backdropElement.classList.add('active');
   drawerElement.classList.add('active');
 
+  // If initialQuery is provided from smart search or quick AI prompt, auto-send it
+  if (context && context.initialQuery) {
+    const q = context.initialQuery.trim();
+    if (q) {
+      setTimeout(() => {
+        handleUserMessage(q);
+      }, 350);
+    }
+  }
+
   // Auto focus input
   const input = drawerElement.querySelector('#ai-chat-input');
   setTimeout(() => input?.focus(), 300);
