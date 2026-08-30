@@ -2,16 +2,16 @@
  * Rawabit v2 — Algeria Interactive Map with Cinematic Motion Choreography
  * 1. Base Map: 1:1 Google Maps Panning, Crisp 1px Borders, Solid White Line Tethered Tooltip
  * 2. Click 1 Choreography:
- *    - T=0.0s: Smooth Camera Zoom & Center on Wilaya (No blur yet)
+ *    - T=0.0s: Smooth Camera Zoom & Center on Wilaya (No blur yet), body.classList.add('modal-open')
  *    - T=0.4s: Wilaya path flashes with emerald pulse
  *    - T=0.5s: Fade in true translucent glass blur backdrop (rgba(20, 45, 35, 0.2) + blur(25px)) behind Wilaya
- *    - T=0.7s: Draw 4 glowing SVG vector lines (stroke: rgba(52, 211, 153, 0.6)) from Wilaya center to 4 cards
- *    - T=1.0s: Fade in 4 HUD Cards (Name, Verified Talents, Specialties, Universities) + Sleek Top Typography
+ *    - T=0.7s: Draw 4 WHITE glowing SVG lines (stroke: #ffffff) connecting Wilaya center to 4 close-proximity cards
+ *    - T=1.0s: Fade in 4 HUD Cards (Name, Verified Talents, Specialties, Universities) + High-Contrast Top Typography
  * 3. Click 2 "Breathe Out" Exit & Isolated Loading:
  *    - T=0.0s: Cards, lines, top typography, and cloned Wilaya scale down & fade out (opacity: 0)
  *    - T=0.3s: Center Loader appears in the empty blurred void
- *    - T=0.8s: Navigates cleanly to renderProfiles(wilayaCode)
- * 4. Reversal: Click background -> Smooth fade out & camera zooms out to national view
+ *    - T=0.8s: Navigates cleanly to renderProfiles(wilayaCode), body.classList.remove('modal-open')
+ * 4. Reversal: Click background -> Smooth fade out & camera zooms out to national view, body.classList.remove('modal-open')
  */
 
 import { MAP_VIEWBOX, WILAYAS } from './map-paths.js';
@@ -438,6 +438,9 @@ export function renderMap(container) {
     tooltip.style.opacity = '0';
     tetherLayer.style.opacity = '0';
 
+    // ── FIX 1: Lock Background Scroll on Open ──
+    document.body.classList.add('modal-open');
+
     // ── T = 0.0s: Camera smoothly zooms & centers on Wilaya (NO blur yet) ──
     const bbox = pathEl.getBBox();
     const pad = Math.max(bbox.width, bbox.height) * 0.95;
@@ -479,7 +482,7 @@ export function renderMap(container) {
       specs: ['Artificial Intelligence', 'Energy Systems', 'Software Engineering', 'Biotechnology']
     };
 
-    // Master container for the HUD (True Glass Blur)
+    // Master container for the HUD (True Glass Blur: rgba(20, 45, 35, 0.2) + blur(25px))
     const hudMaster = document.createElement('div');
     hudMaster.id = 'hud-master-overlay';
     hudMaster.className = 'hud-master-overlay';
@@ -489,18 +492,18 @@ export function renderMap(container) {
     const mapRect = svg.getBoundingClientRect();
 
     hudMaster.innerHTML = `
-      <!-- Pure Top Typography -->
-      <div class="hud-top-typography" id="hud-top-typography" style="position: fixed; top: 5vh; left: 0; width: 100%; text-align: center; pointer-events: none; z-index: 30; opacity: 0; transition: opacity 0.5s ease 0.3s;">
-        <h2 style="color: #ffffff; font-size: 2rem; font-weight: 700; letter-spacing: 1px; text-shadow: 0 4px 15px rgba(0,0,0,0.4); margin: 0 0 8px;">${topTitle}</h2>
-        <p style="color: #cbd5e1; font-size: 1.1rem; font-weight: 400; margin: 0; text-shadow: 0 2px 8px rgba(0,0,0,0.3);">${topSubtitle}</p>
+      <!-- Pure Top Typography (Exact Contrast & Shadow Spec) -->
+      <div class="hud-top-text" style="position: absolute; top: 8vh; width: 100%; text-align: center; z-index: 1005; pointer-events: none;">
+        <h2 style="color: #ffffff; font-size: 2.2rem; font-weight: 800; text-shadow: 0 4px 20px rgba(0,0,0,0.8); margin: 0 0 8px;">${topTitle}</h2>
+        <p style="color: #ffffff; font-size: 1.1rem; font-weight: 500; text-shadow: 0 2px 10px rgba(0,0,0,0.8); margin: 0;">${topSubtitle}</p>
       </div>
 
-      <!-- Dedicated Full-Screen Viewport SVG Layer for Glowing Solid Tethers -->
+      <!-- Dedicated Full-Screen Viewport SVG Layer for Glowing WHITE Solid Tethers -->
       <svg id="hud-tether-canvas" style="position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 15; overflow: visible;">
-        <line id="hud-tether-1" stroke="rgba(52, 211, 153, 0.6)" stroke-width="1.5" style="filter: drop-shadow(0 0 8px rgba(52, 211, 153, 0.8)); opacity: 0; transition: opacity 0.5s ease 0.3s;"/>
-        <line id="hud-tether-2" stroke="rgba(52, 211, 153, 0.6)" stroke-width="1.5" style="filter: drop-shadow(0 0 8px rgba(52, 211, 153, 0.8)); opacity: 0; transition: opacity 0.5s ease 0.3s;"/>
-        <line id="hud-tether-3" stroke="rgba(52, 211, 153, 0.6)" stroke-width="1.5" style="filter: drop-shadow(0 0 8px rgba(52, 211, 153, 0.8)); opacity: 0; transition: opacity 0.5s ease 0.3s;"/>
-        <line id="hud-tether-4" stroke="rgba(52, 211, 153, 0.6)" stroke-width="1.5" style="filter: drop-shadow(0 0 8px rgba(52, 211, 153, 0.8)); opacity: 0; transition: opacity 0.5s ease 0.3s;"/>
+        <line id="hud-tether-1" stroke="#ffffff" stroke-width="1.5" style="filter: drop-shadow(0 0 4px rgba(255,255,255,0.8)); opacity: 0; transition: opacity 0.5s ease 0.3s;"/>
+        <line id="hud-tether-2" stroke="#ffffff" stroke-width="1.5" style="filter: drop-shadow(0 0 4px rgba(255,255,255,0.8)); opacity: 0; transition: opacity 0.5s ease 0.3s;"/>
+        <line id="hud-tether-3" stroke="#ffffff" stroke-width="1.5" style="filter: drop-shadow(0 0 4px rgba(255,255,255,0.8)); opacity: 0; transition: opacity 0.5s ease 0.3s;"/>
+        <line id="hud-tether-4" stroke="#ffffff" stroke-width="1.5" style="filter: drop-shadow(0 0 4px rgba(255,255,255,0.8)); opacity: 0; transition: opacity 0.5s ease 0.3s;"/>
       </svg>
 
       <!-- SVG Layer for Cloned Glowing Wilaya Shape -->
@@ -523,7 +526,7 @@ export function renderMap(container) {
         <div style="font-size: 1.05rem; font-weight: 800; color: #FFFFFF; text-shadow: 0 4px 16px rgba(0,0,0,0.5);">${loadingText}</div>
       </div>
 
-      <!-- 4 Floating Glassmorphic HUD Cards Layer -->
+      <!-- 4 Floating Glassmorphic HUD Cards Layer (Close Proximity to Wilaya Shape) -->
       <div class="hud-cards-stage" id="hud-cards-stage" style="position: fixed; inset: 0; pointer-events: none; z-index: 20;">
         
         <!-- Card 1: Wilaya Name (Top-Left) -->
@@ -575,8 +578,6 @@ export function renderMap(container) {
     // Fade in translucent frosted blur backdrop
     requestAnimationFrame(() => {
       hudMaster.style.opacity = '1';
-      const topTypo = hudMaster.querySelector('#hud-top-typography');
-      if (topTypo) topTypo.style.opacity = '1';
     });
 
     // Fetch and hydrate real Supabase count
@@ -588,9 +589,9 @@ export function renderMap(container) {
       if (countEl) countEl.textContent = '30+';
     });
 
-    // ── T = 0.7s (200ms after blur mount): Draw 4 Glowing SVG lines ──
+    // ── T = 0.7s (200ms after blur mount): Position Cards Close to Shape & Draw 4 WHITE lines ──
     setTimeout(() => {
-      draw4SolidTetherLines(hudMaster, pathEl);
+      positionCardsAndDrawWhiteLines(hudMaster, pathEl);
     }, 200);
 
     // ── T = 1.0s (500ms after blur mount): Fade in the 4 HUD Cards ──
@@ -623,8 +624,8 @@ export function renderMap(container) {
     document.addEventListener('keydown', escHandler);
   }
 
-  // Draw 4 Solid Vector Lines connecting Wilaya center to 4 Card coordinates
-  function draw4SolidTetherLines(hudMaster, pathEl) {
+  // Position 4 Cards with reduced 50% distance offsets around the Wilaya shape and draw 4 WHITE solid lines
+  function positionCardsAndDrawWhiteLines(hudMaster, pathEl) {
     const l1 = hudMaster.querySelector('#hud-tether-1');
     const l2 = hudMaster.querySelector('#hud-tether-2');
     const l3 = hudMaster.querySelector('#hud-tether-3');
@@ -640,38 +641,67 @@ export function renderMap(container) {
     const originX = pRect.left + pRect.width / 2;
     const originY = pRect.top + pRect.height / 2;
 
+    const halfW = Math.max(pRect.width / 2, 70);
+    const halfH = Math.max(pRect.height / 2, 70);
+
+    // ── 50% Reduced Distance Proximity Positioning ──
+    // Card 1: Top-Left
+    const c1Left = Math.max(16, originX - halfW - 230);
+    const c1Top = Math.max(110, originY - halfH - 45);
+    c1.style.left = `${c1Left}px`;
+    c1.style.top = `${c1Top}px`;
+
+    // Card 2: Top-Right
+    const c2Left = Math.min(window.innerWidth - 250, originX + halfW + 30);
+    const c2Top = Math.max(110, originY - halfH - 45);
+    c2.style.left = `${c2Left}px`;
+    c2.style.top = `${c2Top}px`;
+
+    // Card 3: Bottom-Left
+    const c3Left = Math.max(16, originX - halfW - 250);
+    const c3Top = Math.min(window.innerHeight - 150, originY + halfH + 20);
+    c3.style.left = `${c3Left}px`;
+    c3.style.top = `${c3Top}px`;
+
+    // Card 4: Bottom-Right
+    const c4Left = Math.min(window.innerWidth - 270, originX + halfW + 30);
+    const c4Top = Math.min(window.innerHeight - 150, originY + halfH + 20);
+    c4.style.left = `${c4Left}px`;
+    c4.style.top = `${c4Top}px`;
+
+    // Get live updated card bounding rects
     const r1 = c1.getBoundingClientRect();
     const r2 = c2.getBoundingClientRect();
     const r3 = c3.getBoundingClientRect();
     const r4 = c4.getBoundingClientRect();
 
-    // Line 1: From center to Card 1 (Top-Left)
+    // ── Line 1 (WHITE): Origin -> Card 1 ──
     l1.setAttribute('x1', originX);
     l1.setAttribute('y1', originY);
     l1.setAttribute('x2', r1.right);
     l1.setAttribute('y2', r1.bottom - 12);
-    l1.style.opacity = '1';
+    l1.style.opacity = '0.8';
 
-    // Line 2: From center to Card 2 (Top-Right)
+    // ── Line 2 (WHITE): Origin -> Card 2 ──
     l2.setAttribute('x1', originX);
     l2.setAttribute('y1', originY);
     l2.setAttribute('x2', r2.left);
     l2.setAttribute('y2', r2.bottom - 12);
-    l2.style.opacity = '1';
+    l2.style.opacity = '0.8';
 
-    // Line 3: From center to Card 3 (Bottom-Left)
+    // ── Line 3 (WHITE): Origin -> Card 3 ──
     l3.setAttribute('x1', originX);
     l3.setAttribute('y1', originY);
     l3.setAttribute('x2', r3.right);
     l3.setAttribute('y2', r3.top + 12);
-    l3.style.opacity = '1';
+    l3.style.opacity = '0.8';
 
-    // Line 4: From center to Card 4 (Bottom-Right)
+    // ── Line 4 (WHITE): Origin -> Card 4 ──
     l4.setAttribute('x1', originX);
     l4.setAttribute('y1', originY);
     l4.setAttribute('x2', r4.left);
     l4.setAttribute('y2', r4.top + 12);
-    l4.style.opacity = '1';
+    l4.style.opacity = '0.8';
   }
 
   // Reveal 4 HUD Cards with spring animation
@@ -690,7 +720,7 @@ export function renderMap(container) {
   function executeBreatheOutTransition(hudMaster, wilaya) {
     const cards = hudMaster.querySelectorAll('.hud-card');
     const tetherCanvas = hudMaster.querySelector('#hud-tether-canvas');
-    const topTypo = hudMaster.querySelector('#hud-top-typography');
+    const topText = hudMaster.querySelector('.hud-top-text');
     const cloneWrap = hudMaster.querySelector('#hud-clone-wrap');
     const loader = hudMaster.querySelector('#hud-isolated-loader');
 
@@ -704,9 +734,9 @@ export function renderMap(container) {
       tetherCanvas.style.transition = 'opacity 0.3s ease';
       tetherCanvas.style.opacity = '0';
     }
-    if (topTypo) {
-      topTypo.style.transition = 'all 0.3s ease';
-      topTypo.style.opacity = '0';
+    if (topText) {
+      topText.style.transition = 'all 0.3s ease';
+      topText.style.opacity = '0';
     }
     if (cloneWrap) {
       cloneWrap.style.transition = 'all 0.3s ease';
@@ -724,12 +754,13 @@ export function renderMap(container) {
       }
     }, 300);
 
-    // 3. T=0.8s: Execute routing to renderProfiles(wilayaCode)
+    // 3. T=0.8s: Execute routing to renderProfiles(wilayaCode) and unlock scroll
     setTimeout(() => {
       hudMaster.style.opacity = '0';
       setTimeout(() => {
         hudMaster.remove();
         isHUDActive = false;
+        document.body.classList.remove('modal-open');
         store.setState({ selectedWilaya: wilaya });
         navigate(`#/wilaya/${wilaya.code}`);
       }, 250);
@@ -742,6 +773,7 @@ export function renderMap(container) {
     setTimeout(() => {
       hudMaster.remove();
       isHUDActive = false;
+      document.body.classList.remove('modal-open');
     }, 300);
 
     animateViewBox(BASE_VB, 550);

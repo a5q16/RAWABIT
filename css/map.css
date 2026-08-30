@@ -257,6 +257,11 @@
   box-shadow: 0 10px 24px rgba(0, 135, 90, 0.16);
 }
 
+/* Scroll Lock when Modal/HUD is Active */
+body.modal-open {
+  overflow: hidden !important;
+}
+
 /* ==========================================================================
    TRUE GLASS BLUR HUD OVERLAY, TOP TYPOGRAPHY & 4 CARDS
    ========================================================================== */
@@ -268,10 +273,11 @@
   -webkit-backdrop-filter: blur(25px) !important;
 }
 
-/* Pure Top Typography */
-.hud-top-typography {
+/* Pure Top Typography (High-Contrast & Crisp Dropshadows) */
+.hud-top-text {
   text-align: center;
   pointer-events: none;
+  user-select: none;
 }
 
 /* 4 Glassmorphism HUD Floating Cards */
