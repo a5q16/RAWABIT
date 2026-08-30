@@ -1,6 +1,5 @@
 ﻿/* ==========================================================================
-   CINEMATIC ANTIGRAVITY ALGERIA SVG MAP — 60FPS GPU ACCELERATED
-   100% 1:1 Google Maps Panning · Frosted Glass Isolation · Optic Tethers
+   ALGERIA SVG MAP & ANTIGRAVITY HUD STYLES
    ========================================================================== */
 
 .map-card-wrapper {
@@ -39,26 +38,25 @@
   cursor: grabbing !important;
 }
 
-/* ── WILAYA SVG PATHS (CRISP BORDERS & LUXURY HOVER) ── */
+/* ── WILAYA SVG PATHS (EXACT SPEC: stroke #cbd5e1 1px, fill #f1f5f9, hover #e2e8f0) ── */
 .wilaya-group {
   cursor: pointer;
   outline: none;
 }
 
 .wilaya-path {
-  fill: #F1F5F9;
-  stroke: #CBD5E1;
-  stroke-width: 0.08;
+  stroke: #cbd5e1;
+  stroke-width: 1px;
+  fill: #f1f5f9;
+  transition: fill 0.3s ease;
   vector-effect: non-scaling-stroke;
   stroke-linejoin: round;
   stroke-linecap: round;
-  transition: fill 0.2s cubic-bezier(0.16, 1, 0.3, 1), stroke 0.2s cubic-bezier(0.16, 1, 0.3, 1), filter 0.2s ease;
 }
 
-.wilaya-group:hover .wilaya-path {
-  fill: #00875A !important;
-  stroke: #34D399 !important;
-  filter: drop-shadow(0 0 8px rgba(0, 135, 90, 0.65));
+.wilaya-group:hover .wilaya-path,
+.wilaya-path:hover {
+  fill: #e2e8f0;
 }
 
 /* ── HOVER TOOLTIP ── */
@@ -211,26 +209,6 @@
   color: var(--color-text);
 }
 
-.map-item-sub {
-  font-size: 0.78rem;
-  color: #64748B;
-}
-
-.map-item-arrow {
-  color: #94A3B8;
-  opacity: 0;
-  transition: all 0.2s ease;
-}
-
-.map-search-item:hover .map-item-arrow {
-  opacity: 1;
-  transform: translateX(4px);
-}
-
-[dir="rtl"] .map-search-item:hover .map-item-arrow {
-  transform: translateX(-4px);
-}
-
 .map-search-empty {
   padding: 16px;
   text-align: center;
@@ -274,351 +252,38 @@
 }
 
 /* ==========================================================================
-   CINEMATIC ISOLATION STAGE (Frosted Void, Antigravity Float & Optical Tethers)
+   ANTIGRAVITY HUD OVERLAY & CARDS (EXACT SPEC)
    ========================================================================== */
 
-.cinematic-isolation-overlay {
+.hud-card {
   position: absolute;
-  inset: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: radial-gradient(circle at center, rgba(2, 28, 22, 0.65) 0%, rgba(1, 15, 12, 0.94) 100%);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  overflow: hidden;
-}
-
-.cinematic-isolation-overlay.active {
-  opacity: 1;
-  pointer-events: auto;
-  cursor: pointer;
-}
-
-.cinematic-isolation-overlay.is-closing {
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.cinematic-isolation-overlay.is-leaving {
-  opacity: 0;
-  transform: scale(1.04);
-  transition: opacity 0.35s ease, transform 0.35s ease;
-}
-
-/* ── OPTICAL TETHER LINES SVG CANVAS ── */
-.tether-svg-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 105;
-  overflow: visible;
-}
-
-.optic-tether-line {
-  stroke-dasharray: 600;
-  stroke-dashoffset: 600;
-  animation: drawOptic 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes drawOptic {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
-.center-beacon-ring {
-  animation: beaconPulse 2s cubic-bezier(0.25, 1, 0.5, 1) infinite;
-  transform-origin: center;
-}
-
-@keyframes beaconPulse {
-  0% {
-    r: 7;
-    opacity: 0.9;
-  }
-  100% {
-    r: 32;
-    opacity: 0;
-  }
-}
-
-/* ── ISOLATED ANTIGRAVITY WILAYA SHAPE ── */
-.isolated-wilaya-stage {
-  position: relative;
-  z-index: 110;
-  width: 260px;
-  height: 260px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: auto;
-  cursor: pointer;
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.isolated-wilaya-stage:hover {
-  transform: scale(1.05);
-}
-
-.antigravity-float-node {
-  animation: antigravityFloating 4.5s ease-in-out infinite;
-}
-
-@keyframes antigravityFloating {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-12px) rotate(0.8deg);
-  }
-}
-
-.shape-ambient-glow {
-  position: absolute;
-  width: 220px;
-  height: 220px;
-  background: radial-gradient(circle, rgba(52, 211, 153, 0.45) 0%, rgba(217, 119, 6, 0.2) 60%, transparent 80%);
-  filter: blur(28px);
-  pointer-events: none;
-  animation: pulseGlow 4s ease-in-out infinite alternate;
-}
-
-@keyframes pulseGlow {
-  0% { transform: scale(0.85); opacity: 0.6; }
-  100% { transform: scale(1.2); opacity: 1; }
-}
-
-.isolated-shape-svg {
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  filter: drop-shadow(0 16px 36px rgba(0, 135, 90, 0.8));
-}
-
-.isolated-shape-svg path {
-  stroke-linejoin: round;
-  stroke-linecap: round;
-}
-
-/* ── GLASSMORPHISM HUD FLOATING DATA CARDS ── */
-.hud-floating-card {
-  position: absolute;
-  pointer-events: auto;
-  background: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 24px;
-  border: 1.5px solid rgba(0, 135, 90, 0.3);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.32), 0 0 0 1px rgba(255, 255, 255, 0.8);
-  padding: 18px 22px;
-  text-align: start;
-  cursor: default;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-  animation: hudCardSpring 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.hud-floating-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.38), 0 0 0 2px rgba(52, 211, 153, 0.6);
-}
-
-@keyframes hudCardSpring {
-  0% {
-    opacity: 0;
-    transform: translateY(16px) scale(0.92);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-/* Card 1: Identity Node (Top-Left) */
-.hud-card-identity {
-  top: 40px;
-  inset-inline-start: 40px;
-  min-width: 220px;
-  max-width: 290px;
-}
-
-.hud-card-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-
-.hud-code-pill {
-  background: var(--color-accent-light);
-  color: var(--color-accent);
-  font-weight: 900;
-  font-size: 0.85rem;
-  padding: 3px 10px;
-  border-radius: var(--radius-full);
-}
-
-.hud-sovereignty-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.72rem;
-  font-weight: 800;
-  color: #64748B;
-}
-
-.hud-green-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--color-accent);
-  box-shadow: 0 0 0 3px rgba(0, 135, 90, 0.25);
-}
-
-.hud-wilaya-title {
-  font-size: 1.5rem;
-  font-weight: 900;
-  color: var(--color-text);
-  line-height: 1.15;
-  margin-bottom: 3px;
-}
-
-.hud-wilaya-subtitle {
-  font-size: 0.84rem;
-  font-weight: 700;
-  color: #64748B;
-}
-
-/* Card 2: Intelligence & Real Supabase Stats (Top-Right) */
-.hud-card-intelligence {
-  top: 40px;
-  inset-inline-end: 40px;
-  min-width: 220px;
-  max-width: 300px;
-}
-
-.hud-stats-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.hud-stat-number {
-  font-size: 2.2rem;
-  font-weight: 900;
-  color: var(--color-accent);
-  line-height: 1;
-}
-
-.hud-stat-meta {
-  display: flex;
-  flex-direction: column;
-}
-
-.hud-stat-label {
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--color-text-secondary);
-}
-
-.hud-tier-pill {
-  font-size: 0.72rem;
-  font-weight: 800;
-  color: #D97706;
-}
-
-.hud-domains-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.hud-domain-chip {
-  background: #F0FDF4;
-  border: 1px solid rgba(0, 135, 90, 0.2);
-  color: var(--color-accent);
-  font-size: 0.74rem;
-  font-weight: 800;
-  padding: 3px 8px;
-  border-radius: var(--radius-full);
-}
-
-.domain-skeleton {
-  width: 60px;
-  height: 18px;
-  background: #E2E8F0;
-  border-radius: var(--radius-full);
-}
-
-/* Card 3: Interactive CTA Action Node (Bottom-Center) */
-.hud-card-cta {
-  bottom: 36px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  background: linear-gradient(135deg, #022C22 0%, #064E3B 100%);
-  color: #FFFFFF;
-  border: 1.5px solid #34D399;
-  box-shadow: 0 20px 48px rgba(2, 44, 34, 0.5), 0 0 24px rgba(52, 211, 153, 0.4);
-  cursor: pointer;
-  padding: 16px 26px;
-  border-radius: 28px;
-}
-
-.hud-card-cta:hover {
-  transform: translateY(-4px) scale(1.03);
-  box-shadow: 0 26px 56px rgba(2, 44, 34, 0.6), 0 0 32px rgba(52, 211, 153, 0.6);
-}
-
-.hud-radar-wrap {
-  position: relative;
-  width: 40px;
-  height: 40px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(5, 150, 105, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 16px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.15);
-  color: #34D399;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  text-align: start;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.hud-radar-ring {
-  position: absolute;
-  inset: -4px;
-  border-radius: 16px;
-  border: 1.5px solid #34D399;
-  animation: radarRings 2s infinite;
-  pointer-events: none;
+.hud-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 34px rgba(5, 150, 105, 0.12);
 }
 
-@keyframes radarRings {
-  0% { transform: scale(0.9); opacity: 0.9; }
-  100% { transform: scale(1.45); opacity: 0; }
+.hud-card.cta-card {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1.5px solid rgba(5, 150, 105, 0.4);
+  box-shadow: 0 12px 32px rgba(5, 150, 105, 0.15);
 }
 
-.hud-cta-content {
-  display: flex;
-  flex-direction: column;
-}
-
-.hud-cta-prompt {
-  font-size: 0.82rem;
-  color: rgba(255, 255, 255, 0.85);
-  font-weight: 600;
-}
-
-.hud-cta-link {
-  font-size: 0.98rem;
-  font-weight: 900;
-  color: #34D399;
+.hud-card.cta-card:hover {
+  background: #FFFFFF;
+  border-color: #059669;
+  box-shadow: 0 16px 40px rgba(5, 150, 105, 0.25);
+  transform: translateY(-3px) scale(1.02);
 }
 
 @media (max-width: 768px) {
@@ -626,27 +291,13 @@
     height: 540px;
     min-height: 540px;
   }
-  .hud-card-identity {
-    top: 20px;
-    inset-inline-start: 16px;
-    max-width: 170px;
-    padding: 12px 14px;
+  .hud-stage-wrap {
+    width: 90vw !important;
+    height: 70vh !important;
   }
-  .hud-card-intelligence {
-    top: 20px;
-    inset-inline-end: 16px;
-    max-width: 170px;
-    padding: 12px 14px;
-  }
-  .hud-wilaya-title {
-    font-size: 1.15rem;
-  }
-  .hud-stat-number {
-    font-size: 1.6rem;
-  }
-  .hud-card-cta {
-    bottom: 20px;
-    padding: 12px 18px;
+  .hud-card {
+    padding: 12px !important;
+    font-size: 0.85rem !important;
   }
 }
 
