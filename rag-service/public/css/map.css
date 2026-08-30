@@ -302,10 +302,9 @@ body.modal-open {
 
 /* Card 1: Wilaya Name (Top-Left) */
 .hud-card-1 {
-  top: 14vh;
-  inset-inline-start: 5vw;
-  min-width: 200px;
-  max-width: 280px;
+  top: 25%;
+  left: 10%;
+  width: 280px;
 }
 
 .hud-card-badge {
@@ -335,10 +334,9 @@ body.modal-open {
 
 /* Card 2: Verified Talents (Top-Right) */
 .hud-card-2 {
-  top: 14vh;
-  inset-inline-end: 5vw;
-  min-width: 190px;
-  max-width: 280px;
+  top: 25%;
+  right: 10%;
+  width: 280px;
 }
 
 .hud-card-label {
@@ -366,10 +364,9 @@ body.modal-open {
 
 /* Card 3: Available Specialties (Bottom-Left) */
 .hud-card-3 {
-  bottom: 8vh;
-  inset-inline-start: 5vw;
-  min-width: 220px;
-  max-width: 320px;
+  bottom: 15%;
+  left: 10%;
+  width: 280px;
 }
 
 .hud-tags-wrap {
@@ -391,10 +388,9 @@ body.modal-open {
 
 /* Card 4: Available Universities (Bottom-Right) */
 .hud-card-4 {
-  bottom: 8vh;
-  inset-inline-end: 5vw;
-  min-width: 220px;
-  max-width: 320px;
+  bottom: 15%;
+  right: 10%;
+  width: 280px;
 }
 
 .hud-unis-wrap {
@@ -421,67 +417,39 @@ body.modal-open {
   flex-shrink: 0;
 }
 
-/* ── Minimalist Loading Spinner in Blurred Void ── */
-.hud-loader-ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border: 3px solid rgba(52, 211, 153, 0.2);
-  border-top-color: #34D399;
-  animation: spinRadar 0.9s linear infinite;
-}
-
-.hud-loader-core {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #34D399;
-  box-shadow: 0 0 20px #34D399;
-  animation: pulseCore 0.9s ease-in-out infinite alternate;
-}
-
-@keyframes spinRadar {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes pulseCore {
-  0% { transform: scale(0.8); opacity: 0.7; }
-  100% { transform: scale(1.2); opacity: 1; }
-}
-
 @media (max-width: 768px) {
   .map-card-wrapper {
     height: 540px;
     min-height: 540px;
   }
   .hud-card-1 {
-    top: 15vh;
-    inset-inline-start: 16px;
-    max-width: 150px;
+    top: 18%;
+    left: 4%;
+    width: 140px;
     padding: 10px 12px;
   }
   .hud-card-2 {
-    top: 15vh;
-    inset-inline-end: 16px;
-    max-width: 150px;
+    top: 18%;
+    right: 4%;
+    width: 140px;
     padding: 10px 12px;
   }
   .hud-card-3 {
-    bottom: 4vh;
-    inset-inline-start: 16px;
-    max-width: 160px;
+    bottom: 8%;
+    left: 4%;
+    width: 145px;
     padding: 10px 12px;
   }
   .hud-card-4 {
-    bottom: 4vh;
-    inset-inline-end: 16px;
-    max-width: 160px;
+    bottom: 8%;
+    right: 4%;
+    width: 145px;
     padding: 10px 12px;
   }
-  .hud-top-typography h2 {
-    font-size: 1.35rem !important;
+  .hud-top-text h2 {
+    font-size: 1.4rem !important;
   }
-  .hud-top-typography p {
+  .hud-top-text p {
     font-size: 0.9rem !important;
   }
 }

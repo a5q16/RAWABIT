@@ -5,17 +5,21 @@
 let _loaderEl = null;
 
 export function createLoader() {
-    const loader = document.createElement('div');
-    loader.className = 'loader-screen';
-    loader.innerHTML = `
-        <div class="loader-brand">روابط</div>
-        <div class="loader-dots">
-            <span class="loader-dot"></span>
-            <span class="loader-dot"></span>
-            <span class="loader-dot"></span>
-        </div>
-    `;
-    document.body.appendChild(loader);
+    let loader = document.getElementById('loader');
+    if (!loader) {
+        loader = document.createElement('div');
+        loader.id = 'loader';
+        loader.className = 'loader-screen';
+        loader.innerHTML = `
+            <div class="loader-brand">روابط</div>
+            <div class="loader-dots">
+                <span class="loader-dot"></span>
+                <span class="loader-dot"></span>
+                <span class="loader-dot"></span>
+            </div>
+        `;
+        document.body.appendChild(loader);
+    }
     _loaderEl = loader;
     return loader;
 }
