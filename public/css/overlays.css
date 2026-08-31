@@ -75,6 +75,14 @@
   font-family: var(--font-primary);
 }
 
+.fullscreen-lang-subtitle {
+  font-size: clamp(0.9rem, 1.8vw, 1.05rem);
+  font-weight: 600;
+  color: #64748B;
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
 /* 3-Column Luxury Cards Container */
 .fullscreen-lang-cards {
   display: flex;

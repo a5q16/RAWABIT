@@ -18,21 +18,21 @@ const LANGUAGE_CARDS = [
     code: 'ar',
     icon: 'ع',
     title: 'العربية',
-    subtitle: 'العربية',
+    subtitle: 'اللغة الرسمية',
     desc: 'اكتشف ألمع العقول الجزائرية وتواصل مع الكفاءات الموثقة عبر كل التخصصات.'
   },
   {
     code: 'en',
     icon: 'En',
     title: 'English',
-    subtitle: 'English',
+    subtitle: 'International',
     desc: 'Discover Algeria\'s brightest minds and connect with verified professionals across every discipline.'
   },
   {
     code: 'fr',
     icon: 'Fr',
     title: 'Français',
-    subtitle: 'Français',
+    subtitle: 'Langue Nationale',
     desc: 'Découvrez les esprits les plus brillants d\'Algérie et connectez-vous avec des professionnels vérifiés.'
   }
 ];
@@ -58,7 +58,8 @@ export function createLanguageOverlay() {
 
     <!-- Dynamic Title Header -->
     <div class="fullscreen-lang-header">
-      <h2 class="fullscreen-lang-title" id="lang-dynamic-title">كيف تريد ان تبدأ؟</h2>
+      <h2 class="fullscreen-lang-title" id="lang-dynamic-title">كيف تفضل أن تبدأ تجربتك؟</h2>
+      <p class="fullscreen-lang-subtitle" id="lang-dynamic-subtitle">اختر لغة المنصة • Choisissez votre langue • Choose your language</p>
     </div>
 
     <!-- 3 Large Luxury White Cards -->
@@ -143,23 +144,28 @@ export function openLanguageSelector(isFirstVisit = false) {
   currentIsFirstVisit = isFirstVisit;
 
   const titleEl = overlayElement.querySelector('#lang-dynamic-title');
+  const subtitleEl = overlayElement.querySelector('#lang-dynamic-subtitle');
   const closeBtn = overlayElement.querySelector('#lang-close-btn');
 
   // Dynamic Title Logic based on isFirstVisit
   if (isFirstVisit) {
-    // Onboarding Title
-    if (titleEl) titleEl.textContent = 'كيف تريد ان تبدأ؟';
+    // Onboarding Title & Trilingual Welcome
+    if (titleEl) titleEl.textContent = 'كيف تفضل أن تبدأ تجربتك؟';
+    if (subtitleEl) subtitleEl.textContent = 'اختر لغة المنصة • Choisissez votre langue • Choose your language';
     if (closeBtn) closeBtn.classList.add('hidden');
   } else {
     // In-Site Language Switcher Title
     const currentLang = store.state.lang;
-    if (titleEl) {
+    if (titleEl && subtitleEl) {
       if (currentLang === 'en') {
-        titleEl.textContent = 'You can change your experience at any time';
+        titleEl.textContent = 'Change Platform Language';
+        subtitleEl.textContent = 'You can switch your browsing language at any time';
       } else if (currentLang === 'fr') {
-        titleEl.textContent = 'Vous pouvez changer votre expérience à tout moment';
+        titleEl.textContent = 'Changer la langue de la plateforme';
+        subtitleEl.textContent = 'Vous pouvez modifier la langue de navigation à tout moment';
       } else {
-        titleEl.textContent = 'تستطيع تغيير تجربتك في أي لحظة';
+        titleEl.textContent = 'تغيير لغة المنصة';
+        subtitleEl.textContent = 'يمكنك تبديل لغة العرض والتصفح في أي وقت';
       }
     }
     if (closeBtn) closeBtn.classList.remove('hidden');
@@ -181,6 +187,7 @@ export function openLanguageSelector(isFirstVisit = false) {
  */
 export function closeLanguageSelector() {
   if (!overlayElement) return;
+
   overlayElement.classList.remove('active');
   popOverlay();
 }
