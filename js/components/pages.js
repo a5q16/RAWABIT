@@ -535,7 +535,7 @@ function renderPageFooter() {
       <div class="container">
         <div class="footer-minimal-inner">
           <div class="footer-minimal-brand">
-            <div class="footer-logo-mark">ر</div>
+            <img class="footer-logo-img" src="./logo.png" alt="Rawabit Logo" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12); flex-shrink: 0;" />
             <span class="footer-logo-name" data-i18n="nav.brandName">${t('nav.brandName')}</span>
           </div>
 

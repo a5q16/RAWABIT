@@ -531,17 +531,17 @@
   gap: 10px;
 }
 
-.footer-minimal-brand .footer-logo-mark {
+.footer-minimal-brand .footer-logo-mark,
+.footer-minimal-brand .footer-logo-img {
   width: 36px;
   height: 36px;
-  border-radius: var(--radius-sm);
-  background: var(--color-accent);
-  color: white;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 900;
-  font-size: 1.1rem;
 }
 
 .footer-minimal-brand .footer-logo-name {
