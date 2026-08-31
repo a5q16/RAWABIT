@@ -544,6 +544,8 @@ function renderPageFooter() {
             <span class="footer-nav-sep">·</span>
             <a class="footer-minimal-link" href="#/why" data-i18n="footer.link2">${t('footer.link2')}</a>
             <span class="footer-nav-sep">·</span>
+            <a class="footer-minimal-link trigger-roadmap" href="javascript:void(0)" id="trigger-roadmap-footer-inner" data-i18n="nav.roadmap">${t('nav.roadmap')}</a>
+            <span class="footer-nav-sep">·</span>
             <a class="footer-minimal-link" href="#/contact" data-i18n="footer.link3">${t('footer.link3')}</a>
           </nav>
 

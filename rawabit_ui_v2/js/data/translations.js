@@ -16,8 +16,24 @@ export const TRANSLATIONS = {
     'nav.home': 'الرئيسية',
     'nav.about': 'عن روابط',
     'nav.why': 'لماذا روابط والرؤية',
+    'nav.roadmap': 'خارطة الطريق',
     'nav.contact': 'اتصل بنا',
     'nav.langBtn': 'العربية',
+
+    // Learning Roadmap Modal
+    'roadmap.badge': 'المسار التعليمي والمهني الذكي',
+    'roadmap.modalTitle': 'خارطة الطريق التعليمية المخصصة',
+    'roadmap.modalSubtitle': 'حدد جامعتك الحالية ومستواك الأكاديمي مع مجالك المستهدف لبناء مسار تدريبي وأكاديمي مخصص مدعوم بالذكاء الاصطناعي.',
+    'roadmap.inputUniversityLabel': 'الجامعة الحالية / المستوى الأكاديمي',
+    'roadmap.inputUniversityPlaceholder': 'مثال: جامعة باب الزوار (USTHB)، سنة ثانية إعلام آلي',
+    'roadmap.inputFieldLabel': 'المجال أو المنصب المستهدف',
+    'roadmap.inputFieldPlaceholder': 'مثال: الذكاء الاصطناعي (AI)، الأمن السيبراني، هندسة البرمجيات',
+    'roadmap.submitBtn': 'توليد خارطة الطريق بالذكاء الاصطناعي',
+    'roadmap.chipUSTHB': 'USTHB - سنة 2',
+    'roadmap.chipESI': 'ESI الجزائر - ماستر',
+    'roadmap.chipAI': 'الذكاء الاصطناعي',
+    'roadmap.chipCyber': 'الأمن السيبراني',
+    'roadmap.chipCloud': 'الحوسبة السحابية',
 
     // Hero Section
     'hero.title': 'اكتشف الكفاءات الجزائرية',
@@ -236,8 +252,24 @@ export const TRANSLATIONS = {
     'nav.home': 'Home',
     'nav.about': 'About',
     'nav.why': 'Why & Vision',
+    'nav.roadmap': 'Roadmap',
     'nav.contact': 'Contact',
     'nav.langBtn': 'English',
+
+    // Learning Roadmap Modal
+    'roadmap.badge': 'AI Learning & Career Pathways',
+    'roadmap.modalTitle': 'Personalized Learning Roadmap',
+    'roadmap.modalSubtitle': 'Specify your university, level, and target specialty to generate an AI-tailored academic and industry skill roadmap.',
+    'roadmap.inputUniversityLabel': 'Current University / Academic Level',
+    'roadmap.inputUniversityPlaceholder': 'e.g., USTHB, 2nd Year Computer Science',
+    'roadmap.inputFieldLabel': 'Target Field / Career Role',
+    'roadmap.inputFieldPlaceholder': 'e.g., Artificial Intelligence, Cybersecurity, Cloud Engineering',
+    'roadmap.submitBtn': 'Generate My Roadmap',
+    'roadmap.chipUSTHB': 'USTHB - 2nd Year',
+    'roadmap.chipESI': 'ESI Algiers - Master',
+    'roadmap.chipAI': 'Artificial Intelligence',
+    'roadmap.chipCyber': 'Cybersecurity',
+    'roadmap.chipCloud': 'Cloud Architecture',
 
     // Hero Section
     'hero.title': 'Discover Algerian Talents',
@@ -457,8 +489,24 @@ export const TRANSLATIONS = {
     'nav.home': 'Accueil',
     'nav.about': 'À propos',
     'nav.why': 'Pourquoi & Vision',
+    'nav.roadmap': 'Feuille de Route',
     'nav.contact': 'Contact',
     'nav.langBtn': 'Français',
+
+    // Learning Roadmap Modal
+    'roadmap.badge': 'Parcours d’Apprentissage IA',
+    'roadmap.modalTitle': 'Feuille de Route Personnalisée',
+    'roadmap.modalSubtitle': 'Indiquez votre université, niveau et spécialité cible pour concevoir un parcours d’apprentissage sur mesure guidé par l’IA.',
+    'roadmap.inputUniversityLabel': 'Université Actuelle / Niveau d’Études',
+    'roadmap.inputUniversityPlaceholder': 'ex. : USTHB, 2ème Année Informatique',
+    'roadmap.inputFieldLabel': 'Domaine ou Poste Visé',
+    'roadmap.inputFieldPlaceholder': 'ex. : Intelligence Artificielle, Cybersécurité, Génie Logiciel',
+    'roadmap.submitBtn': 'Générer Ma Feuille de Route',
+    'roadmap.chipUSTHB': 'USTHB - 2ème Année',
+    'roadmap.chipESI': 'ESI Alger - Master',
+    'roadmap.chipAI': 'Intelligence Artificielle',
+    'roadmap.chipCyber': 'Cybersécurité',
+    'roadmap.chipCloud': 'Architecture Cloud',
 
     // Hero Section
     'hero.title': 'Découvrez les talents algériens',

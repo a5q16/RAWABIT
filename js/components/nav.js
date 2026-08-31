@@ -36,6 +36,7 @@ export function createNav() {
         <a class="nav-link active" href="#/" data-i18n="nav.home" data-route="#/">${t('nav.home')}</a>
         <a class="nav-link" href="#/about" data-i18n="nav.about" data-route="#/about">${t('nav.about')}</a>
         <a class="nav-link" href="#/why" data-i18n="nav.why" data-route="#/why">${t('nav.why')}</a>
+        <a class="nav-link trigger-roadmap" href="javascript:void(0)" id="trigger-roadmap" data-i18n="nav.roadmap">${t('nav.roadmap')}</a>
         <a class="nav-link" href="#/contact" data-i18n="nav.contact" data-route="#/contact">${t('nav.contact')}</a>
       </div>
 
@@ -65,6 +66,7 @@ export function createNav() {
         <a class="nav-mobile-link active" href="#/" data-i18n="nav.home" data-route="#/">${t('nav.home')}</a>
         <a class="nav-mobile-link" href="#/about" data-i18n="nav.about" data-route="#/about">${t('nav.about')}</a>
         <a class="nav-mobile-link" href="#/why" data-i18n="nav.why" data-route="#/why">${t('nav.why')}</a>
+        <a class="nav-mobile-link trigger-roadmap" href="javascript:void(0)" id="trigger-roadmap-mobile" data-i18n="nav.roadmap">${t('nav.roadmap')}</a>
         <a class="nav-mobile-link" href="#/contact" data-i18n="nav.contact" data-route="#/contact">${t('nav.contact')}</a>
       </div>
 
