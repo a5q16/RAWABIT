@@ -380,12 +380,13 @@
 }
 
 .ai-bubble {
-  background: rgba(15, 23, 42, 0.55);
-  color: #F1F5F9;
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  background: rgba(15, 23, 42, 0.65);
+  color: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35);
   border-inline-start: 4px solid #10B981;
   border-radius: 18px 18px 18px 4px;
   backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 [dir='ltr'] .ai-bubble {
@@ -393,7 +394,19 @@
   border-inline-start: 4px solid #10B981;
 }
 
-/* ── Tables & Code Styling inside AI Bubbles ── */
+/* ── High-Contrast Accessibility & Typography for AI Bubbles ── */
+.chat-message, .ai-bubble, .ai-msg-bubble, .message-content, .markdown-body, .ai-msg-body {
+  color: rgba(255, 255, 255, 0.95) !important;
+  line-height: 1.75;
+  font-weight: 400;
+}
+
+.ai-bubble p, .chat-message p, .ai-msg-bubble p,
+.ai-bubble li, .chat-message li, .ai-msg-bubble li,
+.ai-bubble span, .chat-message span {
+  color: rgba(255, 255, 255, 0.95) !important;
+}
+
 .ai-bubble p {
   margin: 0 0 10px 0;
 }
@@ -401,8 +414,14 @@
   margin-bottom: 0;
 }
 
-.ai-bubble strong {
-  color: #34D399;
+/* Ensure any headings or bold text inside the AI response are bright high-contrast white & emerald */
+.chat-message h1, .chat-message h2, .chat-message h3, .chat-message h4,
+.ai-bubble h1, .ai-bubble h2, .ai-bubble h3, .ai-bubble h4,
+.ai-msg-bubble h1, .ai-msg-bubble h2, .ai-msg-bubble h3,
+.chat-message strong, .chat-message b,
+.ai-bubble strong, .ai-bubble b,
+.ai-msg-bubble strong, .ai-msg-bubble b {
+  color: #FFFFFF !important;
   font-weight: 700;
 }
 
