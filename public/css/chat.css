@@ -281,39 +281,51 @@
   font-weight: 700;
 }
 
-.ai-bubble table {
-  border-collapse: collapse;
+.chat-message table, .chat-bubble table, .ai-bubble table, .ai-msg-bubble table {
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   width: 100%;
+  max-width: 100%;
   margin: 12px 0;
+  border-collapse: collapse;
+  white-space: nowrap; /* Prevents the container from crushing the table */
   border-radius: 10px;
-  overflow: hidden;
   border: 1px solid rgba(5, 150, 105, 0.25);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-.ai-bubble th {
+.chat-message th, .chat-bubble th, .ai-bubble th, .ai-msg-bubble th,
+.chat-message td, .chat-bubble td, .ai-bubble td, .ai-msg-bubble td {
+  padding: 10px 14px;
+  min-width: 120px; /* Forces enough width for Arabic text to be readable */
+  white-space: normal; /* Allows natural wrapping within the safe minimum width */
+  word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.ai-bubble th, .chat-bubble th, .chat-message th {
   background: #059669;
   color: #FFFFFF;
-  padding: 10px 14px;
   font-weight: 700;
   font-size: 0.85rem;
   text-align: inherit;
   border: none;
 }
 
-.ai-bubble td {
-  padding: 8px 14px;
+.ai-bubble td, .chat-bubble td, .chat-message td {
   font-size: 0.85rem;
   color: #1E293B;
   background: #FFFFFF;
   border-bottom: 1px solid rgba(5, 150, 105, 0.1);
 }
 
-.ai-bubble tr:nth-child(even) td {
+.ai-bubble tr:nth-child(even) td, .chat-bubble tr:nth-child(even) td, .chat-message tr:nth-child(even) td {
   background: #F8FAF8;
 }
 
-.ai-bubble tr:last-child td {
+.ai-bubble tr:last-child td, .chat-bubble tr:last-child td, .chat-message tr:last-child td {
   border-bottom: none;
 }
 
