@@ -24,7 +24,7 @@ export function createNav() {
       
       <!-- Brand Logo -->
       <a class="nav-logo" href="#/" id="nav-logo-link">
-        <img class="nav-logo-img" src="./logo%202.jpg" alt="Rawabit Logo" style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12); flex-shrink: 0;" />
+        <img class="nav-logo-img" src="./logo.png" alt="Rawabit Logo" style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12); flex-shrink: 0;" />
         <div class="nav-logo-text">
           <span class="nav-logo-name" data-i18n="nav.brandName">${t('nav.brandName')}</span>
           <span class="nav-logo-sub" data-i18n="nav.brandSubtitle">${t('nav.brandSubtitle')}</span>
