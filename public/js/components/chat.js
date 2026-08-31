@@ -1,6 +1,6 @@
 /**
- * Rawabit v2 — AI Assistant Chat Drawer Component with Context Isolation & Marked.js HTML Parser
- * Luxury Saudi-Gov Tech Aesthetic · Real Groq/FastAPI SSE Streaming · 100% Strict Localization
+ * Rawabit v2 — Sovereign Full-Screen AI Workspace & Chatbot Interface
+ * Luxury Gov-Tech Aesthetic · 2-Column Responsive Workspace · Real Groq/Supabase RAG Streaming
  */
 
 import { t } from '../i18n.js';
@@ -13,8 +13,8 @@ let currentSessionKey = null; // Bound to profile.id / wilayaCode / 'global'
 let activeMessages = []; // Isolated session messages
 let isStreaming = false;
 
-const USER_AVATAR_SVG = `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
-const AI_AVATAR_SVG = `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/></svg>`;
+const USER_AVATAR_SVG = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+const AI_AVATAR_SVG = `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/></svg>`;
 
 /**
  * Resolves the AI API URL across Vite, Webpack, window.ENV, and defaults
@@ -28,7 +28,36 @@ function getAiApiUrl() {
 }
 
 /**
- * Ensures the persistent Chat Drawer DOM is created and attached
+ * Safely format Markdown to sanitized HTML
+ */
+function formatMarkdown(text) {
+  if (!text) return '';
+  try {
+    if (typeof marked !== 'undefined' && marked.parse) {
+      const rawHtml = marked.parse(text, { breaks: true, gfm: true });
+      if (typeof DOMPurify !== 'undefined' && DOMPurify.sanitize) {
+        return DOMPurify.sanitize(rawHtml);
+      }
+      return rawHtml;
+    }
+  } catch (e) {
+    console.warn('[Rawabit AI] Markdown parse fallback:', e);
+  }
+  return escapeHtml(text).replace(/\n/g, '<br/>');
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+/**
+ * Ensures the persistent Full-Screen AI Workspace DOM is created and attached
  */
 function createChatDrawerDOM() {
   if (drawerElement && backdropElement) return;
@@ -38,58 +67,135 @@ function createChatDrawerDOM() {
   backdropElement.className = 'ai-drawer-backdrop';
   backdropElement.id = 'ai-drawer-backdrop';
 
-  // 2. Drawer Panel
+  // 2. Full-Screen Workspace Panel
   drawerElement = document.createElement('div');
   drawerElement.className = 'ai-drawer-panel';
   drawerElement.id = 'ai-drawer-panel';
 
   drawerElement.innerHTML = `
-    <!-- Header -->
-    <header class="ai-drawer-header">
-      <div class="ai-drawer-title-wrap">
-        <div class="ai-drawer-icon">
-          ${AI_AVATAR_SVG}
-        </div>
-        <div>
-          <h2 class="ai-drawer-heading" id="ai-drawer-heading">المساعد الذكي</h2>
-          <div class="ai-drawer-status">
-            <span class="ai-status-dot"></span>
-            <span id="ai-drawer-substatus">جاهز للإجابة الفورية</span>
+    <div class="ai-workspace-container">
+      
+      <!-- 1. Executive Sidebar -->
+      <aside class="ai-sidebar" id="ai-workspace-sidebar">
+        <div class="ai-sidebar-header">
+          <div class="ai-brand-badge">
+            <div class="ai-brand-icon">
+              ${AI_AVATAR_SVG}
+            </div>
+            <div class="ai-brand-info">
+              <span class="ai-brand-title">RAWABIT AI</span>
+              <span class="ai-brand-badge-tag" id="sidebar-brand-tag">المنظومة السيادية</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      <button class="ai-drawer-close-btn" id="ai-drawer-close-btn" aria-label="Close">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
-    </header>
+        <div class="ai-sidebar-body">
+          <!-- Active Scope Context -->
+          <div class="ai-sidebar-section">
+            <div class="ai-section-title" id="sidebar-context-heading">نطاق الاستفسار النشط</div>
+            <div class="ai-context-card" id="ai-sidebar-context-card">
+              <div class="ctx-name" id="ctx-card-name">السجل الوطني العام</div>
+              <div class="ctx-title" id="ctx-card-title">استعلام شامل عبر 58 ولاية وكافة التخصصات</div>
+              <div class="ctx-meta">
+                <span class="ctx-badge" id="ctx-card-badge">● متصل بقاعدة البيانات</span>
+              </div>
+            </div>
+          </div>
 
-    <!-- Context Info Strip (Injected dynamically) -->
-    <div id="ai-context-strip" style="display: none;"></div>
+          <!-- Scope Capabilities Navigation -->
+          <div class="ai-sidebar-section">
+            <div class="ai-section-title" id="sidebar-capabilities-heading">المجالات المتاحة</div>
+            <div class="ai-capability-list">
+              <button type="button" class="ai-cap-btn" data-prompt="توقع المسار المهني وأفضل التخصصات المطلوبة لسوق العمل في الجزائر">
+                <span class="cap-icon">🎯</span>
+                <span class="cap-text" id="cap-careers-text">التنبؤ بالمسار المهني</span>
+              </button>
+              <button type="button" class="ai-cap-btn" data-prompt="تحليل فجوات المهارات والشهادات المطلوبة للكفاءات الجزائرية">
+                <span class="cap-icon">📊</span>
+                <span class="cap-text" id="cap-gaps-text">تحليل فجوات المهارات</span>
+              </button>
+              <button type="button" class="ai-cap-btn" data-prompt="اقتراح خارطة طريق للتعلم والبحث العلمي والشهادات المعتمدة">
+                <span class="cap-icon">🗺️</span>
+                <span class="cap-text" id="cap-roadmap-text">خارطة طريق التعلم</span>
+              </button>
+              <button type="button" class="ai-cap-btn" data-prompt="استكشاف الكفاءات الموثقة والمراكز البحثية والجامعات الوطنية">
+                <span class="cap-icon">🔍</span>
+                <span class="cap-text" id="cap-registry-text">استكشاف سجل الكفاءات</span>
+              </button>
+            </div>
+          </div>
+        </div>
 
-    <!-- Messages Container -->
-    <div class="ai-chat-messages" id="ai-chat-messages"></div>
+        <!-- Sidebar Footer -->
+        <div class="ai-sidebar-footer">
+          <button type="button" class="ai-clear-session-btn" id="ai-clear-session-btn">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
+            <span id="ai-clear-session-label">جلسة استفسار جديدة</span>
+          </button>
+          <div class="ai-engine-telemetry">
+            <span class="ai-status-dot"></span>
+            <span>Groq LPU RAG • Live Connected</span>
+          </div>
+        </div>
+      </aside>
 
-    <!-- Input Area -->
-    <div class="ai-drawer-input-wrap">
-      <form class="ai-input-form" id="ai-chat-form" onsubmit="event.preventDefault();">
-        <input 
-          type="text" 
-          class="ai-chat-input" 
-          id="ai-chat-input" 
-          placeholder="اكتب استفسارك للمساعد الذكي..." 
-          autocomplete="off"
-        />
-        <button type="submit" class="ai-send-btn" id="ai-send-btn" aria-label="Send">
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="22" y1="2" x2="11" y2="13"></line>
-            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-          </svg>
-        </button>
-      </form>
+      <!-- 2. Main Conversation Canvas -->
+      <main class="ai-chat-canvas">
+        <!-- Top Navigation Bar -->
+        <header class="ai-canvas-topbar">
+          <div class="topbar-left">
+            <button type="button" class="ai-sidebar-toggle" id="ai-sidebar-toggle" aria-label="Toggle Sidebar">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
+            <div class="topbar-heading-wrap">
+              <h1 class="topbar-title" id="ai-topbar-heading">المساعد الذكي السيادي</h1>
+              <span class="topbar-subtitle" id="ai-topbar-subheading">المنصة الوطنية للربط بين الكفاءات والخبرات الجزائرية</span>
+            </div>
+          </div>
+
+          <div class="topbar-actions">
+            <button type="button" class="ai-close-canvas-btn" id="ai-drawer-close-btn" aria-label="Close" title="إغلاق (Esc)">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+              <span class="key-badge">ESC</span>
+            </button>
+          </div>
+        </header>
+
+        <!-- Messages Stream Area -->
+        <div class="ai-chat-messages" id="ai-chat-messages"></div>
+
+        <!-- Floating Command Center Composer -->
+        <div class="ai-composer-wrap">
+          <div class="ai-composer-container">
+            <form class="ai-input-form" id="ai-chat-form" onsubmit="event.preventDefault();">
+              <textarea 
+                class="ai-chat-input" 
+                id="ai-chat-input" 
+                rows="1" 
+                placeholder="اكتب استفسارك للمساعد الذكي..." 
+                autocomplete="off"
+              ></textarea>
+              
+              <div class="ai-composer-bottom">
+                <div class="ai-composer-hints">
+                  <span class="hint-pill" id="hint-enter-pill">Enter ↵ للإرسال</span>
+                  <span class="hint-pill" id="hint-shift-pill">Shift + Enter للسطر الجديد</span>
+                  <span class="hint-pill" id="ai-char-counter">0 / 2000</span>
+                </div>
+                <button type="submit" class="ai-send-btn" id="ai-send-btn" aria-label="Send">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                  </svg>
+                  <span id="ai-send-label">إرسال</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+      </main>
+
     </div>
   `;
 
@@ -101,36 +207,98 @@ function createChatDrawerDOM() {
   closeBtn.addEventListener('click', closeAIChat);
   backdropElement.addEventListener('click', closeAIChat);
 
+  // Mobile sidebar toggle
+  const sidebarToggle = drawerElement.querySelector('#ai-sidebar-toggle');
+  const sidebar = drawerElement.querySelector('#ai-workspace-sidebar');
+  if (sidebarToggle && sidebar) {
+    sidebarToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('mobile-open');
+    });
+  }
+
+  // Clear session button
+  const clearBtn = drawerElement.querySelector('#ai-clear-session-btn');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      activeMessages = [];
+      const messagesContainer = drawerElement.querySelector('#ai-chat-messages');
+      if (messagesContainer) messagesContainer.innerHTML = '';
+      renderInitialGreeting(currentContext, store.state.lang);
+    });
+  }
+
+  // Capability Navigation Buttons
+  const capButtons = drawerElement.querySelectorAll('.ai-cap-btn');
+  capButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const p = btn.getAttribute('data-prompt');
+      if (p && !isStreaming) {
+        if (sidebar) sidebar.classList.remove('mobile-open');
+        handleUserMessage(p);
+      }
+    });
+  });
+
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && isOverlayActive('ai-chat')) {
       closeAIChat();
     }
   });
 
-  // Wire Form Submit
-  const form = drawerElement.querySelector('#ai-chat-form');
+  // Textarea auto-resize and keyboard shortcuts
   const input = drawerElement.querySelector('#ai-chat-input');
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const text = input.value.trim();
-    if (!text || isStreaming) return;
-    input.value = '';
-    handleUserMessage(text);
-  });
+  const form = drawerElement.querySelector('#ai-chat-form');
+  const charCounter = drawerElement.querySelector('#ai-char-counter');
+
+  if (input) {
+    input.addEventListener('input', () => {
+      input.style.height = 'auto';
+      input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+      if (charCounter) {
+        const len = input.value.length;
+        charCounter.textContent = `${len} / 2000`;
+        charCounter.style.color = len > 1900 ? '#EF4444' : '#64748B';
+      }
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        const text = input.value.trim();
+        if (!text || isStreaming) return;
+        input.value = '';
+        input.style.height = 'auto';
+        if (charCounter) charCounter.textContent = '0 / 2000';
+        handleUserMessage(text);
+      }
+    });
+  }
+
+  if (form && input) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (!text || isStreaming) return;
+      input.value = '';
+      input.style.height = 'auto';
+      if (charCounter) charCounter.textContent = '0 / 2000';
+      handleUserMessage(text);
+    });
+  }
 }
 
 /**
- * Open the AI Chat Drawer with strict context isolation & RTL support
+ * Open the Full-Screen AI Workspace with strict context isolation & RTL support
  * @param {Object} context - Optional metadata (profile, search query, or wilaya guidance)
  */
 export function openAIChat(context = null) {
   createChatDrawerDOM();
   currentContext = context;
 
-  const lang = store.state.lang;
+  const lang = store.state.lang || localStorage.getItem('rawabit_lang') || 'ar';
   const isRtl = lang === 'ar';
   drawerElement.setAttribute('dir', isRtl ? 'rtl' : 'ltr');
-  updateHeaderTranslations(lang);
+  updateWorkspaceTranslations(lang);
 
   // ── Strict Context Isolation ──
   const newSessionKey = context?.profile?.id 
@@ -148,27 +316,8 @@ export function openAIChat(context = null) {
     }
   }
 
-  // Render context strip if profile provided
-  const contextStrip = drawerElement.querySelector('#ai-context-strip');
-  if (context && context.profile) {
-    const p = context.profile;
-    const name = (lang === 'ar' && p.nameAr) ? p.nameAr : (lang === 'fr' && p.nameFr ? p.nameFr : p.name);
-    const title = (lang === 'ar' && p.titleAr) ? p.titleAr : (lang === 'fr' && p.titleFr ? p.titleFr : p.title);
-    const reliabilityLabel = lang === 'ar' ? 'موثوقية' : (lang === 'fr' ? 'fiabilité' : 'reliability');
-    
-    contextStrip.innerHTML = `
-      <div class="ai-context-badge">
-        <div>
-          <div class="ctx-name">${name}</div>
-          <div class="ctx-title">${title}</div>
-        </div>
-        <span style="font-weight: 800; font-size: 0.85rem; color: #00875A;">${p.reliability || 99}% ${reliabilityLabel}</span>
-      </div>
-    `;
-    contextStrip.style.display = 'block';
-  } else {
-    contextStrip.style.display = 'none';
-  }
+  // Update Sidebar Context Card
+  updateSidebarContextDisplay(context, lang);
 
   // Populate Initial Greeting if messages empty for this session
   if (messagesContainer && messagesContainer.children.length === 0) {
@@ -199,7 +348,7 @@ export function openAIChat(context = null) {
 }
 
 /**
- * Close the AI Chat Drawer smoothly
+ * Close the Full-Screen AI Workspace smoothly
  */
 export function closeAIChat() {
   if (!drawerElement || !backdropElement) return;
@@ -208,7 +357,7 @@ export function closeAIChat() {
   backdropElement.classList.remove('active');
   popOverlay();
 
-  // Contextual Awareness: Fade FAB back in when drawer closes
+  // Fade FAB back in when drawer closes
   const fab = document.querySelector('#global-ai-fab');
   if (fab) fab.classList.remove('drawer-open');
 }
@@ -221,7 +370,7 @@ let globalFabInstance = null;
 export function createGlobalAIFab() {
   if (globalFabInstance && document.body.contains(globalFabInstance)) return globalFabInstance;
 
-  const lang = store.state.lang;
+  const lang = store.state.lang || localStorage.getItem('rawabit_lang') || 'ar';
   const fabLabel = lang === 'ar' ? 'المساعد الذكي' : (lang === 'fr' ? 'Assistant IA' : 'AI Assistant');
 
   const fab = document.createElement('button');
@@ -254,34 +403,105 @@ export function createGlobalAIFab() {
 }
 
 /**
- * Format and update Drawer Header text according to language
+ * Update Sidebar Context Card display according to active context
  */
-function updateHeaderTranslations(lang) {
-  const heading = drawerElement.querySelector('#ai-drawer-heading');
-  const substatus = drawerElement.querySelector('#ai-drawer-substatus');
-  const input = drawerElement.querySelector('#ai-chat-input');
-  const fabLabel = document.querySelector('#fab-label-text');
-  const fab = document.querySelector('#global-ai-fab');
+function updateSidebarContextDisplay(context, lang) {
+  const nameEl = drawerElement.querySelector('#ctx-card-name');
+  const titleEl = drawerElement.querySelector('#ctx-card-title');
+  const badgeEl = drawerElement.querySelector('#ctx-card-badge');
 
-  const labelText = lang === 'ar' ? 'المساعد الذكي' : (lang === 'fr' ? 'Assistant IA' : 'AI Assistant');
-  if (fabLabel) fabLabel.textContent = labelText;
-  if (fab) {
-    fab.setAttribute('aria-label', labelText);
-    fab.setAttribute('title', labelText);
+  if (!nameEl || !titleEl || !badgeEl) return;
+
+  if (context && context.profile) {
+    const p = context.profile;
+    const name = (lang === 'ar' && p.nameAr) ? p.nameAr : (lang === 'fr' && p.nameFr ? p.nameFr : p.name);
+    const title = (lang === 'ar' && p.titleAr) ? p.titleAr : (lang === 'fr' && p.titleFr ? p.titleFr : p.title);
+    
+    nameEl.textContent = name;
+    titleEl.textContent = title;
+    badgeEl.textContent = lang === 'ar' ? `● ملف معتمد (ولاية ${p.wilayaCode || '16'})` : `● Verified Dossier (Wilaya ${p.wilayaCode || '16'})`;
+    badgeEl.style.color = '#10B981';
+  } else if (context && context.wilayaCode) {
+    nameEl.textContent = lang === 'ar' ? `ولاية ${context.wilayaCode}` : `Wilaya ${context.wilayaCode}`;
+    titleEl.textContent = lang === 'ar' ? 'استكشاف كفاءات ومشاريع الولاية' : 'Exploring provincial competencies & research centers';
+    badgeEl.textContent = lang === 'ar' ? '● نطاق ولائي مخصص' : '● Provincial Scope';
+    badgeEl.style.color = '#38BDF8';
+  } else {
+    nameEl.textContent = lang === 'ar' ? 'السجل الوطني العام' : 'National Sovereign Registry';
+    titleEl.textContent = lang === 'ar' ? 'استعلام شامل عبر 58 ولاية وكافة التخصصات' : 'Comprehensive search across all 58 Wilayas and specialties';
+    badgeEl.textContent = lang === 'ar' ? '● متصل بقاعدة البيانات' : '● Live Database Connected';
+    badgeEl.style.color = '#34D399';
   }
+}
+
+/**
+ * Format and update Workspace Translations according to active language
+ */
+function updateWorkspaceTranslations(lang) {
+  const topbarHeading = drawerElement.querySelector('#ai-topbar-heading');
+  const topbarSubheading = drawerElement.querySelector('#ai-topbar-subheading');
+  const input = drawerElement.querySelector('#ai-chat-input');
+  const sendLabel = drawerElement.querySelector('#ai-send-label');
+  const clearLabel = drawerElement.querySelector('#ai-clear-session-label');
+  const brandTag = drawerElement.querySelector('#sidebar-brand-tag');
+  const contextHeading = drawerElement.querySelector('#sidebar-context-heading');
+  const capHeading = drawerElement.querySelector('#sidebar-capabilities-heading');
+  const capCareers = drawerElement.querySelector('#cap-careers-text');
+  const capGaps = drawerElement.querySelector('#cap-gaps-text');
+  const capRoadmap = drawerElement.querySelector('#cap-roadmap-text');
+  const capRegistry = drawerElement.querySelector('#cap-registry-text');
+  const hintEnter = drawerElement.querySelector('#hint-enter-pill');
+  const hintShift = drawerElement.querySelector('#hint-shift-pill');
+  const fabLabel = document.querySelector('#fab-label-text');
+
+  const fabText = lang === 'ar' ? 'المساعد الذكي' : (lang === 'fr' ? 'Assistant IA' : 'AI Assistant');
+  if (fabLabel) fabLabel.textContent = fabText;
 
   if (lang === 'en') {
-    if (heading) heading.textContent = 'Smart Assistant';
-    if (substatus) substatus.textContent = 'Ready for instant query';
-    if (input) input.placeholder = 'Ask the AI assistant anything...';
+    if (topbarHeading) topbarHeading.textContent = 'Sovereign AI Assistant';
+    if (topbarSubheading) topbarSubheading.textContent = 'National Registry for Algerian Competencies & Careers';
+    if (input) input.placeholder = 'Ask anything about competencies, career paths, or verified research...';
+    if (sendLabel) sendLabel.textContent = 'Send';
+    if (clearLabel) clearLabel.textContent = 'New Inquiry Session';
+    if (brandTag) brandTag.textContent = 'Sovereign Intelligence';
+    if (contextHeading) contextHeading.textContent = 'Active Inquiry Scope';
+    if (capHeading) capHeading.textContent = 'Available Domains';
+    if (capCareers) capCareers.textContent = 'Career Prediction';
+    if (capGaps) capGaps.textContent = 'Skills Gap Analysis';
+    if (capRoadmap) capRoadmap.textContent = 'Learning Roadmap';
+    if (capRegistry) capRegistry.textContent = 'Explore Competencies Registry';
+    if (hintEnter) hintEnter.textContent = 'Enter ↵ to send';
+    if (hintShift) hintShift.textContent = 'Shift + Enter for new line';
   } else if (lang === 'fr') {
-    if (heading) heading.textContent = 'Assistant Intelligent';
-    if (substatus) substatus.textContent = 'Prêt pour réponse instantanée';
-    if (input) input.placeholder = 'Posez votre question à l’assistant IA...';
+    if (topbarHeading) topbarHeading.textContent = 'Assistant Intelligent Souverain';
+    if (topbarSubheading) topbarSubheading.textContent = 'Plateforme Nationale des Compétences et Expertises Algériennes';
+    if (input) input.placeholder = 'Posez vos questions sur les compétences, carrières ou chercheurs...';
+    if (sendLabel) sendLabel.textContent = 'Envoyer';
+    if (clearLabel) clearLabel.textContent = 'Nouvelle Session';
+    if (brandTag) brandTag.textContent = 'Intelligence Souveraine';
+    if (contextHeading) contextHeading.textContent = 'Périmètre Actif';
+    if (capHeading) capHeading.textContent = 'Domaines Disponibles';
+    if (capCareers) capCareers.textContent = 'Prédiction de Carrière';
+    if (capGaps) capGaps.textContent = 'Analyse des Compétences';
+    if (capRoadmap) capRoadmap.textContent = 'Feuille de Route d’Apprentissage';
+    if (capRegistry) capRegistry.textContent = 'Explorer le Répertoire National';
+    if (hintEnter) hintEnter.textContent = 'Entrée ↵ pour envoyer';
+    if (hintShift) hintShift.textContent = 'Maj + Entrée pour saut de ligne';
   } else {
-    if (heading) heading.textContent = 'المساعد الذكي';
-    if (substatus) substatus.textContent = 'جاهز للإجابة الفورية';
-    if (input) input.placeholder = 'اكتب استفسارك للمساعد الذكي...';
+    if (topbarHeading) topbarHeading.textContent = 'المساعد الذكي السيادي';
+    if (topbarSubheading) topbarSubheading.textContent = 'المنصة الوطنية للربط بين الكفاءات والخبرات الجزائرية';
+    if (input) input.placeholder = 'اكتب استفسارك للمساعد الذكي حول الكفاءات، المسار المهني، أو المهارات...';
+    if (sendLabel) sendLabel.textContent = 'إرسال';
+    if (clearLabel) clearLabel.textContent = 'جلسة استفسار جديدة';
+    if (brandTag) brandTag.textContent = 'المنظومة السيادية';
+    if (contextHeading) contextHeading.textContent = 'نطاق الاستفسار النشط';
+    if (capHeading) capHeading.textContent = 'المجالات المتاحة';
+    if (capCareers) capCareers.textContent = 'التنبؤ بالمسار المهني';
+    if (capGaps) capGaps.textContent = 'تحليل فجوات المهارات';
+    if (capRoadmap) capRoadmap.textContent = 'خارطة طريق التعلم';
+    if (capRegistry) capRegistry.textContent = 'استكشاف سجل الكفاءات';
+    if (hintEnter) hintEnter.textContent = 'Enter ↵ للإرسال';
+    if (hintShift) hintShift.textContent = 'Shift + Enter للسطر الجديد';
   }
 }
 
@@ -299,25 +519,25 @@ function renderInitialGreeting(context, lang = 'ar') {
     const name = (activeLang === 'ar' && p.nameAr) ? p.nameAr : (activeLang === 'fr' && p.nameFr ? p.nameFr : p.name);
 
     if (activeLang === 'en') {
-      greetingText = `Hello! I am Rawabit AI. How can I help you explore **${name}**'s verified research background, competencies, or collaboration details?`;
-      chips = ['Summarize published papers', 'Verified specialties', 'Direct contact & collaboration'];
+      greetingText = `Hello! I am Rawabit AI. How can I assist you with **${name}**'s verified dossier, competencies, academic trajectory, or research publications?`;
+      chips = ['Summarize published research & thesis', 'Verified competencies & skills', 'Career trajectory & appointments'];
     } else if (activeLang === 'fr') {
-      greetingText = `Bonjour ! Je suis l'IA Rawabit. Comment puis-je vous renseigner sur le parcours de **${name}**, ses compétences ou ses collaborations ?`;
-      chips = ['Résumer les publications', 'Spécialités vérifiées', 'Contact et collaborations'];
+      greetingText = `Bonjour ! Je suis l'IA Rawabit. Comment puis-je vous renseigner sur le parcours de **${name}**, ses compétences vérifiées ou ses contributions ?`;
+      chips = ['Résumer les publications et thèse', 'Compétences et spécialités', 'Parcours professionnel et postes'];
     } else {
       greetingText = `مرحباً بك! أنا مساعد روابط الذكي. كيف يمكنني مساعدتك في استكشاف المسار المعتمد للباحث **${name}**، التخصصات الدقيقة، أو إمكانيات التعاون معه؟`;
-      chips = ['ملخص الأبحاث والخبرات', 'التخصصات الدقيقة المعتمدة', 'مجالات الاستشارة والمشاريع'];
+      chips = ['ملخص الأبحاث والرسالة الأكاديمية', 'التخصصات الدقيقة المعتمدة', 'المسار المهني والمشاريع'];
     }
   } else {
     if (activeLang === 'en') {
-      greetingText = `Welcome! I am the Rawabit Sovereign AI Assistant for Algerian competencies. How can I assist you today?`;
-      chips = ['Find AI experts in Algeria', 'Top renewable energy researchers', 'How verification works in Rawabit'];
+      greetingText = `Welcome to the Rawabit Sovereign AI Workspace! I can assist you with career predictions, skills gap analysis, verified Algerian researchers, and national academic institutions.`;
+      chips = ['Top AI & NLP researchers in Algeria', 'Renewable energy & solar engineering careers', 'How competency verification works'];
     } else if (activeLang === 'fr') {
-      greetingText = `Bienvenue ! Je suis l'assistant IA souverain de Rawabit pour les compétences algériennes. Comment puis-je vous aider aujourd'hui ?`;
-      chips = ['Chercheurs IA en Algérie', 'Experts en énergies renouvelables', 'Comment fonctionne la certification'];
+      greetingText = `Bienvenue sur l'Espace IA Souverain de Rawabit ! Je peux vous orienter vers les compétences algériennes vérifiées, analyser les trajectoires de carrière ou évaluer les filières émergentes.`;
+      chips = ['Chercheurs IA & NLP en Algérie', 'Métiers des énergies renouvelables', 'Processus de certification nationale'];
     } else {
-      greetingText = `مرحباً بك! أنا مساعد روابط الذكي للكفاءات والخبرات الوطنية. كيف يمكنني مساعدتك اليوم؟`;
-      chips = ['أبرز خبراء الذكاء الاصطناعي في الجزائر', 'كفاءات الطاقة المتجددة والهيدروجين', 'كيف يتم توثيق الكفاءات في روابط؟'];
+      greetingText = `أهلاً بك في منصة روابط للذكاء الاصطناعي السيادي! يمكنني مساعدتك في استكشاف الكفاءات الموثقة، التنبؤ بالمسارات المهنية، تحليل فجوات المهارات، وربط الاحتياجات الوطنية.`;
+      chips = ['أبرز خبراء الذكاء الاصطناعي في الجزائر', 'كفاءات الطاقة المتجددة والهيدروجين الأخضر', 'كيف يتم توثيق الكفاءات في روابط؟'];
     }
   }
 
@@ -357,7 +577,7 @@ function appendStaticAIMessage(text, chips = []) {
   if (chips && chips.length > 0) {
     chipsHtml = `
       <div class="ai-chips-wrap">
-        ${chips.map(c => `<button class="ai-chip-btn" data-query="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join('')}
+        ${chips.map(c => `<button type="button" class="ai-chip-btn" data-query="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join('')}
       </div>
     `;
   }
@@ -395,10 +615,13 @@ async function handleUserMessage(queryText) {
   activeMessages.push({ role: 'user', content: queryText });
 
   const container = drawerElement.querySelector('#ai-chat-messages');
-  const substatus = drawerElement.querySelector('#ai-drawer-substatus');
-  const lang = store.state.lang;
-  if (substatus) {
-    substatus.textContent = lang === 'ar' ? 'جارٍ التحليل والتوليد...' : (lang === 'fr' ? 'Génération en cours...' : 'Analyzing & generating...');
+  const topbarSub = drawerElement.querySelector('#ai-topbar-subheading');
+  const lang = store.state.lang || localStorage.getItem('rawabit_lang') || 'ar';
+  
+  const originalSubtext = topbarSub ? topbarSub.textContent : '';
+  if (topbarSub) {
+    topbarSub.textContent = lang === 'ar' ? 'جارٍ التحليل والبحث في السجل السيادي...' : (lang === 'fr' ? 'Analyse et consultation du registre souverain...' : 'Analyzing & querying sovereign registry...');
+    topbarSub.style.color = '#059669';
   }
 
   // Create stream bubble
@@ -408,9 +631,9 @@ async function handleUserMessage(queryText) {
     <div class="ai-msg-avatar">${AI_AVATAR_SVG}</div>
     <div class="ai-msg-body">
       <div class="ai-msg-bubble ai-bubble streaming" id="active-stream-bubble">
-        <span class="ai-typing-indicator">
+        <div class="ai-typing-indicator">
           <span></span><span></span><span></span>
-        </span>
+        </div>
       </div>
     </div>
   `;
@@ -507,72 +730,40 @@ async function handleUserMessage(queryText) {
       }
     }
 
-    if (!hasReceivedTokens && !accumulatedText) {
-      accumulatedText = t('chat.defaultResponse') || (lang === 'ar' ? 'تمت معالجة استفسارك بنجاح وفق سجلات المنصة المعتمدة.' : 'Your query was processed successfully according to official records.');
+    if (!hasReceivedTokens && accumulatedText) {
       bubble.innerHTML = formatMarkdown(accumulatedText);
+    } else if (!hasReceivedTokens) {
+      bubble.innerHTML = lang === 'ar' 
+        ? 'تمت معالجة الاستفسار بنجاح.' 
+        : 'Query processed successfully.';
     }
 
-    activeMessages.push({ role: 'assistant', content: accumulatedText });
+    activeMessages.push({ role: 'assistant', content: accumulatedText || 'Query processed.' });
 
   } catch (err) {
-    bubble.innerHTML = `<span style="color:#DC2626;">${lang === 'ar' ? 'تعذر استلام الرد المباشر' : 'Unable to receive direct stream'}: ${escapeHtml(err.message)}</span>`;
+    console.error('[Rawabit AI] Streaming error:', err);
+    bubble.innerHTML = `
+      <div style="color: #DC2626; font-weight: 700;">
+        ⚠️ ${lang === 'ar' ? 'تعذر الاتصال بخدمة الذكاء الاصطناعي. يرجى المحاولة لاحقاً.' : 'Failed to connect to AI engine. Please try again later.'}
+      </div>
+    `;
   } finally {
     isStreaming = false;
     bubble.classList.remove('streaming');
-    bubble.removeAttribute('id');
-    if (substatus) {
-      substatus.textContent = lang === 'ar' ? 'جاهز للإجابة الفورية' : (lang === 'fr' ? 'Prêt pour réponse' : 'Ready for instant query');
+    if (topbarSub) {
+      topbarSub.textContent = originalSubtext;
+      topbarSub.style.color = '#64748B';
     }
     scrollToBottom();
   }
 }
 
 /**
- * Scroll chat messages viewport to bottom
+ * Smoothly scroll the messages container to bottom
  */
 function scrollToBottom() {
   const container = drawerElement?.querySelector('#ai-chat-messages');
   if (container) {
     container.scrollTop = container.scrollHeight;
   }
-}
-
-/**
- * Robust HTML / Markdown Parser utilizing marked.js & DOMPurify Sanitizer
- */
-function formatMarkdown(md) {
-  if (!md) return '';
-
-  if (typeof window !== 'undefined' && window.marked && typeof window.marked.parse === 'function') {
-    try {
-      const rawHtml = window.marked.parse(md, { gfm: true, breaks: true });
-      if (typeof window.DOMPurify !== 'undefined' && typeof window.DOMPurify.sanitize === 'function') {
-        return window.DOMPurify.sanitize(rawHtml);
-      }
-      return rawHtml;
-    } catch (e) {
-      console.warn('marked.parse error:', e);
-    }
-  }
-
-  // Fallback if marked is still loading
-  let html = escapeHtml(md);
-  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-  html = html.replace(/`(.*?)`/g, '<code>$1</code>');
-  html = html.replace(/\n\n/g, '<br/><br/>').replace(/\n/g, '<br/>');
-  
-  if (typeof window !== 'undefined' && window.DOMPurify && typeof window.DOMPurify.sanitize === 'function') {
-    return window.DOMPurify.sanitize(html);
-  }
-  return html;
-}
-
-function escapeHtml(str) {
-  if (!str) return '';
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
 }
