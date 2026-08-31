@@ -52,7 +52,7 @@
 /* ── 3. Top Glass Header Bar ── */
 .ai-glass-header {
   width: 100%;
-  height: 68px;
+  height: 72px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -60,9 +60,12 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 20;
+  z-index: 100;
   padding: 0 24px;
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.7) 0%, rgba(15, 23, 42, 0) 100%);
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .ai-glass-header-inner {
@@ -154,9 +157,10 @@
 /* ── 4. Main Centered Scroll Body ── */
 .ai-glass-scroll-body {
   flex: 1;
+  height: 100%;
   overflow-y: auto;
-  padding-top: 80px;
-  padding-bottom: 130px;
+  padding-top: 100px !important; /* Clear the fixed header */
+  padding-bottom: 160px !important; /* Clear the floating bottom omnibar */
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -563,12 +567,12 @@
 /* ── 7. Floating Omnibar Command Center ── */
 .ai-floating-omnibar {
   position: absolute;
-  bottom: 24px;
+  bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  width: calc(100% - 40px);
+  width: calc(100% - 32px);
   max-width: 850px;
-  z-index: 30;
+  z-index: 100;
 }
 
 .ai-omnibar-card {
@@ -732,7 +736,7 @@
   }
 
   .ai-glass-scroll-body {
-    padding-top: 70px;
-    padding-bottom: 120px;
+    padding-top: 90px !important;
+    padding-bottom: 140px !important;
   }
 }
