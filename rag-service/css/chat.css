@@ -1,15 +1,15 @@
 /**
- * Rawabit v2 — Sovereign Full-Screen AI Workspace & Chatbot Interface
- * Luxury Gov-Tech Aesthetic · Full-Screen 2-Column Responsive Layout · Full Markdown & Table Support
+ * Rawabit v2 — Sovereign Full-Screen Glassmorphism AI Chat Interface
+ * Raycast/Perplexity-Inspired Floating Omnibar · Centered 850px Canvas · Dynamic Zero-State FAQ
  */
 
-/* ── 1. Full-Screen Backdrop & Viewport Container ── */
+/* ── 1. Full-Screen Backdrop Overlay ── */
 .ai-drawer-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(10, 15, 29, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(10, 15, 29, 0.75);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   z-index: 99998;
   opacity: 0;
   pointer-events: none;
@@ -28,15 +28,19 @@
   width: 100vw;
   height: 100vh;
   height: 100dvh;
-  background: #0B1120;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
   z-index: 99999;
   display: flex;
+  flex-direction: column;
   opacity: 0;
   visibility: hidden;
   transform: scale(0.985);
   transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s;
   font-family: var(--font-primary, 'Tajawal', sans-serif);
   overflow: hidden;
+  color: #F8FAFC;
 }
 
 .ai-drawer-panel.active {
@@ -45,375 +49,273 @@
   transform: scale(1);
 }
 
-/* ── 3. Workspace Inner Grid (Sidebar + Main Canvas) ── */
-.ai-workspace-container {
-  display: flex;
+/* ── 3. Top Glass Header Bar ── */
+.ai-glass-header {
   width: 100%;
-  height: 100%;
-  position: relative;
-  overflow: hidden;
-}
-
-/* ── 4. Executive Sidebar (Left in LTR / Right in RTL) ── */
-.ai-sidebar {
-  width: 320px;
-  min-width: 300px;
-  max-width: 360px;
-  height: 100%;
-  background: #0F172A;
-  border-inline-end: 1px solid rgba(255, 255, 255, 0.08);
+  height: 70px;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  padding: 0 24px;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.9) 0%, rgba(15, 23, 42, 0) 100%);
+}
+
+.ai-glass-header-inner {
+  width: 100%;
+  max-width: 850px;
+  display: flex;
+  align-items: center;
   justify-content: space-between;
-  padding: 24px 20px;
-  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
-  z-index: 10;
-  flex-shrink: 0;
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Brand Badge */
-.ai-sidebar-header {
-  padding-bottom: 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.ai-brand-badge {
+.ai-header-brand {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.ai-brand-icon {
-  width: 44px;
-  height: 44px;
+.ai-brand-gem {
+  width: 38px;
+  height: 38px;
   border-radius: 12px;
   background: linear-gradient(135deg, #059669 0%, #10B981 100%);
   color: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
-  flex-shrink: 0;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
 }
 
-.ai-brand-info {
+.ai-brand-titles {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
-.ai-brand-title {
-  font-size: 1.15rem;
+.ai-brand-heading {
+  font-size: 1.05rem;
   font-weight: 800;
   color: #FFFFFF;
-  letter-spacing: 0.5px;
-}
-
-.ai-brand-badge-tag {
-  font-size: 0.74rem;
-  font-weight: 700;
-  color: #34D399;
-  background: rgba(52, 211, 153, 0.12);
-  padding: 2px 8px;
-  border-radius: 999px;
-  width: max-content;
-}
-
-/* Sidebar Scrollable Body */
-.ai-sidebar-body {
-  flex: 1;
-  overflow-y: auto;
-  padding: 18px 0;
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
-}
-
-.ai-sidebar-body::-webkit-scrollbar {
-  width: 4px;
-}
-.ai-sidebar-body::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-}
-
-.ai-section-title {
-  font-size: 0.75rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: #94A3B8;
-  margin-bottom: 10px;
-}
-
-/* Active Context Card in Sidebar */
-.ai-context-card {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(52, 211, 153, 0.25);
-  border-radius: 12px;
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  transition: all 0.2s ease;
-}
-
-.ai-context-card:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(52, 211, 153, 0.4);
-}
-
-.ctx-name {
-  font-weight: 800;
-  font-size: 0.95rem;
-  color: #F8FAFC;
-}
-
-.ctx-title {
-  font-size: 0.78rem;
-  color: #94A3B8;
-  line-height: 1.4;
-  word-break: break-word;
-}
-
-.ctx-meta {
+  letter-spacing: 0.3px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-top: 4px;
-  padding-top: 6px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.ctx-badge {
-  font-size: 0.72rem;
-  font-weight: 800;
-  color: #34D399;
-}
-
-/* Capability Quick Navigation Buttons */
-.ai-capability-list {
-  display: flex;
-  flex-direction: column;
   gap: 8px;
 }
 
-.ai-cap-btn {
+.ai-brand-subheading {
+  font-size: 0.74rem;
+  color: #94A3B8;
+  font-weight: 600;
+}
+
+.ai-header-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 14px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  gap: 10px;
+}
+
+.ai-glass-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 10px;
   color: #E2E8F0;
-  font-size: 0.84rem;
-  font-weight: 600;
-  text-align: inherit;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  width: 100%;
-}
-
-.ai-cap-btn:hover {
-  background: rgba(5, 150, 105, 0.15);
-  border-color: rgba(52, 211, 153, 0.3);
-  color: #34D399;
-  transform: translateX(-3px);
-}
-
-[dir="ltr"] .ai-cap-btn:hover {
-  transform: translateX(3px);
-}
-
-.cap-icon {
-  font-size: 1.1rem;
-  flex-shrink: 0;
-}
-
-.cap-text {
-  flex: 1;
-  line-height: 1.3;
-}
-
-/* Sidebar Footer */
-.ai-sidebar-footer {
-  padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.ai-clear-session-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 14px;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  border-radius: 10px;
-  color: #F87171;
   font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
+  backdrop-filter: blur(10px);
   transition: all 0.2s ease;
 }
 
-.ai-clear-session-btn:hover {
-  background: rgba(239, 68, 68, 0.2);
-  border-color: rgba(239, 68, 68, 0.4);
-  color: #FCA5A5;
+.ai-glass-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #FFFFFF;
+  transform: translateY(-1px);
 }
 
-.ai-engine-telemetry {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  font-size: 0.72rem;
-  color: #64748B;
-  font-weight: 700;
+.ai-close-btn {
+  background: rgba(255, 255, 255, 0.06);
 }
 
-.ai-status-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #10B981;
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
-  animation: pulseDot 2s infinite ease-in-out;
-}
-
-@keyframes pulseDot {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.3); opacity: 0.7; }
-}
-
-/* ── 5. Main Conversation Canvas ── */
-.ai-chat-canvas {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  background: #F8FAFC;
-  position: relative;
-  min-width: 0;
-  height: 100%;
-  overflow: hidden;
-}
-
-/* Top Navigation Bar */
-.ai-canvas-topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 28px;
-  background: #FFFFFF;
-  border-bottom: 1px solid #E2E8F0;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
-  z-index: 5;
-  flex-shrink: 0;
-}
-
-.topbar-left {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.ai-sidebar-toggle {
-  display: none;
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  background: #F1F5F9;
-  border: 1px solid #E2E8F0;
-  color: #334155;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-}
-
-.topbar-heading-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.topbar-title {
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: #0F172A;
-  margin: 0;
-}
-
-.topbar-subtitle {
-  font-size: 0.78rem;
-  color: #64748B;
-  font-weight: 600;
-}
-
-.topbar-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.ai-close-canvas-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  background: #F1F5F9;
-  border: 1px solid #E2E8F0;
-  border-radius: 10px;
-  color: #475569;
-  font-size: 0.82rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.ai-close-canvas-btn:hover {
-  background: #E2E8F0;
-  color: #0F172A;
-  transform: scale(1.02);
-}
-
-.key-badge {
-  background: #CBD5E1;
-  color: #1E293B;
+.key-pill {
   font-size: 0.68rem;
-  font-weight: 800;
+  background: rgba(255, 255, 255, 0.15);
   padding: 2px 6px;
   border-radius: 4px;
+  color: #CBD5E1;
 }
 
-/* ── 6. Chat Messages Scroll Area ── */
-.ai-chat-messages {
+/* ── 4. Main Centered Scroll Body ── */
+.ai-glass-scroll-body {
   flex: 1;
   overflow-y: auto;
-  padding: 28px 24px 20px;
+  padding-top: 85px;
+  padding-bottom: 140px;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  align-items: center;
   scroll-behavior: smooth;
-  width: 100%;
-  max-width: 960px;
-  margin: 0 auto;
 }
 
-.ai-chat-messages::-webkit-scrollbar {
+.ai-glass-scroll-body::-webkit-scrollbar {
   width: 6px;
 }
-.ai-chat-messages::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.15);
+.ai-glass-scroll-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 6px;
 }
 
-/* ── Message Bubble Layout ── */
+.ai-centered-column {
+  width: 100%;
+  max-width: 850px;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+/* ── 5. Dynamic Zero-State FAQ Grid ── */
+.ai-zero-state {
+  margin: auto 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 30px 0;
+  animation: zeroFadeIn 0.35s ease-out forwards;
+}
+
+@keyframes zeroFadeIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.zero-icon-glow {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #059669 0%, #10B981 100%);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 35px rgba(16, 185, 129, 0.45);
+  margin-bottom: 18px;
+}
+
+.zero-title {
+  font-size: clamp(1.5rem, 3.2vw, 2rem);
+  font-weight: 800;
+  color: #FFFFFF;
+  margin-bottom: 8px;
+  letter-spacing: -0.3px;
+}
+
+.zero-subtitle {
+  font-size: 0.95rem;
+  color: #94A3B8;
+  max-width: 540px;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+/* Context Badge in Zero State */
+.zero-context-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  padding: 6px 16px;
+  border-radius: 999px;
+  color: #34D399;
+  font-size: 0.82rem;
+  font-weight: 700;
+  margin-bottom: 28px;
+}
+
+.zero-context-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10B981;
+  box-shadow: 0 0 8px #10B981;
+}
+
+/* 2x2 Sleek Glass FAQ Cards Grid */
+.zero-faq-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  width: 100%;
+  max-width: 800px;
+}
+
+.zero-faq-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 16px;
+  padding: 18px 20px;
+  text-align: inherit;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  backdrop-filter: blur(12px);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.zero-faq-card:hover {
+  background: rgba(5, 150, 105, 0.15);
+  border-color: rgba(52, 211, 153, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.faq-card-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.faq-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.faq-card-title {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #F8FAFC;
+  line-height: 1.3;
+}
+
+.faq-card-desc {
+  font-size: 0.78rem;
+  color: #94A3B8;
+  line-height: 1.45;
+}
+
+/* ── 6. Message Stream Layout ── */
+.ai-chat-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  padding-bottom: 20px;
+}
+
 .ai-msg {
   display: flex;
   gap: 14px;
@@ -422,14 +324,8 @@
 }
 
 @keyframes msgFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .ai-msg-user {
@@ -445,12 +341,12 @@
 .ai-msg-avatar {
   width: 36px;
   height: 36px;
-  border-radius: 50%;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
 .ai-msg-user .ai-msg-avatar {
@@ -472,17 +368,17 @@
 }
 
 .ai-msg-bubble {
-  padding: 14px 20px;
-  font-size: 0.95rem;
-  line-height: 1.7;
+  padding: 16px 22px;
+  font-size: 0.96rem;
+  line-height: 1.75;
   word-break: break-word;
-  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 .user-bubble {
-  background: #FFFFFF;
-  color: #0F172A;
-  border: 1px solid #E2E8F0;
+  background: rgba(30, 41, 59, 0.9);
+  color: #F8FAFC;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20px 20px 4px 20px;
 }
 
@@ -491,29 +387,29 @@
 }
 
 .ai-bubble {
-  background: #FFFFFF;
-  color: #1E293B;
-  border: 1px solid rgba(5, 150, 105, 0.25);
+  background: rgba(15, 23, 42, 0.7);
+  color: #F1F5F9;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-inline-start: 4px solid #10B981;
   border-radius: 20px 20px 20px 4px;
-  border-inline-start: 4px solid #059669;
+  backdrop-filter: blur(14px);
 }
 
 [dir='ltr'] .ai-bubble {
   border-radius: 20px 20px 4px 20px;
-  border-inline-start: 4px solid #059669;
+  border-inline-start: 4px solid #10B981;
 }
 
-/* ── Dynamic Markdown & Table Styling inside AI Bubbles ── */
+/* ── Tables & Code Styling inside AI Bubbles ── */
 .ai-bubble p {
-  margin: 0 0 10px 0;
+  margin: 0 0 12px 0;
 }
-
 .ai-bubble p:last-child {
   margin-bottom: 0;
 }
 
 .ai-bubble strong {
-  color: #047857;
+  color: #34D399;
   font-weight: 700;
 }
 
@@ -523,12 +419,13 @@
   -webkit-overflow-scrolling: touch;
   width: 100%;
   max-width: 100%;
-  margin: 14px 0;
+  margin: 16px 0;
   border-collapse: collapse;
   white-space: nowrap;
-  border-radius: 10px;
-  border: 1px solid rgba(5, 150, 105, 0.25);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border-radius: 12px;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  background: rgba(15, 23, 42, 0.6);
 }
 
 .chat-message table td, .chat-message table th,
@@ -538,7 +435,7 @@
   white-space: nowrap !important;
   width: max-content !important;
   min-width: max-content !important;
-  padding: 12px 16px;
+  padding: 12px 18px;
 }
 
 .ai-bubble th, .chat-bubble th, .chat-message th {
@@ -552,13 +449,13 @@
 
 .ai-bubble td, .chat-bubble td, .chat-message td {
   font-size: 0.88rem;
-  color: #1E293B;
-  background: #FFFFFF;
-  border-bottom: 1px solid rgba(5, 150, 105, 0.1);
+  color: #E2E8F0;
+  background: rgba(15, 23, 42, 0.5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .ai-bubble tr:nth-child(even) td, .chat-bubble tr:nth-child(even) td, .chat-message tr:nth-child(even) td {
-  background: #F8FAF8;
+  background: rgba(30, 41, 59, 0.5);
 }
 
 .ai-bubble tr:last-child td, .chat-bubble tr:last-child td, .chat-message tr:last-child td {
@@ -575,21 +472,22 @@
 }
 
 .ai-bubble code {
-  background: rgba(5, 150, 105, 0.12);
-  color: #065F46;
+  background: rgba(16, 185, 129, 0.16);
+  color: #6EE7B7;
   padding: 2px 6px;
   border-radius: 4px;
   font-family: 'Fira Code', monospace;
-  font-size: 0.85rem;
+  font-size: 0.86rem;
 }
 
 .ai-bubble pre {
-  background: #0F172A;
+  background: #0B1120;
   color: #E2E8F0;
-  padding: 14px;
-  border-radius: 8px;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   overflow-x: auto;
-  margin: 10px 0;
+  margin: 12px 0;
 }
 
 .ai-bubble pre code {
@@ -603,28 +501,28 @@
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .ai-chip-btn {
-  background: #FFFFFF;
-  border: 1px solid #CBD5E1;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 20px;
-  padding: 7px 14px;
+  padding: 7px 15px;
   font-size: 0.82rem;
   font-weight: 600;
-  color: #334155;
+  color: #E2E8F0;
   cursor: pointer;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  backdrop-filter: blur(8px);
   transition: all 0.2s ease;
 }
 
 .ai-chip-btn:hover {
-  background: #059669;
-  border-color: #059669;
+  background: rgba(5, 150, 105, 0.3);
+  border-color: #10B981;
   color: #FFFFFF;
   transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(5, 150, 105, 0.25);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
 }
 
 /* ── Typing Indicator ── */
@@ -636,10 +534,10 @@
 }
 
 .ai-typing-indicator span {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: #059669;
+  background: #10B981;
   animation: typingBounce 1.4s infinite ease-in-out both;
 }
 
@@ -651,80 +549,80 @@
   40% { transform: scale(1); opacity: 1; }
 }
 
-/* ── 7. Floating Command Center / Composer Area ── */
-.ai-composer-wrap {
-  padding: 16px 24px 22px;
-  background: #FFFFFF;
-  border-top: 1px solid #E2E8F0;
-  z-index: 5;
-  flex-shrink: 0;
-  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.03);
+/* ── 7. Floating Omnibar Command Center ── */
+.ai-floating-omnibar {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 40px);
+  max-width: 850px;
+  z-index: 30;
 }
 
-.ai-composer-container {
-  max-width: 960px;
-  margin: 0 auto;
-  width: 100%;
+.ai-omnibar-card {
+  background: rgba(30, 41, 59, 0.88);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 20px;
+  padding: 14px 18px 12px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  transition: all 0.25s ease;
 }
 
-.ai-input-form {
+.ai-omnibar-card:focus-within {
+  border-color: #10B981;
+  background: rgba(15, 23, 42, 0.95);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 25px rgba(16, 185, 129, 0.25);
+}
+
+.ai-omnibar-form {
   display: flex;
   flex-direction: column;
-  background: #F8FAFC;
-  border: 1.5px solid #CBD5E1;
-  border-radius: 16px;
-  padding: 12px 16px 10px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
-  transition: all 0.2s ease;
+  gap: 8px;
 }
 
-.ai-input-form:focus-within {
-  border-color: #059669;
-  background: #FFFFFF;
-  box-shadow: 0 6px 20px rgba(5, 150, 105, 0.12);
-}
-
-.ai-chat-input {
+.ai-omnibar-input {
   width: 100%;
   border: none;
   background: transparent;
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-family: inherit;
-  color: #0F172A;
+  color: #FFFFFF;
   outline: none;
   resize: none;
-  min-height: 24px;
-  max-height: 120px;
-  line-height: 1.5;
-  padding: 2px 0;
+  min-height: 28px;
+  max-height: 140px;
+  line-height: 1.55;
+  padding: 0;
 }
 
-.ai-chat-input::placeholder {
+.ai-omnibar-input::placeholder {
   color: #94A3B8;
 }
 
-.ai-composer-bottom {
+.ai-omnibar-bottom {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 8px;
   padding-top: 8px;
-  border-top: 1px solid #E2E8F0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.ai-composer-hints {
+.ai-omnibar-hints {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
 }
 
 .hint-pill {
   font-size: 0.72rem;
   font-weight: 700;
-  color: #64748B;
-  background: #E2E8F0;
-  padding: 2px 8px;
+  color: #94A3B8;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 3px 8px;
   border-radius: 6px;
 }
 
@@ -735,19 +633,19 @@
   background: linear-gradient(135deg, #059669 0%, #10B981 100%);
   color: #FFFFFF;
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 8px 18px;
   font-size: 0.88rem;
   font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 3px 10px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
   transition: all 0.2s ease;
   flex-shrink: 0;
 }
 
 .ai-send-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 5px 16px rgba(16, 185, 129, 0.4);
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.5);
 }
 
 .ai-send-btn:active {
@@ -796,47 +694,27 @@
   letter-spacing: 0.3px;
 }
 
-/* ── 9. Responsive Mobile Adaptations ── */
-@media (max-width: 900px) {
-  .ai-sidebar {
-    position: absolute;
-    inset-inline-start: -100%;
-    top: 0;
-    bottom: 0;
-    width: 290px;
-    box-shadow: 6px 0 30px rgba(0, 0, 0, 0.5);
+/* ── 9. Responsive Adaptations ── */
+@media (max-width: 768px) {
+  .zero-faq-grid {
+    grid-template-columns: 1fr;
   }
 
-  .ai-sidebar.mobile-open {
-    inset-inline-start: 0;
+  .ai-floating-omnibar {
+    bottom: 14px;
+    width: calc(100% - 24px);
   }
 
-  .ai-sidebar-toggle {
-    display: flex;
-  }
-
-  .ai-canvas-topbar {
-    padding: 12px 18px;
-  }
-
-  .topbar-title {
-    font-size: 1.05rem;
-  }
-
-  .ai-chat-messages {
-    padding: 18px 14px 16px;
-    gap: 16px;
+  .hint-pill:not(:first-child) {
+    display: none;
   }
 
   .ai-msg {
     max-width: 95%;
   }
 
-  .ai-composer-wrap {
-    padding: 12px 14px 16px;
-  }
-
-  .hint-pill:not(:first-child) {
-    display: none;
+  .ai-glass-scroll-body {
+    padding-top: 75px;
+    padding-bottom: 130px;
   }
 }
