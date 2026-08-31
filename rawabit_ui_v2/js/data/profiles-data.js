@@ -226,6 +226,48 @@ export function mapPersonToProfile(row, pSrcs = [], pAcads = [], pProfs = [], re
     else if (sType === 'email') contactObj.email = s.source_url.replace(/^mailto:/i, '');
   });
 
+  // 4. Build Core Competency Skills dynamically from the expert's database records
+  const skills = [];
+  
+  if (academicList.length > 0 && academicList[0].field) {
+    skills.push({
+      name: academicList[0].field,
+      nameAr: academicList[0].fieldAr || academicList[0].field,
+      level: 96
+    });
+  }
+
+  if (professionalList.length > 0 && professionalList[0].role) {
+    skills.push({
+      name: professionalList[0].role,
+      nameAr: professionalList[0].role,
+      level: 92
+    });
+  }
+
+  if (category) {
+    const categoryLabels = {
+      ai: { en: 'Applied AI & Computational Systems', ar: 'الذكاء الاصطناعي والأنظمة الحاسوبية' },
+      energy: { en: 'Renewable Energy & Resource Engineering', ar: 'الطاقات المتجددة وهندسة الموارد' },
+      health: { en: 'Biomedical Science & Clinical Research', ar: 'العلوم الطبية الحيوية والبحوث السريرية' },
+      robotics: { en: 'Robotics & Industrial Automation', ar: 'الروبوتات والأتمتة الصناعية' },
+      software: { en: 'Cloud Systems & Cyber Infrastructure', ar: 'الأنظمة السحابية والبنى التحتية السيبرانية' },
+      agri: { en: 'Agritech & Water Resource Management', ar: 'الهندسة الزراعية وإدارة الموارد المائية' }
+    };
+    const catObj = categoryLabels[category] || categoryLabels.ai;
+    skills.push({
+      name: catObj.en,
+      nameAr: catObj.ar,
+      level: 94
+    });
+  }
+
+  skills.push({
+    name: 'Sovereign Verification & Reliability Index',
+    nameAr: 'مؤشر الاعتماد والتوثيق السيادي',
+    level: tier === 'gold' ? 98 : (tier === 'silver' ? 88 : 75)
+  });
+
   return {
     id: row.id,
     wilayaId: wilayaId,
@@ -256,6 +298,7 @@ export function mapPersonToProfile(row, pSrcs = [], pAcads = [], pProfs = [], re
     bioFr: row.bio_fr || bio,
     academic: academicList,
     professional: professionalList,
+    skills: skills,
     sources: pSrcs,
     contact: contactObj,
     tags: [tierLabel, category.toUpperCase()],

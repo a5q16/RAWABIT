@@ -179,20 +179,23 @@ export function openMindMap(profile, originCard = null) {
         <h3 class="node-title" data-i18n="mindmap.tabCompetencies">${t('mindmap.tabCompetencies')}</h3>
         <div class="node-content">
           <div class="skills-bars-wrap">
-            ${(profile.skills || []).map(skill => `
-              <div class="skill-row">
-                <div class="skill-labels">
-                  <span class="skill-name">${skill.name}</span>
-                  <span class="skill-pct">${skill.level}%</span>
+            ${(profile.skills || []).map(skill => {
+              const sName = (lang === 'ar' && skill.nameAr) ? skill.nameAr : skill.name;
+              return `
+                <div class="skill-row" style="margin-bottom: 14px;">
+                  <div class="skill-labels" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span class="skill-name" style="font-size: 0.82rem; font-weight: 700; color: #0F172A; line-height: 1.35; word-break: break-word; overflow-wrap: anywhere;">${sName}</span>
+                    <span class="skill-pct" style="font-size: 0.78rem; font-weight: 800; color: #059669; background: rgba(5, 150, 105, 0.1); padding: 1px 7px; border-radius: 6px; flex-shrink: 0; margin-inline-start: 8px;">${skill.level}%</span>
+                  </div>
+                  <div class="skill-track" style="height: 7px; background: #E2E8F0; border-radius: 999px; overflow: hidden; position: relative;">
+                    <div class="skill-fill" style="width: ${skill.level}%; height: 100%; background: linear-gradient(90deg, #059669 0%, #10B981 100%); border-radius: 999px; transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);"></div>
+                  </div>
                 </div>
-                <div class="skill-track">
-                  <div class="skill-fill" style="width: ${skill.level}%;"></div>
-                </div>
-              </div>
-            `).join('')}
+              `;
+            }).join('')}
           </div>
-          <div class="node-tags-wrap">
-            ${(profile.tags || []).map(tg => `<span class="competency-tag">${tg}</span>`).join('')}
+          <div class="node-tags-wrap" style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px;">
+            ${(profile.tags || []).map(tg => `<span class="competency-tag" style="font-size: 0.72rem; background: rgba(5, 150, 105, 0.08); color: #059669; font-weight: 700; padding: 3px 8px; border-radius: 6px;">${tg}</span>`).join('')}
           </div>
         </div>
       </div>
