@@ -112,7 +112,7 @@ export function initSmartSearch(formEl, inputEl) {
         tabWilayas: 'Wilayas',
         askAiPrefix: 'Ask AI about:',
         aiActionBadge: 'AI Chat ↵',
-        aiSubDesc: 'Generate verified responses from sovereign registries',
+        aiSubDesc: 'Generate verified responses from national database',
         wilayasHeading: 'Matching Wilayas',
         talentsHeading: 'Verified Experts',
         specialtiesHeading: 'Specialized Domains',

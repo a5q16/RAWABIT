@@ -1,6 +1,6 @@
 /**
- * Rawabit v2 — Sovereign Full-Screen Glassmorphism AI Chat Interface
- * Raycast/Perplexity-Inspired Floating Omnibar · Centered 850px Canvas · Dynamic Zero-State FAQ
+ * Rawabit v2 — Glassmorphism AI Chat Interface
+ * Clean Professional Styling · Centered 850px Canvas · Dynamic Actionable FAQ Zero-State
  */
 
 import { t } from '../i18n.js';
@@ -14,7 +14,7 @@ let activeMessages = [];
 let isStreaming = false;
 
 const USER_AVATAR_SVG = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
-const AI_AVATAR_SVG = `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/></svg>`;
+const LOGO_SRC = './logo%202.jpg';
 
 /**
  * Resolves the AI API URL across environments
@@ -77,9 +77,9 @@ function createChatDrawerDOM() {
     <header class="ai-glass-header">
       <div class="ai-glass-header-inner">
         <div class="ai-header-brand">
-          <div class="ai-brand-gem">${AI_AVATAR_SVG}</div>
+          <img class="ai-brand-logo-img" src="${LOGO_SRC}" alt="Rawabit Logo" />
           <div class="ai-brand-titles">
-            <span class="ai-brand-heading" id="ai-top-brand-title">روابط AI <span style="font-size:0.75rem; color:#34D399; font-weight:700;">● السيادي</span></span>
+            <span class="ai-brand-heading" id="ai-top-brand-title">Rawabit AI Assistant</span>
             <span class="ai-brand-subheading" id="ai-top-brand-sub">المنصة الوطنية للربط بين الكفاءات والخبرات الجزائرية</span>
           </div>
         </div>
@@ -104,11 +104,9 @@ function createChatDrawerDOM() {
         
         <!-- Dynamic Zero-State FAQ Grid (Shown when empty) -->
         <div class="ai-zero-state" id="ai-zero-state">
-          <div class="zero-icon-glow">
-            ${AI_AVATAR_SVG}
-          </div>
-          <h1 class="zero-title" id="zero-hero-title">المساعد الذكي السيادي</h1>
-          <p class="zero-subtitle" id="zero-hero-subtitle">استكشف الكفاءات الوطنية الجزائرية، تنبأ بمسارك المهني، وحلل فجوات المهارات ببيانات موثقة.</p>
+          <img class="zero-brand-logo" src="${LOGO_SRC}" alt="Rawabit Logo" />
+          <h1 class="zero-title" id="zero-hero-title">مساعد روابط الذكي</h1>
+          <p class="zero-subtitle" id="zero-hero-subtitle">اسألني عن الكفاءات الجزائرية، المراكز الجامعية والبحثية، أو أي باحث متخصص. أنا هنا للمساعدة.</p>
           
           <!-- Context Pill (if profile is active) -->
           <div class="zero-context-pill" id="zero-context-pill" style="display: none;">
@@ -190,7 +188,7 @@ function createChatDrawerDOM() {
   if (input) {
     input.addEventListener('input', () => {
       input.style.height = 'auto';
-      input.style.height = Math.min(input.scrollHeight, 140) + 'px';
+      input.style.height = Math.min(input.scrollHeight, 120) + 'px';
       if (charCounter) {
         const len = input.value.length;
         charCounter.textContent = `${len} / 2000`;
@@ -332,73 +330,72 @@ function renderDynamicZeroState(context, lang = 'ar') {
     }
 
     if (lang === 'en') {
-      if (heroTitle) heroTitle.textContent = `Explore ${name}'s Dossier`;
-      if (heroSubtitle) heroSubtitle.textContent = `Ask verified questions regarding research background, publications, academic credentials, and career trajectory.`;
+      if (heroTitle) heroTitle.textContent = `${name}`;
+      if (heroSubtitle) heroSubtitle.textContent = `Ask me anything about ${name}'s academic background, research publications, or career trajectory.`;
       faqs = [
-        { icon: '🎓', title: 'Academic Qualifications', desc: 'Degrees, university affiliations, and graduation thesis', prompt: `Summarize ${name}'s academic degrees and thesis title` },
-        { icon: '💼', title: 'Professional Trajectory', desc: 'Appointments, corporate roles, and key responsibilities', prompt: `What are ${name}'s professional roles and key appointments?` },
-        { icon: '🔬', title: 'Key Scientific Contributions', desc: 'Core competencies, algorithms, and projects', prompt: `What are the major scientific and technical contributions of ${name}?` },
-        { icon: '🔗', title: 'Verified Channels & Contact', desc: 'LinkedIn, GitHub, Google Scholar, and institutional email', prompt: `Show verified links and contact channels for ${name}` },
+        { title: `Summarize academic degrees and research`, prompt: `Summarize ${name}'s academic degrees and thesis title` },
+        { title: `Show professional career and appointments`, prompt: `What are ${name}'s professional roles and key appointments?` },
+        { title: `What are the major projects and contributions?`, prompt: `What are the major scientific and technical contributions of ${name}?` },
+        { title: `Show verified contact channels and links`, prompt: `Show verified links and contact channels for ${name}` },
       ];
     } else if (lang === 'fr') {
-      if (heroTitle) heroTitle.textContent = `Explorer le Dossier de ${name}`;
-      if (heroSubtitle) heroSubtitle.textContent = `Posez des questions précises sur son parcours académique, ses publications et ses compétences vérifiées.`;
+      if (heroTitle) heroTitle.textContent = `${name}`;
+      if (heroSubtitle) heroSubtitle.textContent = `Posez vos questions sur le parcours de ${name}, ses diplômes ou ses contributions.`;
       faqs = [
-        { icon: '🎓', title: 'Parcours Académique', desc: 'Diplômes, affiliations universitaires et sujet de thèse', prompt: `Résumer les diplômes et la thèse de ${name}` },
-        { icon: '💼', title: 'Parcours Professionnel', desc: 'Postes occupés, entreprises et responsabilités', prompt: `Quels sont les postes et expériences professionnelles de ${name} ?` },
-        { icon: '🔬', title: 'Contributions Majeures', desc: 'Spécialités de recherche, algorithmes et projets', prompt: `Quelles sont les contributions majeures de ${name} ?` },
-        { icon: '🔗', title: 'Canaux et Contact Vérifiés', desc: 'LinkedIn, GitHub, Google Scholar et email', prompt: `Afficher les sources et liens vérifiés pour ${name}` },
+        { title: `Résumer les diplômes et recherches`, prompt: `Résumer les diplômes et la thèse de ${name}` },
+        { title: `Afficher le parcours professionnel`, prompt: `Quels sont les postes et expériences professionnelles de ${name} ?` },
+        { title: `Quelles sont les contributions majeures ?`, prompt: `Quelles sont les contributions majeures de ${name} ?` },
+        { title: `Afficher les coordonnées et liens vérifiés`, prompt: `Afficher les sources et liens vérifiés pour ${name}` },
       ];
     } else {
-      if (heroTitle) heroTitle.textContent = `استكشاف ملف: ${name}`;
-      if (heroSubtitle) heroSubtitle.textContent = `اطرح استفساراتك حول المسار الأكاديمي، الأبحاث المنشورة، التخصصات الدقيقة، والمسيرة المهنية.`;
+      if (heroTitle) heroTitle.textContent = `${name}`;
+      if (heroSubtitle) heroSubtitle.textContent = `اطرح استفساراتك حول المسار الأكاديمي، الأبحاث المنشورة، والتجربة المهنية للباحث.`;
       faqs = [
-        { icon: '🎓', title: 'المسار والشهادات الأكاديمية', desc: 'الدرجات العلمية، الجامعات، وموضوع أطروحة التخرج', prompt: `لخص الدرجات الأكاديمية وأطروحة ${name}` },
-        { icon: '💼', title: 'المسار المهني والمناصب', desc: 'الخبرات الوظيفية، المؤسسات، وسنوات الممارسة', prompt: `ما هي المناصب والخبرات المهنية للباحث ${name}؟` },
-        { icon: '🔬', title: 'أبرز الإسهامات والمشاريع', desc: 'التخصصات الدقيقة، الخوارزميات، والابتكارات', prompt: `ما هي أبرز الإسهامات العلمية والمشاريع المعتمدة للباحث ${name}؟` },
-        { icon: '🔗', title: 'قنوات التواصل والاعتماد', desc: 'لينكد إن، غيت هاب، غوغل سكولار، والبريد الرسمي', prompt: `اعرض الروابط الرسمية وقنوات التحقق الخاصة بـ ${name}` },
+        { title: `لخص الدرجات العلمية والأبحاث`, prompt: `لخص الدرجات الأكاديمية وأطروحة ${name}` },
+        { title: `المسار المهني والمناصب المعتمدة`, prompt: `ما هي المناصب والخبرات المهنية للباحث ${name}؟` },
+        { title: `أبرز الإسهامات والمشاريع التقنية`, prompt: `ما هي أبرز الإسهامات العلمية والمشاريع المعتمدة للباحث ${name}؟` },
+        { title: `قنوات التواصل والاعتماد الموثقة`, prompt: `اعرض الروابط الرسمية وقنوات التحقق الخاصة بـ ${name}` },
       ];
     }
   } else {
     if (contextPill) contextPill.style.display = 'none';
 
     if (lang === 'en') {
-      if (heroTitle) heroTitle.textContent = 'Sovereign AI Assistant';
-      if (heroSubtitle) heroSubtitle.textContent = 'Explore verified Algerian competencies, predict career trajectories, analyze skill gaps, and access national intelligence.';
+      if (heroTitle) heroTitle.textContent = 'Rawabit AI Assistant';
+      if (heroSubtitle) heroSubtitle.textContent = 'Ask me anything about Algerian competencies, universities, or specific experts. I am here to help.';
       faqs = [
-        { icon: '🎯', title: 'Career Prediction', desc: 'Predict high-demand fields and future career pathways in Algeria', prompt: 'Predict career opportunities and emerging high-demand specializations in Algeria' },
-        { icon: '📊', title: 'Skills Gap Analysis', desc: 'Benchmark required technical certifications and industrial skills', prompt: 'Analyze technical skill gaps and required credentials for Algerian talent' },
-        { icon: '🗺️', title: 'Learning Roadmap', desc: 'Synthesize structured learning milestones and academic progression', prompt: 'Generate a step-by-step learning roadmap for AI and renewable energy' },
-        { icon: '🔍', title: 'Verified Talent Registry', desc: 'Discover certified Algerian researchers and institutional centers', prompt: 'Who are the top verified researchers in AI and Energy in Algeria?' },
+        { title: 'Find AI experts in Algiers', prompt: 'Find AI and NLP experts in Algiers' },
+        { title: 'Show me researchers in Renewable Energy', prompt: 'Show me researchers and experts in Renewable Energy and Solar Power in Algeria' },
+        { title: 'How does the verification system work?', prompt: 'How does the competence verification system work in Rawabit?' },
+        { title: 'Search for a specific university', prompt: 'Show me top universities and academic research institutions in Algeria' },
       ];
     } else if (lang === 'fr') {
-      if (heroTitle) heroTitle.textContent = 'Assistant Intelligent Souverain';
-      if (heroSubtitle) heroSubtitle.textContent = 'Explorez les compétences algériennes certifiées, analysez les filières d’avenir et accédez au registre national.';
+      if (heroTitle) heroTitle.textContent = 'Assistant IA Rawabit';
+      if (heroSubtitle) heroSubtitle.textContent = 'Posez vos questions sur les compétences algériennes, les universités ou des experts spécifiques. Je suis là pour vous aider.';
       faqs = [
-        { icon: '🎯', title: 'Prédiction de Carrière', desc: 'Anticiper les filières et métiers les plus recherchés en Algérie', prompt: 'Quelles sont les carrières d’avenir et compétences recherchées en Algérie ?' },
-        { icon: '📊', title: 'Analyse des Compétences', desc: 'Évaluer les écarts de compétences et certifications requises', prompt: 'Analyser les besoins en compétences techniques et certifications requises' },
-        { icon: '🗺️', title: 'Feuille de Route d’Apprentissage', desc: 'Plan structuré pour la progression académique et professionnelle', prompt: 'Proposer une feuille de route d’apprentissage pour l’IA et les énergies' },
-        { icon: '🔍', title: 'Répertoire des Compétences', desc: 'Découvrir les chercheurs et experts algériens certifiés', prompt: 'Quels sont les experts certifiés en intelligence artificielle en Algérie ?' },
+        { title: 'Trouver des experts en IA à Alger', prompt: 'Trouver des experts en IA et traitement du langage à Alger' },
+        { title: 'Chercheurs en énergies renouvelables', prompt: 'Afficher les chercheurs en énergies renouvelables et solaire en Algérie' },
+        { title: 'Comment fonctionne le système de certification ?', prompt: 'Comment fonctionne le système de vérification des compétences sur Rawabit ?' },
+        { title: 'Rechercher une université spécifique', prompt: 'Quelles sont les universités et centres de recherche en Algérie ?' },
       ];
     } else {
-      if (heroTitle) heroTitle.textContent = 'المساعد الذكي السيادي';
-      if (heroSubtitle) heroSubtitle.textContent = 'استكشف الكفاءات الوطنية الجزائرية، تنبأ بمسارك المهني، وحلل فجوات المهارات ببيانات موثقة.';
+      if (heroTitle) heroTitle.textContent = 'مساعد روابط الذكي';
+      if (heroSubtitle) heroSubtitle.textContent = 'اسألني عن الكفاءات الجزائرية، المراكز الجامعية والبحثية، أو أي باحث متخصص. أنا هنا للمساعدة.';
       faqs = [
-        { icon: '🎯', title: 'التنبؤ بالمسار المهني', desc: 'توقع التخصصات والمسارات الوظيفية الأكثر طلباً في سوق العمل الوطني', prompt: 'توقع المسارات المهنية والتخصصات الأكثر طلباً في الجزائر' },
-        { icon: '📊', title: 'تحليل فجوات المهارات', desc: 'مقارنة المهارات التقنية مع متطلبات سوق العمل ومعايير الاعتماد', prompt: 'تحليل فجوات المهارات والشهادات المطلوبة للكفاءات الجزائرية' },
-        { icon: '🗺️', title: 'خارطة طريق التعلم', desc: 'خطة منهجية لاكتساب المهارات والترقية الأكاديمية والمهنية', prompt: 'اقتراح خارطة طريق للتعلم والبحث العلمي في الذكاء الاصطناعي والطاقة' },
-        { icon: '🔍', title: 'استكشاف سجل الكفاءات', desc: 'البحث عن الباحثين والخبراء المعتمدين عبر الـ 58 ولاية', prompt: 'من هم أبرز الباحثين المعتمدين في الذكاء الاصطناعي والطاقة بالجزائر؟' },
+        { title: 'البحث عن خبراء الذكاء الاصطناعي في الجزائر', prompt: 'ابحث عن خبراء الذكاء الاصطناعي ومعالجة اللغة في الجزائر' },
+        { title: 'عرض الباحثين في الطاقات المتجددة', prompt: 'اعرض الباحثين والخبراء في الطاقة المتجددة والشمسية في الجزائر' },
+        { title: 'كيف يعمل نظام توثيق الكفاءات؟', prompt: 'كيف يعمل نظام توثيق واعتماد الكفاءات في منصة روابط؟' },
+        { title: 'البحث عن جامعة أو مؤسسة أكاديمية محددة', prompt: 'ما هي أبرز الجامعات والمراكز البحثية المسجلة في الجزائر؟' },
       ];
     }
   }
 
+  const arrowIcon = lang === 'ar' ? '←' : '→';
+
   grid.innerHTML = faqs.map(item => `
     <div class="zero-faq-card" data-prompt="${escapeHtml(item.prompt)}">
-      <span class="faq-card-icon">${item.icon}</span>
-      <div class="faq-card-body">
-        <span class="faq-card-title">${escapeHtml(item.title)}</span>
-        <span class="faq-card-desc">${escapeHtml(item.desc)}</span>
-      </div>
+      <span class="faq-card-title">${escapeHtml(item.title)}</span>
+      <span class="faq-card-arrow">${arrowIcon}</span>
     </div>
   `).join('');
 
@@ -430,15 +427,15 @@ function updateWorkspaceTranslations(lang) {
   if (fabLabel) fabLabel.textContent = fabText;
 
   if (lang === 'en') {
-    if (topBrandTitle) topBrandTitle.innerHTML = 'RAWABIT AI <span style="font-size:0.75rem; color:#34D399; font-weight:700;">● Sovereign</span>';
+    if (topBrandTitle) topBrandTitle.textContent = 'Rawabit AI Assistant';
     if (topBrandSub) topBrandSub.textContent = 'National Registry for Algerian Competencies & Careers';
     if (newChatLabel) newChatLabel.textContent = 'New Chat';
-    if (input) input.placeholder = 'Ask anything about competencies, career prediction, skill gaps, or verified research...';
+    if (input) input.placeholder = 'Ask anything about competencies, research, or career trajectories...';
     if (sendLabel) sendLabel.textContent = 'Send';
     if (hintEnter) hintEnter.textContent = 'Enter ↵ to send';
     if (hintShift) hintShift.textContent = 'Shift + Enter for new line';
   } else if (lang === 'fr') {
-    if (topBrandTitle) topBrandTitle.innerHTML = 'RAWABIT AI <span style="font-size:0.75rem; color:#34D399; font-weight:700;">● Souverain</span>';
+    if (topBrandTitle) topBrandTitle.textContent = 'Assistant IA Rawabit';
     if (topBrandSub) topBrandSub.textContent = 'Plateforme Nationale des Compétences et Expertises Algériennes';
     if (newChatLabel) newChatLabel.textContent = 'Nouvelle Conversation';
     if (input) input.placeholder = 'Posez vos questions sur les compétences, carrières ou chercheurs...';
@@ -446,7 +443,7 @@ function updateWorkspaceTranslations(lang) {
     if (hintEnter) hintEnter.textContent = 'Entrée ↵ pour envoyer';
     if (hintShift) hintShift.textContent = 'Maj + Entrée pour saut de ligne';
   } else {
-    if (topBrandTitle) topBrandTitle.innerHTML = 'روابط AI <span style="font-size:0.75rem; color:#34D399; font-weight:700;">● السيادي</span>';
+    if (topBrandTitle) topBrandTitle.textContent = 'مساعد روابط الذكي';
     if (topBrandSub) topBrandSub.textContent = 'المنصة الوطنية للربط بين الكفاءات والخبرات الجزائرية';
     if (newChatLabel) newChatLabel.textContent = 'محادثة جديدة';
     if (input) input.placeholder = 'اكتب استفسارك للمساعد الذكي حول الكفاءات، المسار المهني، أو المهارات...';
@@ -500,7 +497,9 @@ async function handleUserMessage(queryText) {
   const streamMsgDiv = document.createElement('div');
   streamMsgDiv.className = 'ai-msg ai-msg-assistant animate-fade-in';
   streamMsgDiv.innerHTML = `
-    <div class="ai-msg-avatar">${AI_AVATAR_SVG}</div>
+    <div class="ai-msg-avatar">
+      <img src="${LOGO_SRC}" alt="AI" />
+    </div>
     <div class="ai-msg-body">
       <div class="ai-msg-bubble ai-bubble streaming" id="active-stream-bubble">
         <div class="ai-typing-indicator">
@@ -613,7 +612,7 @@ async function handleUserMessage(queryText) {
     console.error('[Rawabit AI] Streaming error:', err);
     bubble.innerHTML = `
       <div style="color: #F87171; font-weight: 700;">
-        ⚠️ ${lang === 'ar' ? 'تعذر الاتصال بخدمة الذكاء الاصطناعي. يرجى المحاولة لاحقاً.' : 'Failed to connect to AI engine. Please try again later.'}
+        ${lang === 'ar' ? 'تعذر الاتصال بخدمة الذكاء الاصطناعي. يرجى المحاولة لاحقاً.' : 'Failed to connect to AI engine. Please try again later.'}
       </div>
     `;
   } finally {
@@ -652,9 +651,7 @@ export function createGlobalAIFab() {
 
   fab.innerHTML = `
     <div class="fab-inner">
-      <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
-        <path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/>
-      </svg>
+      <img class="fab-logo-img" src="${LOGO_SRC}" alt="Rawabit Logo" />
       <span class="fab-label" id="fab-label-text">${fabLabel}</span>
     </div>
   `;

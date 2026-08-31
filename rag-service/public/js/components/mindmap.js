@@ -74,7 +74,7 @@ export function getProfileSources(profile) {
   if (sources.length === 0) {
     sources.push({
       type: 'rawabit',
-      label: 'Rawabit Sovereign Registry',
+      label: 'Rawabit Verified Registry',
       url: `#/wilaya/${profile.wilayaCode || '16'}`,
       icon: `<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>`
     });

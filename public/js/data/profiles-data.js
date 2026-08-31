@@ -263,8 +263,8 @@ export function mapPersonToProfile(row, pSrcs = [], pAcads = [], pProfs = [], re
   }
 
   skills.push({
-    name: 'Sovereign Verification & Reliability Index',
-    nameAr: 'مؤشر الاعتماد والتوثيق السيادي',
+    name: 'Official Verification & Reliability Index',
+    nameAr: 'مؤشر الاعتماد والتوثيق الرسمي',
     level: tier === 'gold' ? 98 : (tier === 'silver' ? 88 : 75)
   });
 
