@@ -308,7 +308,9 @@ async function init() {
 
   // Render sticky navbar
   const nav = createNav();
-  document.body.prepend(nav);
+  if (!document.body.contains(nav)) {
+    document.body.prepend(nav);
+  }
 
   // Render full-screen 3-card language switcher overlay
   const langOverlay = createLanguageOverlay();

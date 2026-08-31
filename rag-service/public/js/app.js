@@ -18,6 +18,7 @@ import { renderAbout, renderWhy, renderContact } from './components/pages.js';
 import { getPlatformStats } from './data/profiles-data.js';
 import { initSmartSearch } from './components/smart-search.js';
 import { createGlobalAIFab } from './components/chat.js';
+import { initRoadmapListeners } from './components/roadmap.js';
 
 /**
  * Render the Minimalist Homepage Layout
@@ -235,11 +236,13 @@ export function renderHome() {
             <span class="footer-logo-name" data-i18n="nav.brandName">${t('nav.brandName')}</span>
           </div>
 
-          <!-- Strictly the 3 required links -->
+          <!-- Footer navigation links -->
           <nav class="footer-minimal-nav">
             <a class="footer-minimal-link" href="#/about" data-i18n="footer.link1">${t('footer.link1')}</a>
             <span class="footer-nav-sep">·</span>
             <a class="footer-minimal-link" href="#/vision" data-i18n="footer.link2">${t('footer.link2')}</a>
+            <span class="footer-nav-sep">·</span>
+            <a class="footer-minimal-link trigger-roadmap" href="javascript:void(0)" id="trigger-roadmap-footer" data-i18n="nav.roadmap">${t('nav.roadmap')}</a>
             <span class="footer-nav-sep">·</span>
             <a class="footer-minimal-link" href="#/contact" data-i18n="footer.link3">${t('footer.link3')}</a>
           </nav>
@@ -305,7 +308,9 @@ async function init() {
 
   // Render sticky navbar
   const nav = createNav();
-  document.body.prepend(nav);
+  if (!document.body.contains(nav)) {
+    document.body.prepend(nav);
+  }
 
   // Render full-screen 3-card language switcher overlay
   const langOverlay = createLanguageOverlay();
@@ -336,6 +341,9 @@ async function init() {
 
   // Boot router
   initRouter();
+
+  // Initialize Learning Roadmap click triggers
+  initRoadmapListeners();
 
   // Hide loader
   hideLoader();
