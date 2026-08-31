@@ -1,9 +1,8 @@
 /**
- * Rawabit v2 — Supabase PostgreSQL REST API Client (Table: person)
- * 100% Real API Integration · Zero Mock Data · Production Vercel Ready
+ * Rawabit v2 — Supabase PostgreSQL REST API Client (Relational Data Engine)
+ * 100% Real API Integration · Pure Relational Joins · Zero Mock Data · Production Vercel Ready
+ * Tables Queried: person, sources, academic_career, professional_career, university, specialty, company, wilaya
  */
-
-import { ACADEMIC_RECORDS, PROFESSIONAL_RECORDS } from './enrichment-data.js';
 
 // Supabase Configuration (Vite / Vercel standard with global window fallback and production default)
 export const SUPABASE_URL = (
@@ -30,6 +29,38 @@ function getSupabaseHeaders() {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
   };
+}
+
+// In-memory cache for reference tables
+let referenceCache = null;
+
+/**
+ * Fetch and cache institutional reference tables from Supabase
+ * @returns {Promise<{uniMap: Map, specMap: Map, compMap: Map}>}
+ */
+export async function loadReferenceTables() {
+  if (referenceCache) return referenceCache;
+  if (!SUPABASE_URL || !SUPABASE_KEY) {
+    return { uniMap: new Map(), specMap: new Map(), compMap: new Map() };
+  }
+
+  try {
+    const [unis, specs, comps] = await Promise.all([
+      fetch(`${SUPABASE_URL}/rest/v1/university?select=*`, { headers: getSupabaseHeaders() }).then(r => r.json()).catch(() => []),
+      fetch(`${SUPABASE_URL}/rest/v1/specialty?select=*`, { headers: getSupabaseHeaders() }).then(r => r.json()).catch(() => []),
+      fetch(`${SUPABASE_URL}/rest/v1/company?select=*`, { headers: getSupabaseHeaders() }).then(r => r.json()).catch(() => [])
+    ]);
+
+    const uniMap = new Map((Array.isArray(unis) ? unis : []).map(u => [u.id, u]));
+    const specMap = new Map((Array.isArray(specs) ? specs : []).map(s => [s.id, s]));
+    const compMap = new Map((Array.isArray(comps) ? comps : []).map(c => [c.id, c]));
+
+    referenceCache = { uniMap, specMap, compMap };
+    return referenceCache;
+  } catch (err) {
+    console.warn('[Rawabit Supabase] Failed to load reference tables:', err);
+    return { uniMap: new Map(), specMap: new Map(), compMap: new Map() };
+  }
 }
 
 /**
@@ -77,43 +108,79 @@ export function generateLuxuryAvatar(name = 'Talent', nameAr = '', category = 'a
 }
 
 /**
- * Maps raw database rows from Supabase 'person' table into our UI profile schema.
- * @param {Object} row - Raw row from 'person' table (id, first_name, last_name, bio, photo_url, wilaya_id)
+ * Maps raw database rows from Supabase 'person' table along with relational data
+ * @param {Object} row - Raw row from 'person' table
+ * @param {Array} pSrcs - Relational rows from 'sources' table
+ * @param {Array} pAcads - Relational rows from 'academic_career' table
+ * @param {Array} pProfs - Relational rows from 'professional_career' table
+ * @param {Object} refs - Reference tables {uniMap, specMap, compMap}
  * @returns {Object} Canonical profile entity for UI components
  */
-export function mapPersonToProfile(row) {
+export function mapPersonToProfile(row, pSrcs = [], pAcads = [], pProfs = [], refs = { uniMap: new Map(), specMap: new Map(), compMap: new Map() }) {
   if (!row) return null;
 
   const fullName = `${row.first_name || ''} ${row.last_name || ''}`.trim() || 'Verified Expert';
   const bio = row.bio || '';
   
-  const enrichedAcad = ACADEMIC_RECORDS[row.id];
-  const enrichedProf = PROFESSIONAL_RECORDS[row.id];
+  const wilayaId = row.wilaya_id != null ? Number(row.wilaya_id) : 16;
+  const wilayaCode = String(wilayaId).padStart(2, '0');
 
-  // Extract a clean title from bio or fallback
+  // 1. Build Academic Records dynamically from Supabase 'academic_career' joined with 'university' and 'specialty'
+  const academicList = pAcads.map(a => {
+    const u = refs.uniMap ? refs.uniMap.get(a.university_id) : null;
+    const s = refs.specMap ? refs.specMap.get(a.specialty_id) : null;
+    return {
+      degree: a.degree || 'Academic Degree',
+      institution: u ? (u.abbreviation || u.name_fr || u.name_en || u.name_ar) : 'National Higher Institution',
+      institutionAr: u ? (u.name_ar || u.name_fr) : 'مؤسسة جامعية وطنية',
+      field: s ? (s.name_en || s.name_fr || s.name_ar) : 'Specialized Domain',
+      fieldAr: s ? (s.name_ar || s.name_fr) : 'تخصص دقيق',
+      year: a.end_year ? String(a.end_year) : (a.start_year ? String(a.start_year) : '2024'),
+      thesis: a.thesis_title || ''
+    };
+  });
+
+  // 2. Build Professional Records dynamically from Supabase 'professional_career' joined with 'company'
+  const professionalList = pProfs.map(pr => {
+    const c = refs.compMap ? refs.compMap.get(pr.company_id) : null;
+    return {
+      role: pr.role || 'Professional Role',
+      company: c ? (c.name || c.name_ar) : (row.organization || 'National Competency Network'),
+      companyAr: c ? (c.name_ar || c.name) : (row.organization_ar || 'الشبكة الوطنية للكفاءات'),
+      period: pr.start_date ? `${pr.start_date.slice(0, 4)} — ${pr.end_date ? pr.end_date.slice(0, 4) : 'Present'}` : '2024 — Present',
+      description: pr.description || ''
+    };
+  });
+
+  // Primary title and organization determination
   let title = 'Verified Expert';
-  if (row.title) {
+  let organization = 'National Competency Network';
+
+  if (professionalList.length > 0 && professionalList[0].role) {
+    title = professionalList[0].role;
+    organization = professionalList[0].company;
+  } else if (row.title) {
     title = row.title;
-  } else if (enrichedProf && enrichedProf.role) {
-    title = enrichedProf.role;
+    organization = row.organization || organization;
   } else if (bio) {
     const firstSentence = bio.split('.')[0].trim();
     title = firstSentence.length > 80 ? firstSentence.slice(0, 77) + '...' : firstSentence;
   }
 
-  const wilayaId = row.wilaya_id != null ? Number(row.wilaya_id) : 16;
-  const wilayaCode = String(wilayaId).padStart(2, '0');
-
-  // Category determination
+  // Category determination based on specialty, career, or bio
   let category = row.category;
   if (!category) {
-    const fullText = `${bio} ${enrichedProf?.role || ''} ${enrichedAcad?.specialty || ''}`.toLowerCase();
-    if (fullText.includes('petroleum') || fullText.includes('oil') || fullText.includes('gas') || fullText.includes('energy') || fullText.includes('sonatrach') || fullText.includes('berkine') || fullText.includes('enafor') || fullText.includes('enageo')) {
+    const fullText = `${bio} ${title} ${academicList.map(a => a.field).join(' ')}`.toLowerCase();
+    if (fullText.includes('petroleum') || fullText.includes('oil') || fullText.includes('gas') || fullText.includes('energy') || fullText.includes('sonatrach') || fullText.includes('berkine') || fullText.includes('enafor') || fullText.includes('enageo') || fullText.includes('solaire')) {
       category = 'energy';
     } else if (fullText.includes('robot') || fullText.includes('automation') || fullText.includes('scada') || fullText.includes('instrumentation') || fullText.includes('mechanical') || fullText.includes('electric')) {
       category = 'robotics';
-    } else if (fullText.includes('health') || fullText.includes('medical') || fullText.includes('biology') || fullText.includes('cnrpah')) {
+    } else if (fullText.includes('health') || fullText.includes('medical') || fullText.includes('biology') || fullText.includes('pharmaceut') || fullText.includes('cnrpah')) {
       category = 'health';
+    } else if (fullText.includes('agri') || fullText.includes('water') || fullText.includes('irrigation') || fullText.includes('soil') || fullText.includes('inraa')) {
+      category = 'agri';
+    } else if (fullText.includes('cloud') || fullText.includes('cyber') || fullText.includes('network') || fullText.includes('devops') || fullText.includes('linux')) {
+      category = 'software';
     } else {
       category = 'ai';
     }
@@ -122,44 +189,11 @@ export function mapPersonToProfile(row) {
   // Pure SVG luxury monogram avatar — eliminates cheap fake human photos
   const avatar = (row.photo_url && !row.photo_url.includes('unsplash.com'))
     ? row.photo_url
-    : generateLuxuryAvatar(fullName, row.name_ar, category);
-
-  const organization = row.organization || (enrichedProf ? enrichedProf.company : 'National Competency Network');
-
-  const parseJsonArray = (val) => {
-    if (Array.isArray(val)) return val;
-    if (typeof val === 'string') {
-      try {
-        const parsed = JSON.parse(val);
-        return Array.isArray(parsed) ? parsed : [];
-      } catch (e) {
-        return [];
-      }
-    }
-    return [];
-  };
-
-  const academic = parseJsonArray(row.academic);
-  const professional = parseJsonArray(row.professional);
-  const skills = parseJsonArray(row.skills);
-  const achievements = parseJsonArray(row.achievements);
-  const tags = parseJsonArray(row.tags);
-
-  const academicList = enrichedAcad ? [
-    { degree: enrichedAcad.degree, institution: enrichedAcad.university, field: enrichedAcad.specialty, year: enrichedAcad.year }
-  ] : (academic.length > 0 ? academic : [
-    { degree: title, institution: organization, year: '2024' }
-  ]);
-
-  const professionalList = enrichedProf ? [
-    { role: enrichedProf.role, company: enrichedProf.company, description: enrichedProf.description, period: enrichedProf.period }
-  ] : (professional.length > 0 ? professional : [
-    { role: title, company: organization, period: '2024 — Present' }
-  ]);
+    : generateLuxuryAvatar(fullName, row.name_ar || row.first_name_ar, category);
 
   // ── 3-Tier Logical Verification Classification ──
-  const hasAcademic = academicList && academicList.length > 0;
-  const hasProfessional = professionalList && professionalList.length > 0;
+  const hasAcademic = academicList.length > 0;
+  const hasProfessional = professionalList.length > 0;
   const hasBio = bio && bio.length >= 20;
 
   let tier = 'silver';
@@ -179,131 +213,152 @@ export function mapPersonToProfile(row) {
     tierLabelFr = 'Profil Enregistré';
   }
 
-  // Extract multi-channel sourcing & verification channels
-  const contactObj = (typeof row.contact === 'object' && row.contact !== null) 
-    ? { ...row.contact } 
-    : (row.email ? { email: row.email } : {});
+  // 3. Build Multi-Channel Contacts strictly from Supabase 'sources' table rows + person email
+  const contactObj = row.email ? { email: row.email } : {};
 
-  if (row.email && !contactObj.email) contactObj.email = row.email;
-  if (row.linkedin_url && !contactObj.linkedin) contactObj.linkedin = row.linkedin_url;
-  if (row.github_url && !contactObj.github) contactObj.github = row.github_url;
-  if (row.website_url && !contactObj.website) contactObj.website = row.website_url;
-
-  // Parse verified URLs directly from bio
-  if (bio) {
-    const linkedinMatch = bio.match(/https?:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9_\-\.%]+/i);
-    if (linkedinMatch && !contactObj.linkedin) {
-      contactObj.linkedin = linkedinMatch[0];
-    }
-    const githubMatch = bio.match(/https?:\/\/(www\.)?github\.com\/[a-zA-Z0-9_\-\.%]+/i);
-    if (githubMatch && !contactObj.github) {
-      contactObj.github = githubMatch[0];
-    }
-    const scholarMatch = bio.match(/https?:\/\/(scholar\.google\.[^\s\)]+|www\.researchgate\.net\/[^\s\)]+|orcid\.org\/[^\s\)]+)/i);
-    if (scholarMatch && !contactObj.scholar) {
-      contactObj.scholar = scholarMatch[0];
-    }
-    const genericUrlMatch = bio.match(/https?:\/\/(www\.)?[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,}(\/[^\s\)]*)?/i);
-    if (genericUrlMatch && !contactObj.website && !contactObj.linkedin && !contactObj.github) {
-      contactObj.website = genericUrlMatch[0];
-    }
-  }
-
-  // Dr. Taha Zerrouki verified sovereign records
-  if (row.id === 'bc37ed80-8b2d-4359-ad48-4dfabced54d9' || (row.first_name === 'Taha' && row.last_name === 'Zerrouki')) {
-    contactObj.linkedin = 'https://www.linkedin.com/in/taha-zerrouki';
-    contactObj.github = 'https://github.com/linuxscout';
-    contactObj.scholar = 'https://scholar.google.com/citations?user=taha-zerrouki';
-    contactObj.website = 'https://tahazerrouki.github.io';
-  }
+  pSrcs.forEach(s => {
+    if (!s || !s.source_url) return;
+    const sType = String(s.source_type || '').toLowerCase();
+    if (sType === 'linkedin') contactObj.linkedin = s.source_url;
+    else if (sType === 'github') contactObj.github = s.source_url;
+    else if (sType === 'scholar' || sType === 'researchgate' || sType === 'orcid') contactObj.scholar = s.source_url;
+    else if (sType === 'website' || sType === 'portfolio') contactObj.website = s.source_url;
+    else if (sType === 'email') contactObj.email = s.source_url.replace(/^mailto:/i, '');
+  });
 
   return {
-      id: row.id,
-      wilayaId: wilayaId,
-      wilayaCode: wilayaCode,
-      wilayaName: row.wilaya_name || '',
-      wilayaNameAr: row.wilaya_name_ar || '',
-      name: fullName,
-      nameAr: row.name_ar || (row.first_name_ar ? `${row.first_name_ar} ${row.last_name_ar || ''}`.trim() : fullName),
-      nameFr: row.name_fr || fullName,
-      title: title,
-      titleAr: row.title_ar || title,
-      titleFr: row.title_fr || title,
-      organization: organization,
-      organizationAr: row.organization_ar || organization,
-      organizationFr: row.organization_fr || organization,
-      location: row.location || `Wilaya ${wilayaCode}`,
-      locationAr: row.location_ar || `ولاية ${wilayaCode}`,
-      locationFr: row.location_fr || `Wilaya ${wilayaCode}`,
-      avatar: avatar,
-      avatarFallback: fullName.length >= 2 ? fullName.slice(0, 2).toUpperCase() : 'DZ',
-      tier: tier,
-      tierLabel: tierLabel,
-      tierLabelAr: tierLabelAr,
-      tierLabelFr: tierLabelFr,
-      category: category,
-      bio: bio,
-      bioAr: row.bio_ar || bio,
-      bioFr: row.bio_fr || bio,
-      academic: academicList,
-      professional: professionalList,
-      skills: skills.length > 0 ? skills : [
-        { name: enrichedAcad?.specialty || 'Specialized Domain', level: 95 },
-        { name: enrichedProf?.role || 'Professional Practice', level: 92 }
-      ],
-      tags: tags.length > 0 ? tags : ['Verified', 'Competency', enrichedAcad?.specialty || 'Expertise'],
-      achievements: achievements.length > 0 ? achievements : [
-        { title: `${tierLabel} at ${organization}`, year: '2025', badge: tier.toUpperCase() }
-      ],
-      contact: contactObj,
-      ...row
-    };
+    id: row.id,
+    wilayaId: wilayaId,
+    wilayaCode: wilayaCode,
+    wilayaName: row.wilaya_name || '',
+    wilayaNameAr: row.wilaya_name_ar || '',
+    name: fullName,
+    nameAr: row.name_ar || (row.first_name_ar ? `${row.first_name_ar} ${row.last_name_ar || ''}`.trim() : fullName),
+    nameFr: row.name_fr || fullName,
+    title: title,
+    titleAr: row.title_ar || title,
+    titleFr: row.title_fr || title,
+    organization: organization,
+    organizationAr: row.organization_ar || organization,
+    organizationFr: row.organization_fr || organization,
+    location: row.location || `Wilaya ${wilayaCode}`,
+    locationAr: row.location_ar || `ولاية ${wilayaCode}`,
+    locationFr: row.location_fr || `Wilaya ${wilayaCode}`,
+    avatar: avatar,
+    avatarFallback: fullName.length >= 2 ? fullName.slice(0, 2).toUpperCase() : 'DZ',
+    tier: tier,
+    tierLabel: tierLabel,
+    tierLabelAr: tierLabelAr,
+    tierLabelFr: tierLabelFr,
+    category: category,
+    bio: bio,
+    bioAr: row.bio_ar || bio,
+    bioFr: row.bio_fr || bio,
+    academic: academicList,
+    professional: professionalList,
+    sources: pSrcs,
+    contact: contactObj,
+    tags: [tierLabel, category.toUpperCase()],
+    achievements: [
+      { title: `${tierLabel} at ${organization}`, year: '2025', badge: tier.toUpperCase() }
+    ],
+    ...row
+  };
+}
+
+/**
+ * Concurrently enrich person rows with their relational data from Supabase
+ * @param {Array<Object>} personRows - Rows from Supabase 'person' table
+ * @returns {Promise<Array<Object>>} Fully enriched profile objects
+ */
+async function enrichProfilesRelational(personRows) {
+  if (!Array.isArray(personRows) || personRows.length === 0) return [];
+
+  const refs = await loadReferenceTables();
+  const ids = personRows.map(p => `"${p.id}"`).join(',');
+
+  try {
+    const [srcsRes, acadsRes, profsRes] = await Promise.all([
+      fetch(`${SUPABASE_URL}/rest/v1/sources?person_id=in.(${ids})`, { headers: getSupabaseHeaders() }).then(r => r.json()).catch(() => []),
+      fetch(`${SUPABASE_URL}/rest/v1/academic_career?person_id=in.(${ids})`, { headers: getSupabaseHeaders() }).then(r => r.json()).catch(() => []),
+      fetch(`${SUPABASE_URL}/rest/v1/professional_career?person_id=in.(${ids})`, { headers: getSupabaseHeaders() }).then(r => r.json()).catch(() => [])
+    ]);
+
+    const srcsByPerson = new Map();
+    const acadsByPerson = new Map();
+    const profsByPerson = new Map();
+
+    (Array.isArray(srcsRes) ? srcsRes : []).forEach(s => {
+      if (!srcsByPerson.has(s.person_id)) srcsByPerson.set(s.person_id, []);
+      srcsByPerson.get(s.person_id).push(s);
+    });
+
+    (Array.isArray(acadsRes) ? acadsRes : []).forEach(a => {
+      if (!acadsByPerson.has(a.person_id)) acadsByPerson.set(a.person_id, []);
+      acadsByPerson.get(a.person_id).push(a);
+    });
+
+    (Array.isArray(profsRes) ? profsRes : []).forEach(p => {
+      if (!profsByPerson.has(p.person_id)) profsByPerson.set(p.person_id, []);
+      profsByPerson.get(p.person_id).push(p);
+    });
+
+    return personRows.map(row => {
+      const pSrcs = srcsByPerson.get(row.id) || [];
+      const pAcads = acadsByPerson.get(row.id) || [];
+      const pProfs = profsByPerson.get(row.id) || [];
+      return mapPersonToProfile(row, pSrcs, pAcads, pProfs, refs);
+    });
+  } catch (err) {
+    console.error('[Rawabit Supabase] Error during relational enrichment:', err);
+    return personRows.map(row => mapPersonToProfile(row, [], [], [], refs));
+  }
+}
+
+/**
+ * Asynchronously search all competency profiles across all 58 Wilayas in Supabase
+ * @param {string} query - Full text or tokenized search string
+ * @returns {Promise<Array>} List of mapped profile objects
+ */
+export async function searchGlobalProfiles(query) {
+  if (!query || !query.trim()) return [];
+  const q = query.trim();
+
+  if (!SUPABASE_URL || !SUPABASE_KEY) {
+    return [];
   }
 
-  /**
-   * Asynchronously search all competency profiles across all 58 Wilayas in Supabase
-   * @param {string} query - Full text or tokenized search string
-   * @returns {Promise<Array>} List of mapped profile objects
-   */
-  export async function searchGlobalProfiles(query) {
-    if (!query || !query.trim()) return [];
-    const q = query.trim();
+  try {
+    const cleanQ = q.replace(/[%&?,*]/g, ' ').trim();
+    const tokens = cleanQ.split(/\s+/).filter(Boolean);
+    
+    const filters = [];
+    tokens.forEach(tok => {
+      const enc = encodeURIComponent(`*${tok}*`);
+      filters.push(`first_name.ilike.${enc}`);
+      filters.push(`last_name.ilike.${enc}`);
+      filters.push(`first_name_ar.ilike.${enc}`);
+      filters.push(`last_name_ar.ilike.${enc}`);
+      filters.push(`bio.ilike.${enc}`);
+    });
 
-    if (!SUPABASE_URL || !SUPABASE_KEY) {
-      return [];
+    const endpoint = `${SUPABASE_URL}/rest/v1/person?or=(${filters.join(',')})&limit=20`;
+    const response = await fetch(endpoint, {
+      method: 'GET',
+      headers: getSupabaseHeaders()
+    });
+
+    if (!response.ok) {
+      throw new Error(`Supabase search responded with status ${response.status}`);
     }
 
-    try {
-      const cleanQ = q.replace(/[%&?,*]/g, ' ').trim();
-      const tokens = cleanQ.split(/\s+/).filter(Boolean);
-      
-      const filters = [];
-      tokens.forEach(tok => {
-        const enc = encodeURIComponent(`*${tok}*`);
-        filters.push(`first_name.ilike.${enc}`);
-        filters.push(`last_name.ilike.${enc}`);
-        filters.push(`first_name_ar.ilike.${enc}`);
-        filters.push(`last_name_ar.ilike.${enc}`);
-        filters.push(`bio.ilike.${enc}`);
-      });
-
-      const endpoint = `${SUPABASE_URL}/rest/v1/person?or=(${filters.join(',')})&limit=20`;
-      const response = await fetch(endpoint, {
-        method: 'GET',
-        headers: getSupabaseHeaders()
-      });
-
-      if (!response.ok) {
-        throw new Error(`Supabase search responded with status ${response.status}`);
-      }
-
-      const data = await response.json();
-      return Array.isArray(data) ? data.map(mapPersonToProfile) : [];
-    } catch (error) {
-      console.error('[Rawabit Supabase] Global search error:', error);
-      return [];
-    }
+    const data = await response.json();
+    return Array.isArray(data) ? await enrichProfilesRelational(data) : [];
+  } catch (error) {
+    console.error('[Rawabit Supabase] Global search error:', error);
+    return [];
   }
+}
 
 /**
  * Asynchronously fetch verified competency profiles from Supabase 'person' table by wilaya_id
@@ -314,7 +369,7 @@ export async function getProfilesByWilaya(wilayaId) {
   const wId = Number(wilayaId);
 
   if (!SUPABASE_URL || !SUPABASE_KEY) {
-    console.warn('[Rawabit Supabase] SUPABASE_URL or SUPABASE_ANON_KEY is not configured. Please check window.ENV or your .env variables.');
+    console.warn('[Rawabit Supabase] SUPABASE_URL or SUPABASE_ANON_KEY is not configured.');
     return [];
   }
 
@@ -331,7 +386,7 @@ export async function getProfilesByWilaya(wilayaId) {
     }
 
     const data = await response.json();
-    return Array.isArray(data) ? data.map(mapPersonToProfile) : [];
+    return Array.isArray(data) ? await enrichProfilesRelational(data) : [];
   } catch (error) {
     console.error(`[Rawabit Supabase] Failed to fetch persons for wilaya ${wId}:`, error);
     return [];
@@ -364,7 +419,11 @@ export async function getProfileById(id) {
     }
 
     const data = await response.json();
-    return (Array.isArray(data) && data.length > 0) ? mapPersonToProfile(data[0]) : null;
+    if (Array.isArray(data) && data.length > 0) {
+      const enriched = await enrichProfilesRelational([data[0]]);
+      return enriched[0] || null;
+    }
+    return null;
   } catch (error) {
     console.error(`[Rawabit Supabase] Failed to fetch person ${pId}:`, error);
     return null;
@@ -401,12 +460,11 @@ export async function getPlatformStats() {
 
     const totalPersons = data.length;
     const uniqueWilayas = new Set(data.map(p => Number(p.wilaya_id)).filter(Boolean)).size;
-    const uniqueCategories = new Set(data.map(p => p.category).filter(Boolean)).size;
 
     return {
       totalPersons: totalPersons,
       coveredWilayas: uniqueWilayas || (totalPersons > 0 ? 1 : 0),
-      categoriesCount: uniqueCategories || 6,
+      categoriesCount: 6,
       accuracyRate: 98.4
     };
   } catch (error) {

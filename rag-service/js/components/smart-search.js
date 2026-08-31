@@ -277,7 +277,7 @@ export function initSmartSearch(formEl, inputEl) {
                           <span class="smart-talent-name" style="font-weight: 700; color: #0F172A; font-size: 0.95rem;">${pName}</span>
                           <span style="font-size: 0.72rem; color: #059669; background: rgba(5, 150, 105, 0.1); padding: 1px 6px; border-radius: 6px; font-weight: 600;">Wilaya ${p.wilayaCode || '16'}</span>
                         </div>
-                        <span class="smart-talent-title" style="font-size: 0.78rem; color: #64748B; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${pTitle}</span>
+                        <span class="smart-talent-title" style="font-size: 0.78rem; color: #64748B; display: block; line-height: 1.35; word-break: break-word; overflow-wrap: anywhere; white-space: normal;">${pTitle}</span>
                       </div>
                     </div>
                     <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
