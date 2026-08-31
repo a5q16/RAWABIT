@@ -295,14 +295,14 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-.chat-message th, .chat-bubble th, .ai-bubble th, .ai-msg-bubble th,
-.chat-message td, .chat-bubble td, .ai-bubble td, .ai-msg-bubble td {
-  padding: 10px 14px;
-  min-width: 120px; /* Forces enough width for Arabic text to be readable */
-  white-space: normal; /* Allows natural wrapping within the safe minimum width */
-  word-wrap: break-word;
-  word-break: break-word;
-  overflow-wrap: anywhere;
+.chat-message table td, .chat-message table th,
+.chat-bubble table td, .chat-bubble table th,
+.ai-bubble table td, .ai-bubble table th,
+.ai-msg-bubble table td, .ai-msg-bubble table th {
+  white-space: nowrap !important;
+  width: max-content !important;
+  min-width: max-content !important;
+  padding: 12px 16px;
 }
 
 .ai-bubble th, .chat-bubble th, .chat-message th {

@@ -155,8 +155,10 @@ export default async function handler(req) {
     if (clientPassedContext) {
       combinedContext += `\n\n[ACTIVE CLIENT PROFILE CONTEXT]:\n${clientPassedContext}`;
     }
+    const userLang = body.currentLanguage || (body.lang === 'ar' ? 'Arabic' : (body.lang === 'fr' ? 'French' : 'English')) || 'Arabic';
+    const langDirective = `\n\n[USER UI LANGUAGE & LOCALIZATION DIRECTIVE]:\nThe user's current UI language is ${userLang}. You MUST reply in the language the user types in. If this is the first interaction, start seamlessly in ${userLang}.`;
 
-    const fullSystemPrompt = RAWABIT_BASE_SYSTEM_PROMPT + combinedContext;
+    const fullSystemPrompt = RAWABIT_BASE_SYSTEM_PROMPT + langDirective + combinedContext;
 
     // Build message array
     const messages = [

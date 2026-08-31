@@ -286,20 +286,22 @@ function updateHeaderTranslations(lang) {
 }
 
 /**
- * Render initial conversational prompt & suggested chips
+ * Render initial conversational prompt & suggested chips matching active UI language
  */
-function renderInitialGreeting(context, lang) {
+function renderInitialGreeting(context, lang = 'ar') {
   let greetingText = '';
   let chips = [];
 
+  const activeLang = lang || store.state.lang || localStorage.getItem('rawabit_lang') || 'ar';
+
   if (context && context.profile) {
     const p = context.profile;
-    const name = (lang === 'ar' && p.nameAr) ? p.nameAr : (lang === 'fr' && p.nameFr ? p.nameFr : p.name);
+    const name = (activeLang === 'ar' && p.nameAr) ? p.nameAr : (activeLang === 'fr' && p.nameFr ? p.nameFr : p.name);
 
-    if (lang === 'en') {
+    if (activeLang === 'en') {
       greetingText = `Hello! I am Rawabit AI. How can I help you explore **${name}**'s verified research background, competencies, or collaboration details?`;
       chips = ['Summarize published papers', 'Verified specialties', 'Direct contact & collaboration'];
-    } else if (lang === 'fr') {
+    } else if (activeLang === 'fr') {
       greetingText = `Bonjour ! Je suis l'IA Rawabit. Comment puis-je vous renseigner sur le parcours de **${name}**, ses compétences ou ses collaborations ?`;
       chips = ['Résumer les publications', 'Spécialités vérifiées', 'Contact et collaborations'];
     } else {
@@ -307,14 +309,14 @@ function renderInitialGreeting(context, lang) {
       chips = ['ملخص الأبحاث والخبرات', 'التخصصات الدقيقة المعتمدة', 'مجالات الاستشارة والمشاريع'];
     }
   } else {
-    if (lang === 'en') {
-      greetingText = `Welcome to Rawabit AI Assistant! I can help you discover verified Algerian competencies across all 58 wilayas and evaluate specialized engineering domains.`;
-      chips = ['Find AI experts in Algiers', 'Top solar energy researchers', 'How verification works in Rawabit'];
-    } else if (lang === 'fr') {
-      greetingText = `Bienvenue sur l'Assistant IA de Rawabit ! Je peux vous orienter vers les compétences algériennes vérifiées sur les 58 wilayas ou analyser des domaines techniques pointus.`;
-      chips = ['Chercheurs IA à Alger', 'Experts en énergie solaire', 'Comment fonctionne la certification'];
+    if (activeLang === 'en') {
+      greetingText = `Welcome! I am the Rawabit Sovereign AI Assistant for Algerian competencies. How can I assist you today?`;
+      chips = ['Find AI experts in Algeria', 'Top renewable energy researchers', 'How verification works in Rawabit'];
+    } else if (activeLang === 'fr') {
+      greetingText = `Bienvenue ! Je suis l'assistant IA souverain de Rawabit pour les compétences algériennes. Comment puis-je vous aider aujourd'hui ?`;
+      chips = ['Chercheurs IA en Algérie', 'Experts en énergies renouvelables', 'Comment fonctionne la certification'];
     } else {
-      greetingText = `أهلاً بك في المساعد الذكي لمنصة روابط! يمكنني إرشادك للوصول إلى أدق الكفاءات الجزائرية عبر الـ 58 ولاية، أو تقديم تحليلات حول المشاريع والخبرات الموثقة.`;
+      greetingText = `مرحباً بك! أنا مساعد روابط الذكي للكفاءات والخبرات الوطنية. كيف يمكنني مساعدتك اليوم؟`;
       chips = ['أبرز خبراء الذكاء الاصطناعي في الجزائر', 'كفاءات الطاقة المتجددة والهيدروجين', 'كيف يتم توثيق الكفاءات في روابط؟'];
     }
   }
@@ -420,9 +422,14 @@ async function handleUserMessage(queryText) {
   let accumulatedText = '';
   let hasReceivedTokens = false;
 
+  const activeLang = store.state.lang || localStorage.getItem('rawabit_lang') || 'ar';
+  const languageName = activeLang === 'ar' ? 'Arabic' : (activeLang === 'fr' ? 'French' : 'English');
+
   // Build isolated context payload
   const payload = {
     query: queryText,
+    lang: activeLang,
+    currentLanguage: languageName,
     context: currentContext?.profile ? {
       id: currentContext.profile.id,
       name: currentContext.profile.name,
