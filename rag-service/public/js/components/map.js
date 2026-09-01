@@ -492,7 +492,7 @@ export function renderMap(container) {
     const hudMaster = document.createElement('div');
     hudMaster.id = 'hud-master-overlay';
     hudMaster.className = 'hud-master-overlay';
-    hudMaster.style.cssText = 'position: fixed; inset: 0; z-index: 9999; backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); background: rgba(20, 45, 35, 0.2); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.35s ease; cursor: pointer; overflow: hidden;';
+    hudMaster.style.cssText = 'position: fixed; inset: 0; z-index: var(--z-hud-stage, 50000); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); background: rgba(20, 45, 35, 0.2); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.35s ease; cursor: pointer; overflow: hidden;';
 
     hudMaster.innerHTML = `
       <!-- Pure Top Typography (Exact High-Contrast Spec) -->

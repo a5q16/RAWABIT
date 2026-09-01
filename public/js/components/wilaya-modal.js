@@ -315,11 +315,19 @@ export function closeWilayaIntermediateScreen(animate = true) {
         overlay.parentNode.removeChild(overlay);
       }
       popOverlay();
+      if (typeof document !== 'undefined' && document.body && !document.querySelector('.roadmap-modal-overlay, .mindmap-overlay, .ai-drawer-panel.active, .fullscreen-lang-overlay.active')) {
+        document.body.style.overflow = '';
+        document.body.classList.remove('modal-open');
+      }
     }, 250);
   } else {
     if (overlay.parentNode) {
       overlay.parentNode.removeChild(overlay);
     }
     popOverlay();
+    if (typeof document !== 'undefined' && document.body && !document.querySelector('.roadmap-modal-overlay, .mindmap-overlay, .ai-drawer-panel.active, .fullscreen-lang-overlay.active')) {
+      document.body.style.overflow = '';
+      document.body.classList.remove('modal-open');
+    }
   }
 }

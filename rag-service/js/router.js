@@ -24,11 +24,20 @@ export function getCurrentParams() {
 
 export function initRouter() {
     const handleHashChange = () => {
-        // Global Scroll-Lock Fix: Force body overflow back to normal on any route transition
+        // Global Scroll-Lock Fix & Modal Cleanup on Route Change
         if (typeof document !== 'undefined' && document.body) {
             document.body.style.overflow = '';
             document.body.classList.remove('modal-open');
+            
+            // Clean up any open modal nodes on route change
+            const openOverlays = document.querySelectorAll('.mindmap-overlay, .roadmap-modal-overlay, .wilaya-modal-overlay, #hud-master-overlay');
+            openOverlays.forEach(el => {
+                if (el && el.parentNode) {
+                    el.parentNode.removeChild(el);
+                }
+            });
         }
+        store.setState({ overlayStack: [] });
 
         let rawHash = window.location.hash || '#/';
         

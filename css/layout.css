@@ -9,7 +9,7 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 999999 !important;
+  z-index: var(--z-nav, 5000) !important;
   pointer-events: auto !important;
   height: var(--nav-height);
   display: flex;
@@ -295,7 +295,7 @@
 .section-ai-search {
   padding: var(--space-3xl) var(--space-lg);
   position: relative;
-  z-index: 9999 !important;
+  z-index: var(--z-search-omnibar, 90);
 }
 
 .search-section-wrap {
@@ -303,7 +303,7 @@
   margin: 0 auto;
   text-align: center;
   position: relative;
-  z-index: 9999 !important;
+  z-index: var(--z-search-omnibar, 90);
 }
 
 .section-header {
@@ -328,7 +328,7 @@
 /* Luxurious Wide AI Search Box */
 .ai-search-box {
   position: relative;
-  z-index: 9999 !important;
+  z-index: var(--z-search-omnibar, 90);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 24px;
@@ -1354,7 +1354,7 @@ a.info-ci-val:hover {
   position: fixed;
   bottom: 28px;
   inset-inline-end: 28px;
-  z-index: 900;
+  z-index: var(--z-fab, 9500) !important;
   background: linear-gradient(135deg, #00875A 0%, #059669 100%);
   color: #FFFFFF;
   border: 1.5px solid rgba(52, 211, 153, 0.45);

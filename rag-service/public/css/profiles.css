@@ -11,7 +11,7 @@
   background: linear-gradient(180deg, rgba(230, 244, 237, 0.4) 0%, rgba(250, 250, 250, 1) 100%);
   border-bottom: 1px solid var(--color-border);
   position: relative;
-  z-index: 9999 !important;
+  z-index: var(--z-search-omnibar, 90);
 }
 
 .wilaya-top-bar {
@@ -66,7 +66,7 @@
   max-width: 840px;
   margin: 0 auto;
   position: relative;
-  z-index: 9999 !important;
+  z-index: var(--z-search-omnibar, 90);
 }
 
 /* Pure Bold Luxury Typography (NO CHEAP PILLS) */
@@ -94,7 +94,7 @@
   max-width: 680px;
   margin: 0 auto;
   position: relative;
-  z-index: 9999 !important;
+  z-index: var(--z-search-omnibar, 90);
 }
 
 .wilaya-search-box {
@@ -109,7 +109,7 @@
   transition: all var(--transition-smooth);
   position: relative;
   width: 100%;
-  z-index: 9999 !important;
+  z-index: var(--z-search-omnibar, 90);
 }
 
 [dir='rtl'] .wilaya-search-box {
@@ -796,10 +796,10 @@
 .mindmap-overlay {
   position: fixed;
   inset: 0;
-  z-index: 9000;
-  background: rgba(250, 250, 250, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  z-index: var(--z-modal-overlay, 100000) !important;
+  background: rgba(248, 250, 252, 0.95);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   opacity: 0;
   pointer-events: none;
   overflow-y: auto;
@@ -862,7 +862,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  z-index: 9010;
+  z-index: var(--z-modal-controls, 100010) !important;
   pointer-events: none;
 }
 
@@ -1871,7 +1871,7 @@
   position: fixed;
   bottom: 28px;
   inset-inline-end: 28px;
-  z-index: 999999;
+  z-index: var(--z-toast, 9000) !important;
   max-width: 420px;
   width: calc(100vw - 40px);
   background: rgba(255, 255, 255, 0.95);

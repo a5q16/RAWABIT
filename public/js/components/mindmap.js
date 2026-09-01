@@ -484,6 +484,10 @@ export function closeMindMap(animate = true) {
     }
     activeOverlay = null;
     popOverlay();
+    if (typeof document !== 'undefined' && document.body && !document.querySelector('.roadmap-modal-overlay, .wilaya-modal-overlay, .ai-drawer-panel.active, .fullscreen-lang-overlay.active')) {
+      document.body.style.overflow = '';
+      document.body.classList.remove('modal-open');
+    }
     return;
   }
 
@@ -540,6 +544,10 @@ export function closeMindMap(animate = true) {
         activeOverlay = null;
         store.setState({ selectedProfile: null });
         popOverlay();
+        if (typeof document !== 'undefined' && document.body && !document.querySelector('.roadmap-modal-overlay, .wilaya-modal-overlay, .ai-drawer-panel.active, .fullscreen-lang-overlay.active')) {
+          document.body.style.overflow = '';
+          document.body.classList.remove('modal-open');
+        }
       }, 250);
 
     }, 300);

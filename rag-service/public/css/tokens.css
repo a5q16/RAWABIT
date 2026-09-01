@@ -70,4 +70,21 @@
   /* ── Structural Dimensions ── */
   --nav-height: 76px;
   --container-max-width: 1280px;
+
+  /* ── Master Stacking System (Z-Index Sovereign Architecture) ── */
+  --z-base: 1;
+  --z-elevated: 10;
+  --z-map-elements: 30;
+  --z-search-omnibar: 90;
+  --z-search-dropdown: 1200;
+  --z-nav: 5000;
+  --z-toast: 9000;
+  --z-fab: 9500;
+  --z-hud-stage: 50000;
+  --z-modal-overlay: 100000;
+  --z-modal-dialog: 100005;
+  --z-modal-controls: 100010;
+  --z-chat-backdrop: 200000;
+  --z-chat-panel: 200005;
+  --z-chat-controls: 200010;
 }

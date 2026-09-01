@@ -8,10 +8,10 @@
 .ai-drawer-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(10, 15, 29, 0.4);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  z-index: 99998;
+  background: rgba(10, 15, 29, 0.5);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: var(--z-chat-backdrop, 200000) !important;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -29,10 +29,10 @@
   width: 100vw;
   height: 100vh;
   height: 100dvh;
-  background: rgba(15, 23, 42, 0.5);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-  z-index: 99999;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  z-index: var(--z-chat-panel, 200005) !important;
   display: flex;
   flex-direction: column;
   opacity: 0;
@@ -150,7 +150,7 @@
   position: fixed !important;
   top: 24px;
   right: 24px;
-  z-index: 999999 !important;
+  z-index: var(--z-chat-controls, 200010) !important;
   background: rgba(30, 41, 59, 0.9);
   border: 1px solid rgba(255, 255, 255, 0.15);
   color: #ffffff;
@@ -717,7 +717,7 @@
   position: fixed;
   bottom: 28px;
   inset-inline-end: 28px;
-  z-index: 999;
+  z-index: var(--z-fab, 9500) !important;
   background: linear-gradient(135deg, #059669 0%, #10B981 100%);
   color: #FFFFFF;
   border: none;
