@@ -10,6 +10,8 @@
   padding-bottom: var(--space-2xl);
   background: linear-gradient(180deg, rgba(230, 244, 237, 0.4) 0%, rgba(250, 250, 250, 1) 100%);
   border-bottom: 1px solid var(--color-border);
+  position: relative;
+  z-index: 9999 !important;
 }
 
 .wilaya-top-bar {
@@ -63,6 +65,8 @@
   text-align: center;
   max-width: 840px;
   margin: 0 auto;
+  position: relative;
+  z-index: 9999 !important;
 }
 
 /* Pure Bold Luxury Typography (NO CHEAP PILLS) */
@@ -90,7 +94,7 @@
   max-width: 680px;
   margin: 0 auto;
   position: relative;
-  z-index: 100;
+  z-index: 9999 !important;
 }
 
 .wilaya-search-box {
@@ -105,6 +109,7 @@
   transition: all var(--transition-smooth);
   position: relative;
   width: 100%;
+  z-index: 9999 !important;
 }
 
 [dir='rtl'] .wilaya-search-box {
@@ -192,10 +197,19 @@
 /* ── 2. STEP 1: COMPETENCY DOMAINS GRID ── */
 .wilaya-content-section {
   padding: var(--space-2xl) var(--space-lg) var(--space-4xl);
+  position: relative;
+  z-index: 1 !important;
+}
+
+#wilaya-dynamic-stage {
+  position: relative;
+  z-index: 1 !important;
 }
 
 .domains-view-wrapper {
   width: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 .domains-grid-header {
@@ -218,6 +232,8 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: var(--space-xl);
+  position: relative;
+  z-index: 1;
 }
 
 /* Domain Card Design */
@@ -324,6 +340,8 @@
 /* ── 3. STEP 2: PROFILES GRID VIEW ── */
 .profiles-view-wrapper {
   width: 100%;
+  position: relative;
+  z-index: 1;
 }
 
 .profiles-context-header {
@@ -333,6 +351,8 @@
   margin-bottom: var(--space-xl);
   padding-bottom: var(--space-md);
   border-bottom: 1px solid var(--color-border);
+  position: relative;
+  z-index: 1;
 }
 
 .btn-back-to-domains {
@@ -391,6 +411,8 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: var(--space-xl);
+  position: relative;
+  z-index: 1;
 }
 
 /* Individual Profile Card */
