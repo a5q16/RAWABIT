@@ -90,7 +90,7 @@ function createChatDrawerDOM() {
             <span id="ai-new-chat-label">محادثة جديدة</span>
           </button>
           
-          <button type="button" class="ai-glass-btn ai-close-btn" id="ai-drawer-close-btn" aria-label="Close">
+          <button type="button" class="ai-glass-btn ai-close-btn close-chat-btn" id="close-ai-chat" aria-label="Close Chat">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             <span class="key-pill">ESC</span>
           </button>
@@ -162,8 +162,8 @@ function createChatDrawerDOM() {
   document.body.appendChild(drawerElement);
 
   // Close triggers
-  const closeBtn = drawerElement.querySelector('#ai-drawer-close-btn');
-  closeBtn.addEventListener('click', closeAIChat);
+  const closeBtns = drawerElement.querySelectorAll('#close-ai-chat, .close-chat-btn, #ai-drawer-close-btn');
+  closeBtns.forEach(btn => btn.addEventListener('click', closeAIChat));
   backdropElement.addEventListener('click', closeAIChat);
 
   // Reset / New Chat trigger
@@ -175,8 +175,11 @@ function createChatDrawerDOM() {
   }
 
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && isOverlayActive('ai-chat')) {
-      closeAIChat();
+    if (e.key === 'Escape') {
+      if (drawerElement && drawerElement.classList.contains('active')) {
+        e.preventDefault();
+        closeAIChat();
+      }
     }
   });
 
@@ -302,7 +305,8 @@ export function closeAIChat() {
   backdropElement.classList.remove('active');
   popOverlay();
 
-  if (typeof document !== 'undefined' && document.body && !document.querySelector('.wilaya-modal-overlay, .mindmap-modal-overlay, .roadmap-modal-overlay, .fullscreen-lang-overlay')) {
+  // CRITICAL: Always restore body scroll
+  if (typeof document !== 'undefined' && document.body) {
     document.body.style.overflow = '';
     document.body.classList.remove('modal-open');
   }
