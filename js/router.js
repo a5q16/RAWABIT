@@ -30,7 +30,7 @@ export function initRouter() {
             document.body.classList.remove('modal-open');
             
             // Clean up any open modal nodes on route change
-            const openOverlays = document.querySelectorAll('.mindmap-overlay, .roadmap-modal-overlay, .wilaya-modal-overlay, #hud-master-overlay');
+            const openOverlays = document.querySelectorAll('.mindmap-overlay, .roadmap-modal-overlay, .wilaya-modal-overlay, #hud-master-overlay, .proactive-ai-overlay, #proactive-ai-overlay');
             openOverlays.forEach(el => {
                 if (el && el.parentNode) {
                     el.parentNode.removeChild(el);

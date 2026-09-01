@@ -610,110 +610,211 @@ function renderProfilesGrid(container, profiles, categories, isGlobal = false) {
   });
 }
 
+// ══════════════════════════════════════════════════════════════
+// ── SMART BEHAVIORAL HESITATION ALGORITHM (AI ASSISTANT) ──
+// ══════════════════════════════════════════════════════════════
+
+let hesitationTrackerActive = false;
+let idleTimer = null;
+let lastScrollY = typeof window !== 'undefined' ? window.scrollY : 0;
+let lastScrollDirection = null;
+let scrollDirectionChanges = []; // Tracks timestamps of rapid scroll reversals
+let userHasInteracted = false;
+let promptCooldownUntil = 0;
+let hasPromptedThisSession = false;
+let activeProactiveOverlay = null;
+
 /**
- * ── 3. PROACTIVE "LOST USER" AI ASSISTANT (HESITATION TRACKER) ──
+ * Record user engagement (clicking domain, typing search, opening profile)
+ * Once engaged, hesitation prompts are completely suppressed.
  */
-let hesitationTimer = null;
-let userEngaged = false;
-let toastElement = null;
-
-function startHesitationTracker() {
-  stopHesitationTracker();
-  userEngaged = false;
-
-  hesitationTimer = setTimeout(() => {
-    if (!userEngaged) {
-      showProactiveAiAssistant();
-    }
-  }, 10000);
-}
-
-function stopHesitationTracker() {
-  if (hesitationTimer) {
-    clearTimeout(hesitationTimer);
-    hesitationTimer = null;
-  }
-  removeProactiveToast();
-}
-
-function resetHesitationTracker() {
-  stopHesitationTracker();
-  startHesitationTracker();
-}
-
 function recordUserEngagement() {
-  userEngaged = true;
+  userHasInteracted = true;
   stopHesitationTracker();
 }
 
-function showProactiveAiAssistant() {
-  if (toastElement || userEngaged) return;
+/**
+ * Handle Scroll Events with Direction-Reversal Pacing Analysis
+ */
+function onUserScroll() {
+  if (userHasInteracted || hasPromptedThisSession || (promptCooldownUntil && Date.now() < promptCooldownUntil)) {
+    return;
+  }
 
-  const wilayaMeta = WILAYAS.find(w => w.code === currentWilayaCode) || { name: 'Algiers', nameAr: 'الجزائر' };
-  const wilayaName = store.state.lang === 'ar' ? (wilayaMeta.nameAr || wilayaMeta.name) : wilayaMeta.name;
+  const currentY = window.scrollY;
+  const delta = currentY - lastScrollY;
+  const absDelta = Math.abs(delta);
+  const now = Date.now();
 
-  const toast = document.createElement('div');
-  toast.className = 'proactive-ai-toast animate-slide-up';
-  toast.id = 'proactive-ai-toast';
+  // Ignore micro-scroll jitter (< 40px)
+  if (absDelta < 40) return;
 
-  toast.innerHTML = `
-    <div class="toast-inner">
-      <button class="toast-close-btn" id="toast-close-btn" aria-label="Close">✕</button>
-      
-      <div class="toast-content">
-        <div class="toast-icon-wrap">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
-            <path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/>
-          </svg>
-        </div>
+  const currentDir = delta > 0 ? 'down' : 'up';
 
-        <div class="toast-text-wrap">
-          <h4 class="toast-title" data-i18n="proactive.heading">${t('proactive.heading')}</h4>
-          <p class="toast-desc">
-            ${store.state.lang === 'ar' 
-              ? `هل تبحث عن تخصص معين في ولاية ${wilayaName}؟ اسأل المساعد الذكي لإرشادك مباشرة.`
-              : `Looking for a specific competency in ${wilayaName}? Ask our AI to guide you.`}
-          </p>
-        </div>
-      </div>
+  // Detect genuine rapid direction reversal (Yo-Yo scrolling)
+  if (lastScrollDirection && currentDir !== lastScrollDirection) {
+    scrollDirectionChanges.push(now);
+    // Keep only reversals within the last 6 seconds
+    scrollDirectionChanges = scrollDirectionChanges.filter(t => now - t <= 6000);
 
-      <div class="toast-actions">
-        <button class="toast-btn-action" id="toast-ai-action">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-            <path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/>
-          </svg>
-          <span data-i18n="proactive.btn">${t('proactive.btn')}</span>
-        </button>
-      </div>
+    // If user changed direction 4+ times rapidly without selecting anything -> High-confidence hesitation
+    if (scrollDirectionChanges.length >= 4) {
+      scrollDirectionChanges = [];
+      triggerProactiveAiOverlay();
+      return;
+    }
+  }
+
+  lastScrollDirection = currentDir;
+  lastScrollY = currentY;
+
+  // Reset prolonged idle timer (Set to 45s of genuine inaction)
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(() => {
+    // Only trigger if user is still on initial view without interacting and tab is focused
+    if (!document.hidden && !userHasInteracted && !hasPromptedThisSession && activeDomain === null && !searchQuery) {
+      triggerProactiveAiOverlay();
+    }
+  }, 45000);
+}
+
+function onUserMouseMove() {
+  // Gentle activity refresh without false-positive triggers
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(() => {
+    if (!document.hidden && !userHasInteracted && !hasPromptedThisSession && activeDomain === null && !searchQuery) {
+      triggerProactiveAiOverlay();
+    }
+  }, 45000);
+}
+
+export function startHesitationTracker() {
+  stopHesitationTracker();
+  hesitationTrackerActive = true;
+  userHasInteracted = false;
+  scrollDirectionChanges = [];
+  lastScrollY = typeof window !== 'undefined' ? window.scrollY : 0;
+
+  window.addEventListener('scroll', onUserScroll, { passive: true });
+  window.addEventListener('mousemove', onUserMouseMove, { passive: true });
+
+  // 45s base idle timer for completely untouched page
+  idleTimer = setTimeout(() => {
+    if (!document.hidden && !userHasInteracted && !hasPromptedThisSession && activeDomain === null && !searchQuery) {
+      triggerProactiveAiOverlay();
+    }
+  }, 45000);
+}
+
+export function stopHesitationTracker() {
+  hesitationTrackerActive = false;
+  clearTimeout(idleTimer);
+  idleTimer = null;
+  scrollDirectionChanges = [];
+  window.removeEventListener('scroll', onUserScroll);
+  window.removeEventListener('mousemove', onUserMouseMove);
+  if (activeProactiveOverlay) {
+    dismissProactiveAiOverlay();
+  }
+}
+
+export function resetHesitationTracker() {
+  clearTimeout(idleTimer);
+  scrollDirectionChanges = [];
+  if (hesitationTrackerActive && !userHasInteracted && !hasPromptedThisSession) {
+    idleTimer = setTimeout(() => {
+      if (!document.hidden && !userHasInteracted && !hasPromptedThisSession && activeDomain === null && !searchQuery) {
+        triggerProactiveAiOverlay();
+      }
+    }, 45000);
+  }
+}
+
+/**
+ * Trigger Proactive AI Assistant Full-Screen Ambient Overlay (Zero Pop-Up Boxes)
+ */
+export function triggerProactiveAiOverlay() {
+  if (activeProactiveOverlay || document.getElementById('proactive-ai-overlay')) return;
+  if (store.state.overlayStack && store.state.overlayStack.length > 0) return; // Don't interrupt open mindmap or language selector
+  if (userHasInteracted || hasPromptedThisSession) return;
+  if (promptCooldownUntil && Date.now() < promptCooldownUntil) return;
+
+  hasPromptedThisSession = true;
+
+  const lang = store.state.lang;
+  const headingText = t('proactive.heading') || (lang === 'ar' ? 'هل تبحث عن تخصص معين؟' : 'Looking for a specific expertise?');
+  const subText = t('proactive.sub') || (lang === 'ar' ? 'مساعدنا الذكي جاهز لإرشادك مباشرة إلى الكفاءات المناسبة في هذه الولاية.' : 'Our AI assistant is ready to guide you directly to matching competencies in this wilaya.');
+  const btnText = t('proactive.btn') || (lang === 'ar' ? 'اسأل المساعد الذكي' : 'Ask AI Assistant');
+
+  const overlay = document.createElement('div');
+  overlay.className = 'proactive-ai-overlay';
+  overlay.id = 'proactive-ai-overlay';
+  activeProactiveOverlay = overlay;
+
+  overlay.innerHTML = `
+    <div class="proactive-ai-content animate-fade-in">
+      <h1 class="proactive-ai-heading">${headingText}</h1>
+      <p class="proactive-ai-subtitle">${subText}</p>
+      <button class="proactive-ai-btn" id="btn-proactive-ask">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+          <path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/>
+        </svg>
+        <span>${btnText}</span>
+      </button>
     </div>
   `;
 
-  document.body.appendChild(toast);
-  toastElement = toast;
-
-  toast.querySelector('#toast-close-btn')?.addEventListener('click', () => {
-    removeProactiveToast();
-    userEngaged = true;
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => {
+    overlay.classList.add('active');
   });
 
-  toast.querySelector('#toast-ai-action')?.addEventListener('click', () => {
-    removeProactiveToast();
-    userEngaged = true;
-    const prompt = store.state.lang === 'ar'
-      ? `اقترح لي أفضل الكفاءات والخبراء في ولاية ${wilayaName}`
-      : `Recommend the top verified competencies and researchers in ${wilayaName}`;
-    openAIChat({ initialQuery: prompt });
+  // Action Button Click -> Open AI Chat Drawer & record engagement
+  const askBtn = overlay.querySelector('#btn-proactive-ask');
+  if (askBtn) {
+    askBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      recordUserEngagement();
+      dismissProactiveAiOverlay();
+      const wilayaMeta = WILAYAS.find(w => w.code === currentWilayaCode) || { name: 'Algiers', nameAr: 'الجزائر' };
+      const wilayaName = lang === 'ar' ? (wilayaMeta.nameAr || wilayaMeta.name) : wilayaMeta.name;
+      const prompt = lang === 'ar'
+        ? `اقترح لي أفضل الكفاءات والخبراء في ولاية ${wilayaName}`
+        : `Recommend the top verified competencies and researchers in ${wilayaName}`;
+      openAIChat({ type: 'wilaya', wilayaCode: currentWilayaCode, initialQuery: prompt });
+    });
+  }
+
+  // Dismissal: Clicking anywhere on the full-screen background (except on the button) fades it out
+  overlay.addEventListener('click', (e) => {
+    if (!e.target.closest('#btn-proactive-ask')) {
+      dismissProactiveAiOverlay();
+    }
   });
+
+  // Dismiss on Escape key
+  const escHandler = (e) => {
+    if (e.key === 'Escape') {
+      dismissProactiveAiOverlay();
+      document.removeEventListener('keydown', escHandler);
+    }
+  };
+  document.addEventListener('keydown', escHandler);
 }
 
-function removeProactiveToast() {
-  if (toastElement) {
-    toastElement.classList.add('is-hiding');
-    setTimeout(() => {
-      if (toastElement && toastElement.parentNode) {
-        toastElement.parentNode.removeChild(toastElement);
-      }
-      toastElement = null;
-    }, 300);
-  }
+export function dismissProactiveAiOverlay() {
+  if (!activeProactiveOverlay) return;
+  const el = activeProactiveOverlay;
+  el.classList.remove('active');
+  activeProactiveOverlay = null;
+
+  // Set a 5-minute cooldown so it never annoys the user repeatedly
+  promptCooldownUntil = Date.now() + (5 * 60 * 1000);
+  stopHesitationTracker();
+
+  setTimeout(() => {
+    if (el && el.parentNode) {
+      el.parentNode.removeChild(el);
+    }
+  }, 400);
 }
