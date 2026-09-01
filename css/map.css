@@ -513,25 +513,83 @@ body.modal-open {
 }
 
 /* ==========================================================================
-   SMART SEARCH DROPDOWN (Global Hero Search)
+   SMART SEARCH DROPDOWN (Global Hero Search & Wilaya Search)
    ========================================================================== */
 .smart-search-dropdown {
   position: absolute;
-  top: calc(100% + 12px);
+  top: calc(100% + 10px);
   inset-inline-start: 0;
   width: 100%;
-  background: rgba(255, 255, 255, 0.94);
+  background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-radius: 20px;
   border: 1.5px solid rgba(5, 150, 105, 0.25);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.14), 0 4px 20px rgba(5, 150, 105, 0.1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1), 0 20px 48px rgba(0, 0, 0, 0.08);
   padding: 16px;
   max-height: 480px;
   overflow-y: auto;
-  z-index: 9999;
+  z-index: 1000;
   text-align: start;
   animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ── SEARCH SCOPE TOGGLE PILL ── */
+.search-scope-pill-toggle {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(241, 245, 249, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 9999px;
+  padding: 3px;
+  gap: 3px;
+  margin-inline-end: 8px;
+  flex-shrink: 0;
+  backdrop-filter: blur(8px);
+  transition: all var(--transition-fast);
+}
+
+.scope-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.scope-pill-btn:hover {
+  color: var(--color-accent);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.scope-pill-btn.active {
+  background: var(--color-accent);
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(0, 135, 90, 0.3);
+}
+
+.scope-pill-btn svg {
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .search-scope-pill-toggle {
+    margin-inline-end: 4px;
+  }
+  .scope-pill-btn {
+    padding: 5px 10px;
+    font-size: 0.76rem;
+    gap: 4px;
+  }
 }
 
 /* Category Filter Tabs / Chips */

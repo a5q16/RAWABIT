@@ -52,6 +52,10 @@ export const TRANSLATIONS = {
     'search.wilayasHeading': 'الولايات المطابقة',
     'search.talentsHeading': 'الكفاءات والخبراء المعتمدون',
     'search.noMatches': 'لا توجد نتائج مباشرة، يمكنك استشارة الذكاء الاصطناعي أعلاه',
+    'search.scopeLocal': 'نطاق الولاية',
+    'search.scopeGlobal': 'كل الولايات',
+    'search.scopeHeadingLocal': 'كفاءات وخبرات الولاية',
+    'search.scopeHeadingGlobal': 'كفاءات السجل الوطني الموحد (كل الولايات)',
 
     // Map Intro Section & Sci-Fi HUD
     'map.title': 'أو ابحث عن الكفاءة المرادة حسب الولايات بواسطة الخريطة التفاعلية',
@@ -288,6 +292,10 @@ export const TRANSLATIONS = {
     'search.wilayasHeading': 'Matching Wilayas',
     'search.talentsHeading': 'Verified Talents & Experts',
     'search.noMatches': 'No direct matches found. Try asking AI above.',
+    'search.scopeLocal': 'This Wilaya',
+    'search.scopeGlobal': 'All Wilayas',
+    'search.scopeHeadingLocal': 'Talents in this Wilaya',
+    'search.scopeHeadingGlobal': 'National Talent Registry (All Wilayas)',
 
     // Map Intro Section & Sci-Fi HUD
     'map.title': 'Or explore desired competencies by wilaya via the interactive map',
@@ -525,6 +533,10 @@ export const TRANSLATIONS = {
     'search.wilayasHeading': 'Wilayas Correspondantes',
     'search.talentsHeading': 'Compétences & Experts Agréés',
     'search.noMatches': 'Aucune correspondance directe. Consultez l’IA ci-dessus.',
+    'search.scopeLocal': 'Cette Wilaya',
+    'search.scopeGlobal': 'Toutes Wilayas',
+    'search.scopeHeadingLocal': 'Compétences de cette Wilaya',
+    'search.scopeHeadingGlobal': 'Registre National (Toutes les Wilayas)',
 
     // Map Intro Section & Sci-Fi HUD
     'map.title': 'Ou recherchez la compétence souhaitée par wilaya grâce à la carte interactive',

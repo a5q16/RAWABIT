@@ -289,12 +289,16 @@
 /* ── AI SEARCH SECTION ── */
 .section-ai-search {
   padding: var(--space-3xl) var(--space-lg);
+  position: relative;
+  z-index: 100;
 }
 
 .search-section-wrap {
   max-width: 960px;
   margin: 0 auto;
   text-align: center;
+  position: relative;
+  z-index: 100;
 }
 
 .section-header {
@@ -318,6 +322,7 @@
 
 /* Luxurious Wide AI Search Box */
 .ai-search-box {
+  position: relative;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 24px;
@@ -389,6 +394,8 @@
 /* ── MAP INTRO SECTION ── */
 .section-map {
   padding: var(--space-3xl) var(--space-lg);
+  position: relative;
+  z-index: 10;
   background: linear-gradient(180deg, rgba(250, 250, 250, 1) 0%, rgba(243, 244, 246, 0.5) 100%);
 }
 

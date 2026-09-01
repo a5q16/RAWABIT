@@ -2,9 +2,10 @@
  * Rawabit v2 — AI-First Categorized Command Palette & Smart Search Engine
  * Features:
  * 1. Categorized Filter Tabs (Ask AI, Experts, Specialties, Wilayas)
- * 2. Pinned Top AI Action Prompt: <div class="ai-suggest" style="cursor:pointer; font-weight:bold; color:#059669;">
- * 3. Segmented Result Headers for Clean UX
- * 4. 100% Strict Dynamic Localization (RTL / LTR)
+ * 2. Scope Switcher (Local Wilaya vs Global Platform Search)
+ * 3. Pinned Top AI Action Prompt with Instant SSE Chat Drawer Integration
+ * 4. Segmented Result Headers for Clean UX
+ * 5. 100% Strict Dynamic Localization (RTL / LTR)
  * Strictly Vanilla JS · 60FPS Reactive
  */
 
@@ -50,17 +51,32 @@ Promise.all([
  * Initialize Categorized Command Palette on a given form and input
  * @param {HTMLFormElement} formEl 
  * @param {HTMLInputElement} inputEl 
+ * @param {Object} options - Configuration options (wilayaCode, defaultScope, onScopeChange, onSearchInput)
  */
-export function initSmartSearch(formEl, inputEl) {
-  if (!formEl || !inputEl) return;
+export function initSmartSearch(formEl, inputEl, options = {}) {
+  if (!formEl || !inputEl) return null;
 
+  const {
+    wilayaCode = null,
+    defaultScope = wilayaCode ? 'local' : 'global',
+    onScopeChange = null,
+    onSearchInput = null
+  } = options;
+
+  let currentScope = defaultScope; // 'local' | 'global'
   let activeIndex = -1;
   let activeTab = 'ai'; // 'ai', 'experts', 'specialties', 'wilayas'
+
+  // Remove existing dropdown if re-initializing on same form
+  const existingDropdown = formEl.querySelector('.smart-search-dropdown');
+  if (existingDropdown) {
+    existingDropdown.remove();
+  }
 
   // Create floating glassmorphism dropdown container
   const dropdown = document.createElement('div');
   dropdown.className = 'smart-search-dropdown';
-  dropdown.id = 'smart-search-dropdown';
+  dropdown.id = `smart-search-dropdown-${Math.random().toString(36).substr(2, 6)}`;
   dropdown.style.display = 'none';
   formEl.style.position = 'relative';
   formEl.appendChild(dropdown);
@@ -84,7 +100,7 @@ export function initSmartSearch(formEl, inputEl) {
         aiActionBadge: 'محادثة ذكية ↵',
         aiSubDesc: 'توليد إجابات دقيقة وموثقة من السجل الوطني للكفاءات',
         wilayasHeading: 'الولايات المعتمدة',
-        talentsHeading: 'الكفاءات والخبراء المعتمدون',
+        talentsHeading: currentScope === 'local' && wilayaCode ? 'كفاءات هذه الولاية' : 'الكفاءات والخبراء المعتمدون',
         specialtiesHeading: 'التخصصات والمجالات الدقيقة',
         enterWilaya: 'استعراض ↵',
         emptyResults: 'لم يتم العثور على نتائج مباشرة، اضغط على اسأل الذكاء الاصطناعي للحصول على تحليل مخصص.'
@@ -99,7 +115,7 @@ export function initSmartSearch(formEl, inputEl) {
         aiActionBadge: 'Chat IA ↵',
         aiSubDesc: 'Générer des réponses vérifiées du registre souverain',
         wilayasHeading: 'Wilayas Enregistrées',
-        talentsHeading: 'Experts Vérifiés',
+        talentsHeading: currentScope === 'local' && wilayaCode ? 'Compétences de cette Wilaya' : 'Experts Vérifiés',
         specialtiesHeading: 'Domaines & Spécialités',
         enterWilaya: 'Explorer ↵',
         emptyResults: 'Aucun résultat direct. Cliquez sur Demander à l’IA pour une recherche étendue.'
@@ -114,7 +130,7 @@ export function initSmartSearch(formEl, inputEl) {
         aiActionBadge: 'AI Chat ↵',
         aiSubDesc: 'Generate verified responses from national database',
         wilayasHeading: 'Matching Wilayas',
-        talentsHeading: 'Verified Experts',
+        talentsHeading: currentScope === 'local' && wilayaCode ? 'Talents in this Wilaya' : 'Verified Experts',
         specialtiesHeading: 'Specialized Domains',
         enterWilaya: 'Explore ↵',
         emptyResults: 'No direct records found. Click Ask AI for dynamic intelligence search.'
@@ -128,17 +144,31 @@ export function initSmartSearch(formEl, inputEl) {
     if (!query || !query.trim()) return;
     const q = query.trim();
 
-    if (searchResultsCache.has(q)) {
-      const cached = searchResultsCache.get(q);
+    const cacheKey = `${currentScope}:${wilayaCode || 'all'}:${q}`;
+    if (searchResultsCache.has(cacheKey)) {
+      const cached = searchResultsCache.get(cacheKey);
       updateTalentsList(cached, q);
       return;
     }
 
     try {
-      const results = await searchGlobalProfiles(q);
+      let results = [];
+      if (currentScope === 'local' && wilayaCode) {
+        const localProfiles = await getProfilesByWilaya(wilayaCode);
+        const lq = q.toLowerCase();
+        results = (localProfiles || []).filter(p => {
+          const nMatch = (p.name && p.name.toLowerCase().includes(lq)) || (p.nameAr && p.nameAr.includes(lq));
+          const tMatch = (p.title && p.title.toLowerCase().includes(lq)) || (p.titleAr && p.titleAr.includes(lq));
+          const bMatch = p.bio && p.bio.toLowerCase().includes(lq);
+          const tgMatch = p.tags && p.tags.some(tg => tg.toLowerCase().includes(lq));
+          return nMatch || tMatch || bMatch || tgMatch;
+        });
+      } else {
+        results = await searchGlobalProfiles(q);
+      }
+
       if (Array.isArray(results) && results.length > 0) {
-        searchResultsCache.set(q, results);
-        // Merge into global cache
+        searchResultsCache.set(cacheKey, results);
         results.forEach(r => {
           if (!cachedProfiles.some(cp => String(cp.id) === String(r.id))) {
             cachedProfiles.push(r);
@@ -152,7 +182,7 @@ export function initSmartSearch(formEl, inputEl) {
   }
 
   function updateTalentsList(results, query) {
-    if (!activeDropdown || activeDropdown.style.display === 'none') return;
+    if (!dropdown || dropdown.style.display === 'none') return;
     if (inputEl.value.trim() !== query.trim()) return;
     renderPalette(query, results);
   }
@@ -178,11 +208,16 @@ export function initSmartSearch(formEl, inputEl) {
       return codeMatch || nameMatch || nameArMatch || nameEnMatch || nameFrMatch;
     }).slice(0, 4);
 
-    // 2. Filter matching Talents (Combine local cached + async results)
+    // 2. Filter matching Talents
     let combinedTalents = Array.isArray(asyncTalents) ? [...asyncTalents] : [];
     
-    // Also search in memory cached profiles
+    // Search in-memory cached profiles
     const localMatches = cachedProfiles.filter(p => {
+      if (currentScope === 'local' && wilayaCode) {
+        const pCode = String(p.wilayaCode || p.wilaya_id || '').padStart(2, '0');
+        const targetCode = String(wilayaCode).padStart(2, '0');
+        if (pCode !== targetCode) return false;
+      }
       if (!q) return true;
       const nMatch = (p.name && p.name.toLowerCase().includes(q)) || (p.nameAr && p.nameAr.includes(q));
       const tMatch = (p.title && p.title.toLowerCase().includes(q)) || (p.titleAr && p.titleAr.includes(q));
@@ -267,6 +302,7 @@ export function initSmartSearch(formEl, inputEl) {
                 const pName = lang === 'ar' ? (p.nameAr || p.name) : (lang === 'fr' ? p.nameFr : p.name);
                 const pTitle = lang === 'ar' ? (p.titleAr || p.title) : (lang === 'fr' ? p.titleFr : p.title);
                 const tierClass = p.tier || 'gold';
+                const pWilaya = p.wilayaCode || p.wilaya_id || '16';
                 const sources = getProfileSources(p);
                 return `
                   <div class="smart-talent-item" data-id="${p.id}" tabindex="0" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; border-radius: 12px; cursor: pointer;">
@@ -275,7 +311,7 @@ export function initSmartSearch(formEl, inputEl) {
                       <div class="smart-talent-info" style="min-width: 0;">
                         <div style="display: flex; align-items: center; gap: 6px;">
                           <span class="smart-talent-name" style="font-weight: 700; color: #0F172A; font-size: 0.95rem;">${pName}</span>
-                          <span style="font-size: 0.72rem; color: #059669; background: rgba(5, 150, 105, 0.1); padding: 1px 6px; border-radius: 6px; font-weight: 600;">Wilaya ${p.wilayaCode || '16'}</span>
+                          <span style="font-size: 0.72rem; color: #059669; background: rgba(5, 150, 105, 0.1); padding: 1px 6px; border-radius: 6px; font-weight: 600;">Wilaya ${pWilaya}</span>
                         </div>
                         <span class="smart-talent-title" style="font-size: 0.78rem; color: #64748B; display: block; line-height: 1.35; word-break: break-word; overflow-wrap: anywhere; white-space: normal;">${pTitle}</span>
                       </div>
@@ -396,8 +432,40 @@ export function initSmartSearch(formEl, inputEl) {
       item.addEventListener('click', () => {
         const cat = item.dataset.cat;
         closeDropdown();
-        navigate(`/#/wilaya/16?domain=${cat}`);
+        navigate(`#/wilaya/${wilayaCode || '16'}?domain=${cat}`);
       });
+    });
+  }
+
+  // ── Wire Search Scope Toggle Buttons (if present in form) ──
+  const scopeToggle = formEl.querySelector('.search-scope-pill-toggle') || formEl.querySelector('#search-scope-toggle');
+  if (scopeToggle) {
+    const localBtn = scopeToggle.querySelector('[data-scope="local"]');
+    const globalBtn = scopeToggle.querySelector('[data-scope="global"]');
+
+    function setScope(scope) {
+      currentScope = scope;
+      if (localBtn) localBtn.classList.toggle('active', scope === 'local');
+      if (globalBtn) globalBtn.classList.toggle('active', scope === 'global');
+      if (typeof onScopeChange === 'function') {
+        onScopeChange(scope);
+      }
+      if (inputEl.value.trim()) {
+        renderPalette(inputEl.value);
+        performLiveSearch(inputEl.value);
+      }
+    }
+
+    localBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setScope('local');
+    });
+
+    globalBtn?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setScope('global');
     });
   }
 
@@ -406,6 +474,10 @@ export function initSmartSearch(formEl, inputEl) {
   inputEl.addEventListener('input', (e) => {
     const val = e.target.value;
     renderPalette(val);
+
+    if (typeof onSearchInput === 'function') {
+      onSearchInput(val, currentScope);
+    }
 
     clearTimeout(debounceTimer);
     if (val && val.trim().length >= 2) {
@@ -462,4 +534,19 @@ export function initSmartSearch(formEl, inputEl) {
       closeDropdown();
     }
   });
+
+  return {
+    getScope: () => currentScope,
+    setScope: (s) => {
+      currentScope = s;
+      const toggle = formEl.querySelector('.search-scope-pill-toggle');
+      if (toggle) {
+        toggle.querySelector('[data-scope="local"]')?.classList.toggle('active', s === 'local');
+        toggle.querySelector('[data-scope="global"]')?.classList.toggle('active', s === 'global');
+      }
+      renderPalette(inputEl.value);
+    },
+    close: closeDropdown,
+    refresh: () => renderPalette(inputEl.value)
+  };
 }

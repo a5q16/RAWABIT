@@ -337,6 +337,15 @@ export function initRoadmapListeners() {
   });
 }
 
+// Auto-initialize when loaded as module script
+if (typeof document !== 'undefined') {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initRoadmapListeners);
+  } else {
+    initRoadmapListeners();
+  }
+}
+
 function escapeHtml(str) {
   if (!str) return '';
   return String(str)

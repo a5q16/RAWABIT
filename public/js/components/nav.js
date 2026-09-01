@@ -9,9 +9,12 @@ import { store } from '../store.js';
 import { openLanguageSelector } from './overlay.js';
 
 export function createNav() {
-  const nav = document.createElement('nav');
-  nav.className = 'nav';
-  nav.id = 'main-nav';
+  let nav = document.getElementById('main-nav');
+  if (!nav) {
+    nav = document.createElement('nav');
+    nav.className = 'nav';
+    nav.id = 'main-nav';
+  }
 
   const langMap = {
     ar: 'العربية',

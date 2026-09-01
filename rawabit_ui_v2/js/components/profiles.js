@@ -1,14 +1,16 @@
 /**
  * Rawabit v2 — Centered Wilaya View & Competency Domains First Architecture
  * Strictly Centered Hero · Clean Luxury Typography · Domain Cards Before Profiles
+ * Unified Smart Search Component with Local vs Global Scope Switcher
  * Proactive "Lost User" AI Assistant (Hesitation Logic & Floating Text) · Mind-Map Integration
  * Pure Vanilla JS · 60FPS Performance
  */
 
-import { getProfilesByWilaya, getAllCategories, generateLuxuryAvatar } from '../data/profiles-data.js';
+import { getProfilesByWilaya, getAllCategories, searchGlobalProfiles, generateLuxuryAvatar } from '../data/profiles-data.js';
 import { WILAYAS } from './map-paths.js';
 import { openMindMap, getProfileSources } from './mindmap.js';
 import { openAIChat } from './chat.js';
+import { initSmartSearch } from './smart-search.js';
 import { t, applyTranslations } from '../i18n.js';
 import { store } from '../store.js';
 import { navigate } from '../router.js';
@@ -18,6 +20,10 @@ export { getProfileSources };
 let activeDomain = null; // null = Domains Grid, string = Active Domain Profiles Grid
 let searchQuery = '';
 let currentWilayaCode = '16';
+let activeScope = 'local'; // 'local' (this Wilaya) | 'global' (all Wilayas)
+let globalProfiles = [];
+let currentProfiles = [];
+let isFetchingProfiles = false;
 
 /**
  * Domain SVG Icons Helper
@@ -79,8 +85,17 @@ function getDomainIconSvg(iconType) {
   }
 }
 
-let currentProfiles = [];
-let isFetchingProfiles = false;
+/**
+ * Tier Badge SVG Icons Helper
+ */
+function getTierBadgeIconSvg(tier) {
+  if (tier === 'gold') {
+    return `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
+  } else if (tier === 'bronze') {
+    return `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>`;
+  }
+  return `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>`;
+}
 
 /**
  * Render the Centered Wilaya View (Async Supabase REST API Integration)
@@ -96,6 +111,11 @@ export async function renderProfiles(wilayaCode) {
   const categories = getAllCategories();
   const lang = store.state.lang;
   
+  activeDomain = null;
+  searchQuery = '';
+  activeScope = 'local';
+  globalProfiles = [];
+
   // Format localized Wilaya Title (Clean luxury typography: "ولاية الجزائر" / "Wilaya of Algiers")
   let wilayaCleanTitle = '';
   if (lang === 'ar') {
@@ -131,32 +151,60 @@ export async function renderProfiles(wilayaCode) {
         <!-- Symmetrical Centered Hero Content -->
         <div class="wilaya-centered-hero animate-fade-in stagger-1">
           
-          <!-- Bold Luxury Typography (NO CHEAP PILLS) -->
+          <!-- Bold Luxury Typography -->
           <h1 class="wilaya-title-pure">${wilayaCleanTitle}</h1>
           
           <p class="wilaya-subtitle-pure" data-i18n="domains.subtitle">
             ${t('domains.subtitle')}
           </p>
 
-          <!-- ── GIANT CENTERED AI SEARCH OMNIBAR (RESTRICTED 600px MAX WIDTH) ── -->
+          <!-- ── UNIFIED SLEEK SMART SEARCH OMNIBAR WITH LOCAL / GLOBAL SCOPE TOGGLE ── -->
           <div class="giant-ai-search-wrap animate-fade-in stagger-2">
-            <div class="giant-search-inner">
-              <div class="ai-sparkle-icon">
+            <form class="ai-search-box wilaya-search-box" id="wilaya-search-form" onsubmit="event.preventDefault();">
+              
+              <div class="ai-search-icon">
                 <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
                   <path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/>
                 </svg>
               </div>
+
               <input 
                 type="text" 
-                class="giant-search-input" 
+                class="ai-search-input" 
                 id="wilaya-search-input" 
                 placeholder="${t('domains.searchPlaceholder')}"
                 data-i18n-placeholder="domains.searchPlaceholder"
                 value="${searchQuery}"
                 autocomplete="off"
               />
-              ${searchQuery ? `<button class="giant-clear-btn" id="giant-clear-btn" title="Clear">✕</button>` : ''}
-            </div>
+
+              <!-- Sleek Search Scope Toggle (Local vs Global) -->
+              <div class="search-scope-pill-toggle" id="wilaya-scope-toggle" role="group" aria-label="Search Scope">
+                <button type="button" class="scope-pill-btn active" data-scope="local" id="scope-btn-local" title="${t('search.scopeHeadingLocal')}">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                  </svg>
+                  <span data-i18n="search.scopeLocal">${t('search.scopeLocal')}</span>
+                </button>
+                <button type="button" class="scope-pill-btn" data-scope="global" id="scope-btn-global" title="${t('search.scopeHeadingGlobal')}">
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                  </svg>
+                  <span data-i18n="search.scopeGlobal">${t('search.scopeGlobal')}</span>
+                </button>
+              </div>
+
+              <button type="submit" class="ai-search-btn" title="${t('search.btn')}">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+              </button>
+
+            </form>
           </div>
 
         </div>
@@ -195,38 +243,42 @@ export async function renderProfiles(wilayaCode) {
       stopHesitationTracker();
       activeDomain = null;
       searchQuery = '';
+      activeScope = 'local';
       navigate('#/');
     });
   }
 
-  // ── Wire Giant Search Input ──
+  // ── Wire Unified Smart Search Component ──
+  const wilayaForm = main.querySelector('#wilaya-search-form');
   const searchInput = main.querySelector('#wilaya-search-input');
-  if (searchInput) {
-    searchInput.addEventListener('input', (e) => {
-      searchQuery = e.target.value.toLowerCase().trim();
-      if (searchQuery.length > 1) {
-        recordUserEngagement();
+
+  if (wilayaForm && searchInput) {
+    initSmartSearch(wilayaForm, searchInput, {
+      wilayaCode: code,
+      defaultScope: 'local',
+      onScopeChange: async (newScope) => {
+        activeScope = newScope;
+        if (searchQuery.length > 1) {
+          recordUserEngagement();
+        }
+        if (activeScope === 'global' && searchQuery.trim().length >= 2) {
+          const results = await searchGlobalProfiles(searchQuery.trim());
+          globalProfiles = results || [];
+        }
+        renderDynamicStage(currentProfiles, categories);
+      },
+      onSearchInput: async (val, scope) => {
+        searchQuery = val.toLowerCase().trim();
+        activeScope = scope;
+        if (searchQuery.length > 1) {
+          recordUserEngagement();
+        }
+        if (activeScope === 'global' && searchQuery.length >= 2) {
+          const results = await searchGlobalProfiles(searchQuery);
+          globalProfiles = results || [];
+        }
+        renderDynamicStage(currentProfiles, categories);
       }
-      renderDynamicStage(currentProfiles, categories);
-      updateClearButtonVisibility();
-    });
-  }
-
-  function updateClearButtonVisibility() {
-    const clearBtn = main.querySelector('#giant-clear-btn');
-    if (clearBtn) {
-      clearBtn.style.display = searchQuery ? 'flex' : 'none';
-    }
-  }
-
-  const clearBtn = main.querySelector('#giant-clear-btn');
-  if (clearBtn) {
-    clearBtn.addEventListener('click', () => {
-      searchQuery = '';
-      if (searchInput) searchInput.value = '';
-      updateClearButtonVisibility();
-      renderDynamicStage(currentProfiles, categories);
-      resetHesitationTracker();
     });
   }
 
@@ -241,30 +293,20 @@ function renderDynamicStage(profiles, categories) {
   const stage = document.getElementById('wilaya-dynamic-stage');
   if (!stage) return;
 
-  // ── Condition 1: If search active OR domain selected -> Render Profiles Grid ──
-  if (searchQuery || activeDomain !== null) {
-    renderProfilesGrid(stage, profiles, categories);
+  // ── Condition 1: Global Search Active with Query -> Render Global Profiles Grid ──
+  if (activeScope === 'global' && searchQuery) {
+    renderProfilesGrid(stage, globalProfiles, categories, true);
     return;
   }
 
-  // ── Condition 2: Default Initial View -> Render Competency Domains Grid ──
-  renderDomainsGrid(stage, profiles, categories);
-}
-
-/**
- * ── STEP 1: COMPETENCY DOMAINS GRID (CLEAN TITLE, ZERO CLUTTER) ──
- */
-/**
- * Tier Badge SVG Icons Helper
- */
-function getTierBadgeIconSvg(tier) {
-  if (tier === 'gold') {
-    return `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
-  } else if (tier === 'bronze') {
-    return `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>`;
+  // ── Condition 2: Local Search Active OR Domain Selected -> Render Local Wilaya Profiles Grid ──
+  if (searchQuery || activeDomain !== null) {
+    renderProfilesGrid(stage, profiles, categories, false);
+    return;
   }
-  // Silver default
-  return `<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/></svg>`;
+
+  // ── Condition 3: Default Initial View -> Render Competency Domains Grid ──
+  renderDomainsGrid(stage, profiles, categories);
 }
 
 /**
@@ -273,7 +315,7 @@ function getTierBadgeIconSvg(tier) {
 function renderDomainsGrid(container, profiles, categories) {
   const lang = store.state.lang;
 
-  // ── GHOST DOMAINS FIX: Completely filter out any domain with 0 Verified Talents ──
+  // Completely filter out any domain with 0 Verified Talents in this wilaya
   const activeCategories = categories.filter(cat => {
     return profiles.some(p => p.category === cat.id);
   });
@@ -301,7 +343,6 @@ function renderDomainsGrid(container, profiles, categories) {
             const catTitle = (lang === 'ar' && cat.labelAr) ? cat.labelAr : (lang === 'fr' && cat.labelFr ? cat.labelFr : cat.label);
             const catDesc = (lang === 'ar' && cat.descAr) ? cat.descAr : (lang === 'fr' && cat.descFr ? cat.descFr : cat.desc);
             
-            // Calculate verified talents in this active domain
             const countInDomain = profiles.filter(p => p.category === cat.id).length;
 
             return `
@@ -352,7 +393,7 @@ function renderDomainsGrid(container, profiles, categories) {
 /**
  * ── STEP 2: PROFILES GRID (Revealed on Domain Click or Search) ──
  */
-function renderProfilesGrid(container, profiles, categories) {
+function renderProfilesGrid(container, profiles, categories, isGlobal = false) {
   const lang = store.state.lang;
 
   // Filter profiles
@@ -369,11 +410,18 @@ function renderProfilesGrid(container, profiles, categories) {
     return nameMatch || titleMatch || tagMatch;
   });
 
-  // Current domain metadata
-  const currentCat = categories.find(c => c.id === activeDomain);
-  const activeDomainTitle = currentCat 
-    ? ((lang === 'ar' && currentCat.labelAr) ? currentCat.labelAr : (lang === 'fr' && currentCat.labelFr ? currentCat.labelFr : currentCat.label))
-    : (searchQuery ? `${t('search.resultsFor')} "${searchQuery}"` : t('domains.filterAll'));
+  // Header Title
+  let activeDomainTitle = '';
+  if (isGlobal) {
+    activeDomainTitle = searchQuery 
+      ? `${t('search.scopeHeadingGlobal')} — "${searchQuery}"` 
+      : t('search.scopeHeadingGlobal');
+  } else {
+    const currentCat = categories.find(c => c.id === activeDomain);
+    activeDomainTitle = currentCat 
+      ? ((lang === 'ar' && currentCat.labelAr) ? currentCat.labelAr : (lang === 'fr' && currentCat.labelFr ? currentCat.labelFr : currentCat.label))
+      : (searchQuery ? `${t('search.resultsFor')} "${searchQuery}"` : t('domains.filterAll'));
+  }
 
   container.innerHTML = `
     <div class="profiles-view-wrapper animate-fade-in">
@@ -418,6 +466,8 @@ function renderProfilesGrid(container, profiles, categories) {
             ? profile.tierLabelAr 
             : (lang === 'fr' && profile.tierLabelFr ? profile.tierLabelFr : (profile.tierLabel || t(`tier.${tierClass}`)));
 
+          const pWilaya = profile.wilayaCode || profile.wilaya_id || currentWilayaCode;
+
           return `
             <article class="profile-card animate-fade-in-up" style="animation-delay: ${Math.min(index * 60, 360)}ms;" data-id="${profile.id}">
               
@@ -436,9 +486,16 @@ function renderProfilesGrid(container, profiles, categories) {
                   </div>
                 </div>
 
-                <div class="tier-badge tier-${tierClass}" title="${t(`tier.${tierClass}Badge`)}">
-                  ${getTierBadgeIconSvg(tierClass)}
-                  <span>${tierText}</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  ${isGlobal ? `
+                    <span style="font-size: 0.76rem; font-weight: 800; color: #00875A; background: #E6F4ED; padding: 4px 10px; border-radius: 9999px;">
+                      Wilaya ${pWilaya}
+                    </span>
+                  ` : ''}
+                  <div class="tier-badge tier-${tierClass}" title="${t(`tier.${tierClass}Badge`)}">
+                    ${getTierBadgeIconSvg(tierClass)}
+                    <span>${tierText}</span>
+                  </div>
                 </div>
               </div>
 
@@ -458,27 +515,23 @@ function renderProfilesGrid(container, profiles, categories) {
                 </div>
 
                 <div class="card-tags">
-                  ${(profile.tags || []).slice(0, 3).map(tg => `<span class="profile-tag">${tg}</span>`).join('')}
-                </div>
-
-                <!-- Verified Multi-Channel Sourcing Tree Indicators -->
-                <div class="card-sourcing-sources" style="display: flex; gap: 6px; margin-top: 10px; align-items: center; flex-wrap: wrap;">
-                  ${getProfileSources(profile).map(s => `
-                    <a href="${s.url}" target="_blank" rel="noopener noreferrer" class="card-source-chip" title="${s.label}" style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 6px; background: rgba(5, 150, 105, 0.08); color: #059669; font-size: 0.72rem; font-weight: 600; text-decoration: none; transition: all 0.2s;" onclick="event.stopPropagation();">
-                      ${s.icon}
-                      <span>${s.label.split(' ')[0]}</span>
-                    </a>
+                  ${(profile.tags || []).slice(0, 3).map(tag => `
+                    <span class="card-tag">#${tag}</span>
                   `).join('')}
                 </div>
               </div>
 
               <div class="card-footer">
-                <span class="expand-prompt">
-                  <span data-i18n="profiles.exploreMindmap">${t('profiles.exploreMindmap')}</span>
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                    <polyline points="9 18 15 12 9 6"></polyline>
+                <button class="btn-card-action btn-open-mindmap" data-profile-id="${profile.id}">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="18" cy="5" r="3"></circle>
+                    <circle cx="6" cy="12" r="3"></circle>
+                    <circle cx="18" cy="19" r="3"></circle>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
                   </svg>
-                </span>
+                  <span data-i18n="profiles.exploreMindmap">${t('profiles.exploreMindmap')}</span>
+                </button>
               </div>
 
             </article>
@@ -489,253 +542,171 @@ function renderProfilesGrid(container, profiles, categories) {
     </div>
   `;
 
-  // Wire Back to Domains button
+  // Wire Back to Domains Button
   const btnBackDomains = container.querySelector('#btn-back-domains');
   if (btnBackDomains) {
     btnBackDomains.addEventListener('click', () => {
-      resetHesitationTracker();
       activeDomain = null;
       searchQuery = '';
-      const input = document.getElementById('wilaya-search-input');
-      if (input) input.value = '';
-
+      activeScope = 'local';
+      const searchInput = document.getElementById('wilaya-search-input');
+      if (searchInput) searchInput.value = '';
+      const localBtn = document.getElementById('scope-btn-local');
+      const globalBtn = document.getElementById('scope-btn-global');
+      if (localBtn) localBtn.classList.add('active');
+      if (globalBtn) globalBtn.classList.remove('active');
       renderDynamicStage(profiles, categories);
-      window.scrollTo({ top: 350, behavior: 'smooth' });
+      window.scrollTo({ top: 380, behavior: 'smooth' });
     });
   }
 
-  // Wire Reset Filters
-  const resetBtn = container.querySelector('#btn-reset-all');
-  if (resetBtn) {
-    resetBtn.addEventListener('click', () => {
-      resetHesitationTracker();
+  // Wire Reset Filters Button
+  const btnReset = container.querySelector('#btn-reset-all');
+  if (btnReset) {
+    btnReset.addEventListener('click', () => {
       activeDomain = null;
       searchQuery = '';
-      const input = document.getElementById('wilaya-search-input');
-      if (input) input.value = '';
+      activeScope = 'local';
+      const searchInput = document.getElementById('wilaya-search-input');
+      if (searchInput) searchInput.value = '';
+      const localBtn = document.getElementById('scope-btn-local');
+      const globalBtn = document.getElementById('scope-btn-global');
+      if (localBtn) localBtn.classList.add('active');
+      if (globalBtn) globalBtn.classList.remove('active');
       renderDynamicStage(profiles, categories);
     });
   }
 
-  // ── STEP 3: WIRE MIND-MAP EXPANSION ──
+  // Wire Mind-Map Modal Trigger on Profile Cards
+  container.querySelectorAll('.btn-open-mindmap').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      recordUserEngagement();
+      const pId = btn.dataset.profileId;
+      const targetProfile = (isGlobal ? globalProfiles : profiles).find(p => String(p.id) === String(pId)) || profiles.find(p => String(p.id) === String(pId));
+      if (targetProfile) {
+        openMindMap(targetProfile);
+      }
+    });
+  });
+
+  // Wire clicking card directly
   container.querySelectorAll('.profile-card').forEach(card => {
     card.addEventListener('click', () => {
       recordUserEngagement();
-      const profileId = card.getAttribute('data-id') || (card.dataset && card.dataset.id);
-      const target = profiles.find(p => String(p.id) === String(profileId));
-      if (target) {
-        openMindMap(target, card);
+      const pId = card.dataset.id;
+      const targetProfile = (isGlobal ? globalProfiles : profiles).find(p => String(p.id) === String(pId)) || profiles.find(p => String(p.id) === String(pId));
+      if (targetProfile) {
+        openMindMap(targetProfile);
       }
     });
   });
 }
 
-
-// ══════════════════════════════════════════════════════════════
-// ── SMART BEHAVIORAL HESITATION ALGORITHM (AI ASSISTANT) ──
-// ══════════════════════════════════════════════════════════════
-
-let hesitationTrackerActive = false;
-let idleTimer = null;
-let lastScrollY = typeof window !== 'undefined' ? window.scrollY : 0;
-let lastScrollDirection = null;
-let scrollDirectionChanges = []; // Tracks timestamps of rapid scroll reversals
-let userHasInteracted = false;
-let promptCooldownUntil = 0;
-let hasPromptedThisSession = false;
-let activeProactiveOverlay = null;
-
 /**
- * Record user engagement (clicking domain, typing search, opening profile)
- * Once engaged, hesitation prompts are completely suppressed.
+ * ── 3. PROACTIVE "LOST USER" AI ASSISTANT (HESITATION TRACKER) ──
  */
+let hesitationTimer = null;
+let userEngaged = false;
+let toastElement = null;
+
+function startHesitationTracker() {
+  stopHesitationTracker();
+  userEngaged = false;
+
+  hesitationTimer = setTimeout(() => {
+    if (!userEngaged) {
+      showProactiveAiAssistant();
+    }
+  }, 10000);
+}
+
+function stopHesitationTracker() {
+  if (hesitationTimer) {
+    clearTimeout(hesitationTimer);
+    hesitationTimer = null;
+  }
+  removeProactiveToast();
+}
+
+function resetHesitationTracker() {
+  stopHesitationTracker();
+  startHesitationTracker();
+}
+
 function recordUserEngagement() {
-  userHasInteracted = true;
+  userEngaged = true;
   stopHesitationTracker();
 }
 
-/**
- * Handle Scroll Events with Direction-Reversal Pacing Analysis
- */
-function onUserScroll() {
-  if (userHasInteracted || hasPromptedThisSession || (promptCooldownUntil && Date.now() < promptCooldownUntil)) {
-    return;
-  }
+function showProactiveAiAssistant() {
+  if (toastElement || userEngaged) return;
 
-  const currentY = window.scrollY;
-  const delta = currentY - lastScrollY;
-  const absDelta = Math.abs(delta);
-  const now = Date.now();
+  const wilayaMeta = WILAYAS.find(w => w.code === currentWilayaCode) || { name: 'Algiers', nameAr: 'الجزائر' };
+  const wilayaName = store.state.lang === 'ar' ? (wilayaMeta.nameAr || wilayaMeta.name) : wilayaMeta.name;
 
-  // Ignore micro-scroll jitter (< 40px)
-  if (absDelta < 40) return;
+  const toast = document.createElement('div');
+  toast.className = 'proactive-ai-toast animate-slide-up';
+  toast.id = 'proactive-ai-toast';
 
-  const currentDir = delta > 0 ? 'down' : 'up';
+  toast.innerHTML = `
+    <div class="toast-inner">
+      <button class="toast-close-btn" id="toast-close-btn" aria-label="Close">✕</button>
+      
+      <div class="toast-content">
+        <div class="toast-icon-wrap">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+            <path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/>
+          </svg>
+        </div>
 
-  // Detect genuine rapid direction reversal (Yo-Yo scrolling)
-  if (lastScrollDirection && currentDir !== lastScrollDirection) {
-    scrollDirectionChanges.push(now);
-    // Keep only reversals within the last 6 seconds
-    scrollDirectionChanges = scrollDirectionChanges.filter(t => now - t <= 6000);
+        <div class="toast-text-wrap">
+          <h4 class="toast-title" data-i18n="proactive.heading">${t('proactive.heading')}</h4>
+          <p class="toast-desc">
+            ${store.state.lang === 'ar' 
+              ? `هل تبحث عن تخصص معين في ولاية ${wilayaName}؟ اسأل المساعد الذكي لإرشادك مباشرة.`
+              : `Looking for a specific competency in ${wilayaName}? Ask our AI to guide you.`}
+          </p>
+        </div>
+      </div>
 
-    // If user changed direction 4+ times rapidly without selecting anything -> High-confidence hesitation
-    if (scrollDirectionChanges.length >= 4) {
-      scrollDirectionChanges = [];
-      triggerProactiveAiOverlay();
-      return;
-    }
-  }
-
-  lastScrollDirection = currentDir;
-  lastScrollY = currentY;
-
-  // Reset prolonged idle timer (Set to 45s of genuine inaction)
-  clearTimeout(idleTimer);
-  idleTimer = setTimeout(() => {
-    // Only trigger if user is still on initial view without interacting and tab is focused
-    if (!document.hidden && !userHasInteracted && !hasPromptedThisSession && activeDomain === null && !searchQuery) {
-      triggerProactiveAiOverlay();
-    }
-  }, 45000);
-}
-
-function onUserMouseMove() {
-  // Gentle activity refresh without false-positive triggers
-  clearTimeout(idleTimer);
-  idleTimer = setTimeout(() => {
-    if (!document.hidden && !userHasInteracted && !hasPromptedThisSession && activeDomain === null && !searchQuery) {
-      triggerProactiveAiOverlay();
-    }
-  }, 45000);
-}
-
-export function startHesitationTracker() {
-  stopHesitationTracker();
-  hesitationTrackerActive = true;
-  userHasInteracted = false;
-  scrollDirectionChanges = [];
-  lastScrollY = window.scrollY;
-
-  window.addEventListener('scroll', onUserScroll, { passive: true });
-  window.addEventListener('mousemove', onUserMouseMove, { passive: true });
-
-  // 45s base idle timer for completely untouched page
-  idleTimer = setTimeout(() => {
-    if (!document.hidden && !userHasInteracted && !hasPromptedThisSession && activeDomain === null && !searchQuery) {
-      triggerProactiveAiOverlay();
-    }
-  }, 45000);
-}
-
-export function stopHesitationTracker() {
-  hesitationTrackerActive = false;
-  clearTimeout(idleTimer);
-  idleTimer = null;
-  scrollDirectionChanges = [];
-  window.removeEventListener('scroll', onUserScroll);
-  window.removeEventListener('mousemove', onUserMouseMove);
-}
-
-export function resetHesitationTracker() {
-  clearTimeout(idleTimer);
-  scrollDirectionChanges = [];
-  if (hesitationTrackerActive && !userHasInteracted && !hasPromptedThisSession) {
-    idleTimer = setTimeout(() => {
-      if (!document.hidden && !userHasInteracted && !hasPromptedThisSession && activeDomain === null && !searchQuery) {
-        triggerProactiveAiOverlay();
-      }
-    }, 45000);
-  }
-}
-
-/**
- * Trigger Proactive AI Assistant Full-Screen Ambient Overlay (Zero Pop-Up Boxes)
- */
-export function triggerProactiveAiOverlay() {
-  if (activeProactiveOverlay || document.getElementById('proactive-ai-overlay')) return;
-  if (store.state.overlayStack.length > 0) return; // Don't interrupt open mindmap or language selector
-  if (userHasInteracted || hasPromptedThisSession) return;
-  if (promptCooldownUntil && Date.now() < promptCooldownUntil) return;
-
-  hasPromptedThisSession = true;
-
-  const lang = store.state.lang;
-  const headingText = t('proactive.heading') || (lang === 'ar' ? 'متردد؟ او تحس بالضياع؟' : 'Hesitant? Or feeling lost?');
-  const subText = t('proactive.sub') || (lang === 'ar' ? 'مساعدنا الذكي هنا لمساعدتك بشكل دقيق لإرشادك وسط الكفاءات.' : 'Our AI assistant is here to guide you accurately through competencies.');
-  const btnText = t('proactive.btn') || (lang === 'ar' ? 'اسأل المساعد الذكي ' : 'Ask AI Assistant ');
-
-  const overlay = document.createElement('div');
-  overlay.className = 'proactive-ai-overlay';
-  overlay.id = 'proactive-ai-overlay';
-  activeProactiveOverlay = overlay;
-
-  overlay.innerHTML = `
-    <div class="proactive-ai-content animate-fade-in">
-      <h1 class="proactive-ai-heading">${headingText}</h1>
-      <p class="proactive-ai-subtitle">${subText}</p>
-      <button class="proactive-ai-btn" id="btn-proactive-ask">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
-          <path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/>
-        </svg>
-        <span>${btnText}</span>
-      </button>
+      <div class="toast-actions">
+        <button class="toast-btn-action" id="toast-ai-action">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+            <path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/>
+          </svg>
+          <span data-i18n="proactive.btn">${t('proactive.btn')}</span>
+        </button>
+      </div>
     </div>
   `;
 
-  document.body.appendChild(overlay);
-  if (typeof document !== 'undefined') {
-    document.body.classList.add('modal-open');
-  }
-  if (typeof window !== 'undefined' && window.requestAnimationFrame) {
-    window.requestAnimationFrame(() => {
-      overlay.classList.add('active');
-    });
-  } else {
-    setTimeout(() => overlay.classList.add('active'), 16);
-  }
+  document.body.appendChild(toast);
+  toastElement = toast;
 
-  // Action Button Click -> Open AI Chat Drawer & record engagement
-  const askBtn = overlay.querySelector('#btn-proactive-ask');
-  askBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    recordUserEngagement();
-    dismissProactiveAiOverlay();
-    openAIChat({ type: 'wilaya', wilayaCode: currentWilayaCode });
+  toast.querySelector('#toast-close-btn')?.addEventListener('click', () => {
+    removeProactiveToast();
+    userEngaged = true;
   });
 
-  // Dismissal: Clicking anywhere on the full-screen background (except on the button) fades it out
-  overlay.addEventListener('click', (e) => {
-    if (!e.target.closest('#btn-proactive-ask')) {
-      dismissProactiveAiOverlay();
-    }
+  toast.querySelector('#toast-ai-action')?.addEventListener('click', () => {
+    removeProactiveToast();
+    userEngaged = true;
+    const prompt = store.state.lang === 'ar'
+      ? `اقترح لي أفضل الكفاءات والخبراء في ولاية ${wilayaName}`
+      : `Recommend the top verified competencies and researchers in ${wilayaName}`;
+    openAIChat({ initialQuery: prompt });
   });
-
-  // Dismiss on Escape key
-  const escHandler = (e) => {
-    if (e.key === 'Escape') {
-      dismissProactiveAiOverlay();
-      document.removeEventListener('keydown', escHandler);
-    }
-  };
-  document.addEventListener('keydown', escHandler);
 }
 
-export function dismissProactiveAiOverlay() {
-  if (!activeProactiveOverlay) return;
-  const el = activeProactiveOverlay;
-  el.classList.remove('active');
-  if (typeof document !== 'undefined') {
-    document.body.classList.remove('modal-open');
+function removeProactiveToast() {
+  if (toastElement) {
+    toastElement.classList.add('is-hiding');
+    setTimeout(() => {
+      if (toastElement && toastElement.parentNode) {
+        toastElement.parentNode.removeChild(toastElement);
+      }
+      toastElement = null;
+    }, 300);
   }
-  activeProactiveOverlay = null;
-
-  // Set a 5-minute cooldown so it never annoys the user repeatedly
-  promptCooldownUntil = Date.now() + (5 * 60 * 1000);
-  stopHesitationTracker();
-
-  setTimeout(() => {
-    if (el && el.parentNode) {
-      el.parentNode.removeChild(el);
-    }
-  }, 400);
 }
