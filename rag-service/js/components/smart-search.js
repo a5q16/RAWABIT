@@ -457,7 +457,7 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
       aiBtn.addEventListener('click', () => {
         const text = inputEl.value.trim() || rawQuery;
         closeDropdown();
-        openAIChat({ initialQuery: text });
+        openAIChat({ initialQuery: text, wilayaCode: wilayaCode || undefined, activeWilayaId: wilayaCode ? Number(wilayaCode) : undefined });
       });
     }
 
@@ -527,7 +527,7 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
     if (!query) return;
 
     closeDropdown();
-    openAIChat({ initialQuery: query });
+    openAIChat({ initialQuery: query, wilayaCode: wilayaCode || undefined, activeWilayaId: wilayaCode ? Number(wilayaCode) : undefined });
   });
 
   // Keyboard navigation inside dropdown

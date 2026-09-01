@@ -525,11 +525,34 @@ async function handleUserMessage(queryText) {
   let accumulatedText = '';
   let hasReceivedTokens = false;
 
+  // Extract active Wilaya ID from URL hash or active context
+  let activeWilayaId = null;
+  const hash = (typeof window !== 'undefined' && window.location.hash) ? window.location.hash : '';
+  if (hash.startsWith('#/wilaya/')) {
+    const parts = hash.split('?')[0].split('/');
+    if (parts[2] && !isNaN(Number(parts[2]))) {
+      activeWilayaId = Number(parts[2]);
+    }
+  }
+  if (!activeWilayaId && currentContext?.activeWilayaId != null) {
+    activeWilayaId = Number(currentContext.activeWilayaId);
+  }
+  if (!activeWilayaId && currentContext?.wilayaCode != null) {
+    activeWilayaId = Number(currentContext.wilayaCode);
+  }
+  if (!activeWilayaId && currentContext?.profile?.wilayaCode != null) {
+    activeWilayaId = Number(currentContext.profile.wilayaCode);
+  }
+  if (!activeWilayaId && currentContext?.profile?.wilaya_id != null) {
+    activeWilayaId = Number(currentContext.profile.wilaya_id);
+  }
+
   // Build isolated context payload
   const payload = {
     query: queryText,
     lang: lang,
     currentLanguage: languageName,
+    activeWilayaId: activeWilayaId || undefined,
     context: currentContext?.profile ? {
       id: currentContext.profile.id,
       name: currentContext.profile.name,
@@ -541,11 +564,12 @@ async function handleUserMessage(queryText) {
       location: currentContext.profile.location,
       locationAr: currentContext.profile.locationAr,
       wilaya: currentContext.profile.wilaya || currentContext.profile.wilayaCode,
+      wilaya_id: currentContext.profile.wilaya_id || currentContext.profile.wilayaCode,
       bio: currentContext.profile.bio || currentContext.profile.bioAr,
       tier: currentContext.profile.tier,
       tags: currentContext.profile.tags,
       reliability: currentContext.profile.reliability
-    } : (currentContext?.wilayaCode ? { wilayaCode: currentContext.wilayaCode } : null),
+    } : (activeWilayaId ? { wilayaCode: activeWilayaId, wilaya_id: activeWilayaId } : null),
     messages: activeMessages
   };
 
