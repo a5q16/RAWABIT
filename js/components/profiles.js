@@ -204,6 +204,32 @@ export async function renderProfiles(wilayaCode) {
         </div>
       </div>
     </section>
+
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <!-- 3. MASSIVELY SIMPLIFIED FOOTER                                 -->
+    <!-- ══════════════════════════════════════════════════════════════ -->
+    <footer class="footer-minimal" id="site-footer">
+      <div class="container">
+        <div class="footer-minimal-inner">
+          
+          <div class="footer-minimal-brand">
+            <img class="footer-logo-img" src="./logo.png" alt="Rawabit Logo" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12); flex-shrink: 0;" />
+            <span class="footer-logo-name" data-i18n="nav.brandName">${t('nav.brandName')}</span>
+          </div>
+
+          <!-- Footer navigation links -->
+          <nav class="footer-minimal-nav footer-nav">
+            <a class="footer-minimal-link" href="#/about" data-i18n="footer.link1">${t('footer.link1')}</a>
+            <a class="footer-minimal-link" href="#/vision" data-i18n="footer.link2">${t('footer.link2')}</a>
+            <a class="footer-minimal-link trigger-roadmap" href="javascript:void(0)" id="trigger-roadmap-footer" data-i18n="nav.roadmap">${t('nav.roadmap')}</a>
+            <a class="footer-minimal-link" href="#/contact" data-i18n="footer.link3">${t('footer.link3')}</a>
+          </nav>
+
+          <p class="footer-minimal-copy" data-i18n="footer.copy">${t('footer.copy')}</p>
+
+        </div>
+      </div>
+    </footer>
   `;
 
   applyTranslations();
