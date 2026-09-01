@@ -2,10 +2,11 @@
  * Rawabit v2 — AI-First Categorized Command Palette & Smart Search Engine
  * Features:
  * 1. Categorized Filter Tabs (Ask AI, Experts, Specialties, Wilayas)
- * 2. Scope Switcher (Local Wilaya vs Global Platform Search)
- * 3. Pinned Top AI Action Prompt with Instant SSE Chat Drawer Integration
- * 4. Segmented Result Headers for Clean UX
- * 5. 100% Strict Dynamic Localization (RTL / LTR)
+ * 2. Scope Switcher Bar inside Dropdown ("This Section" vs "All Site")
+ * 3. Floating Glassmorphism Dropdown with absolute z-index: 9999
+ * 4. Pinned Top AI Action Prompt with Instant SSE Chat Drawer Integration
+ * 5. Segmented Result Headers for Clean UX
+ * 6. 100% Strict Dynamic Localization (RTL / LTR)
  * Strictly Vanilla JS · 60FPS Reactive
  */
 
@@ -51,7 +52,7 @@ Promise.all([
  * Initialize Categorized Command Palette on a given form and input
  * @param {HTMLFormElement} formEl 
  * @param {HTMLInputElement} inputEl 
- * @param {Object} options - Configuration options (wilayaCode, defaultScope, onScopeChange, onSearchInput)
+ * @param {Object} options - Configuration options (wilayaCode, defaultScope, showScopeToggle, onScopeChange, onSearchInput)
  */
 export function initSmartSearch(formEl, inputEl, options = {}) {
   if (!formEl || !inputEl) return null;
@@ -59,6 +60,7 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
   const {
     wilayaCode = null,
     defaultScope = wilayaCode ? 'local' : 'global',
+    showScopeToggle = Boolean(wilayaCode),
     onScopeChange = null,
     onSearchInput = null
   } = options;
@@ -73,11 +75,13 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
     existingDropdown.remove();
   }
 
-  // Create floating glassmorphism dropdown container
+  // Create floating glassmorphism dropdown container with high z-index
   const dropdown = document.createElement('div');
   dropdown.className = 'smart-search-dropdown';
   dropdown.id = `smart-search-dropdown-${Math.random().toString(36).substr(2, 6)}`;
   dropdown.style.display = 'none';
+  dropdown.style.position = 'absolute';
+  dropdown.style.zIndex = '9999';
   formEl.style.position = 'relative';
   formEl.appendChild(dropdown);
   activeDropdown = dropdown;
@@ -92,6 +96,9 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
     const lang = store.state.lang;
     if (lang === 'ar') {
       return {
+        scopeLabel: 'نطاق البحث:',
+        scopeSection: 'هذا القسم',
+        scopeAllSite: 'كامل المنصة',
         tabAi: 'اسأل الذكاء الاصطناعي',
         tabExperts: 'الخبراء والكفاءات',
         tabSpecialties: 'التخصصات والمجالات',
@@ -100,13 +107,16 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
         aiActionBadge: 'محادثة ذكية ↵',
         aiSubDesc: 'توليد إجابات دقيقة وموثقة من السجل الوطني للكفاءات',
         wilayasHeading: 'الولايات المعتمدة',
-        talentsHeading: currentScope === 'local' && wilayaCode ? 'كفاءات هذه الولاية' : 'الكفاءات والخبراء المعتمدون',
+        talentsHeading: currentScope === 'local' && wilayaCode ? 'كفاءات هذا القسم' : 'الكفاءات والخبراء المعتمدون',
         specialtiesHeading: 'التخصصات والمجالات الدقيقة',
         enterWilaya: 'استعراض ↵',
         emptyResults: 'لم يتم العثور على نتائج مباشرة، اضغط على اسأل الذكاء الاصطناعي للحصول على تحليل مخصص.'
       };
     } else if (lang === 'fr') {
       return {
+        scopeLabel: 'Portée du filtre :',
+        scopeSection: 'Cette Section',
+        scopeAllSite: 'Tout le Site',
         tabAi: 'Demander à l’IA',
         tabExperts: 'Experts & Talents',
         tabSpecialties: 'Spécialités & Domaines',
@@ -115,13 +125,16 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
         aiActionBadge: 'Chat IA ↵',
         aiSubDesc: 'Générer des réponses vérifiées du registre souverain',
         wilayasHeading: 'Wilayas Enregistrées',
-        talentsHeading: currentScope === 'local' && wilayaCode ? 'Compétences de cette Wilaya' : 'Experts Vérifiés',
+        talentsHeading: currentScope === 'local' && wilayaCode ? 'Compétences de cette Section' : 'Experts Vérifiés',
         specialtiesHeading: 'Domaines & Spécialités',
         enterWilaya: 'Explorer ↵',
         emptyResults: 'Aucun résultat direct. Cliquez sur Demander à l’IA pour une recherche étendue.'
       };
     } else {
       return {
+        scopeLabel: 'Search Scope:',
+        scopeSection: 'This Section',
+        scopeAllSite: 'All Site',
         tabAi: 'Ask AI',
         tabExperts: 'Experts & Talents',
         tabSpecialties: 'Specialties',
@@ -130,7 +143,7 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
         aiActionBadge: 'AI Chat ↵',
         aiSubDesc: 'Generate verified responses from national database',
         wilayasHeading: 'Matching Wilayas',
-        talentsHeading: currentScope === 'local' && wilayaCode ? 'Talents in this Wilaya' : 'Verified Experts',
+        talentsHeading: currentScope === 'local' && wilayaCode ? 'Talents in this Section' : 'Verified Experts',
         specialtiesHeading: 'Specialized Domains',
         enterWilaya: 'Explore ↵',
         emptyResults: 'No direct records found. Click Ask AI for dynamic intelligence search.'
@@ -242,8 +255,38 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
       return lMatch || dMatch;
     }).slice(0, 4);
 
-    // Render Command Palette DOM
+    // Render Command Palette DOM with Scope Bar inside header
     dropdown.innerHTML = `
+      <!-- 0. SEARCH SCOPE TOGGLE BAR (INSIDE DROPDOWN) -->
+      ${showScopeToggle || wilayaCode ? `
+        <div class="smart-scope-bar">
+          <div class="smart-scope-label">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <span>${i18n.scopeLabel}</span>
+          </div>
+          <div class="smart-scope-tabs" role="tablist">
+            <button type="button" class="smart-scope-tab-btn ${currentScope === 'local' ? 'active' : ''}" data-scope="local">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              <span>${i18n.scopeSection}</span>
+            </button>
+            <button type="button" class="smart-scope-tab-btn ${currentScope === 'global' ? 'active' : ''}" data-scope="global">
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+              </svg>
+              <span>${i18n.scopeAllSite}</span>
+            </button>
+          </div>
+        </div>
+      ` : ''}
+
       <!-- CATEGORY TABS -->
       <div class="smart-palette-tabs">
         <button type="button" class="palette-tab-btn ${activeTab === 'ai' ? 'active' : ''}" data-tab="ai">
@@ -383,6 +426,22 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
 
     dropdown.style.display = 'block';
 
+    // ── Wire Scope Switcher inside Dropdown ──
+    dropdown.querySelectorAll('.smart-scope-tab-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const newScope = btn.getAttribute('data-scope');
+        currentScope = newScope;
+        if (typeof onScopeChange === 'function') {
+          onScopeChange(newScope);
+        }
+        renderPalette(inputEl.value);
+        if (inputEl.value && inputEl.value.trim().length >= 2) {
+          performLiveSearch(inputEl.value);
+        }
+      });
+    });
+
     // ── Wire Tab Click Handlers ──
     dropdown.querySelectorAll('.palette-tab-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
@@ -434,38 +493,6 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
         closeDropdown();
         navigate(`#/wilaya/${wilayaCode || '16'}?domain=${cat}`);
       });
-    });
-  }
-
-  // ── Wire Search Scope Toggle Buttons (if present in form) ──
-  const scopeToggle = formEl.querySelector('.search-scope-pill-toggle') || formEl.querySelector('#search-scope-toggle');
-  if (scopeToggle) {
-    const localBtn = scopeToggle.querySelector('[data-scope="local"]');
-    const globalBtn = scopeToggle.querySelector('[data-scope="global"]');
-
-    function setScope(scope) {
-      currentScope = scope;
-      if (localBtn) localBtn.classList.toggle('active', scope === 'local');
-      if (globalBtn) globalBtn.classList.toggle('active', scope === 'global');
-      if (typeof onScopeChange === 'function') {
-        onScopeChange(scope);
-      }
-      if (inputEl.value.trim()) {
-        renderPalette(inputEl.value);
-        performLiveSearch(inputEl.value);
-      }
-    }
-
-    localBtn?.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setScope('local');
-    });
-
-    globalBtn?.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      setScope('global');
     });
   }
 
@@ -539,11 +566,6 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
     getScope: () => currentScope,
     setScope: (s) => {
       currentScope = s;
-      const toggle = formEl.querySelector('.search-scope-pill-toggle');
-      if (toggle) {
-        toggle.querySelector('[data-scope="local"]')?.classList.toggle('active', s === 'local');
-        toggle.querySelector('[data-scope="global"]')?.classList.toggle('active', s === 'global');
-      }
       renderPalette(inputEl.value);
     },
     close: closeDropdown,

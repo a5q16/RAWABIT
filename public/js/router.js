@@ -11,6 +11,10 @@ export function registerRoute(pattern, handler) {
 }
 
 export function navigate(hash) {
+    if (typeof document !== 'undefined' && document.body) {
+        document.body.style.overflow = '';
+        document.body.classList.remove('modal-open');
+    }
     window.location.hash = hash;
 }
 
@@ -20,6 +24,12 @@ export function getCurrentParams() {
 
 export function initRouter() {
     const handleHashChange = () => {
+        // Global Scroll-Lock Fix: Force body overflow back to normal on any route transition
+        if (typeof document !== 'undefined' && document.body) {
+            document.body.style.overflow = '';
+            document.body.classList.remove('modal-open');
+        }
+
         let rawHash = window.location.hash || '#/';
         
         // Handle in-page smooth scrolling anchors on home page

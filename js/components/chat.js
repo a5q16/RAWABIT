@@ -302,6 +302,11 @@ export function closeAIChat() {
   backdropElement.classList.remove('active');
   popOverlay();
 
+  if (typeof document !== 'undefined' && document.body && !document.querySelector('.wilaya-modal-overlay, .mindmap-modal-overlay, .roadmap-modal-overlay, .fullscreen-lang-overlay')) {
+    document.body.style.overflow = '';
+    document.body.classList.remove('modal-open');
+  }
+
   const fab = document.querySelector('#global-ai-fab');
   if (fab) fab.classList.remove('drawer-open');
 }

@@ -520,7 +520,7 @@ body.modal-open {
   top: calc(100% + 10px);
   inset-inline-start: 0;
   width: 100%;
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba(255, 255, 255, 0.97);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-radius: 20px;
@@ -529,36 +529,57 @@ body.modal-open {
   padding: 16px;
   max-height: 480px;
   overflow-y: auto;
-  z-index: 1000;
+  z-index: 9999;
   text-align: start;
   animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* ── SEARCH SCOPE TOGGLE PILL ── */
-.search-scope-pill-toggle {
-  display: inline-flex;
+/* ── SEARCH SCOPE BAR (INSIDE DROPDOWN HEADER) ── */
+.smart-scope-bar {
+  display: flex;
   align-items: center;
-  background: rgba(241, 245, 249, 0.9);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 9999px;
-  padding: 3px;
-  gap: 3px;
-  margin-inline-end: 8px;
-  flex-shrink: 0;
-  backdrop-filter: blur(8px);
-  transition: all var(--transition-fast);
+  justify-content: space-between;
+  background: #F8FAFC;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 14px;
+  padding: 6px 10px;
+  margin-bottom: 12px;
+  gap: 8px;
 }
 
-.scope-pill-btn {
+.smart-scope-label {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 14px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.02em;
+}
+
+.smart-scope-label svg {
+  color: var(--color-accent);
+}
+
+.smart-scope-tabs {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(226, 232, 240, 0.6);
+  border-radius: 9999px;
+  padding: 3px;
+  gap: 3px;
+}
+
+.smart-scope-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
   border-radius: 9999px;
   border: none;
   background: transparent;
   color: var(--color-text-secondary);
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 700;
   font-family: inherit;
   cursor: pointer;
@@ -566,29 +587,35 @@ body.modal-open {
   white-space: nowrap;
 }
 
-.scope-pill-btn:hover {
+.smart-scope-tab-btn:hover {
   color: var(--color-accent);
   background: rgba(255, 255, 255, 0.6);
 }
 
-.scope-pill-btn.active {
+.smart-scope-tab-btn.active {
   background: var(--color-accent);
   color: #FFFFFF;
-  box-shadow: 0 2px 8px rgba(0, 135, 90, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 135, 90, 0.28);
 }
 
-.scope-pill-btn svg {
+.smart-scope-tab-btn svg {
   flex-shrink: 0;
 }
 
 @media (max-width: 640px) {
-  .search-scope-pill-toggle {
-    margin-inline-end: 4px;
+  .smart-scope-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
   }
-  .scope-pill-btn {
-    padding: 5px 10px;
-    font-size: 0.76rem;
-    gap: 4px;
+  .smart-scope-tabs {
+    justify-content: center;
+  }
+  .smart-scope-tab-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 5px 8px;
+    font-size: 0.75rem;
   }
 }
 

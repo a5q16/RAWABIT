@@ -342,6 +342,12 @@ async function init() {
   // Boot router
   initRouter();
 
+  // Global scroll-lock fix: Always force body overflow and remove modal-open on route change
+  window.addEventListener('hashchange', () => {
+    document.body.style.overflow = '';
+    document.body.classList.remove('modal-open');
+  });
+
   // Initialize Learning Roadmap click triggers
   initRoadmapListeners();
 
