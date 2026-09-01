@@ -10,8 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
 
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
+  <script>    tailwind.config = {
       darkMode: 'class',
       theme: { extend: {
         colors: {
@@ -30,8 +29,7 @@
   <script src="js/theme.js"></script>
   <script src="js/i18n.js"></script>
 
-  <style>
-    *, *::before, *::after { box-sizing: border-box; }
+  <style>    *, *::before, *::after { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body { margin: 0; font-family: 'Inter', 'Cairo', sans-serif; background: #F9F6F0; color: #1a1a1a; transition: background .35s ease, color .35s ease; }
     html.dark body { background: #141414; color: #e8e8e8; }
@@ -65,7 +63,6 @@
     #lang-switcher { display:flex; align-items:center; gap:2px; background:#f3f4f6; border-radius:12px; padding:3px; }
     html.dark #lang-switcher { background:#2F2F2F; }
 
-    /* ── Loading screen (auto-hides via CSS even if JS fails) ── */
     #loading-screen {
       position: fixed; inset: 0; z-index: 9999;
       display: flex; flex-direction: column;
@@ -88,7 +85,6 @@
 </head>
 <body>
 
-  <!-- ═══ LOADING SCREEN ═══ -->
   <div id="loading-screen">
     <div class="dark:text-sage-bright" style="margin-bottom:16px;font-family:'Cairo',sans-serif;font-size:24px;font-weight:700;color:#2C5F2D;">روابط</div>
     <div>
@@ -96,7 +92,6 @@
     </div>
   </div>
 
-  <!-- ═══ NAVBAR ═══ -->
   <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16">
@@ -142,7 +137,6 @@
     </div>
   </nav>
 
-  <!-- ═══ PROFILES PAGE ═══ -->
   <section class="pt-28 pb-20 px-4 animate-fade-in">
     <div class="max-w-6xl mx-auto">
       <div class="text-center mb-10">
@@ -154,7 +148,6 @@
     </div>
   </section>
 
-  <!-- ═══ FOOTER ═══ -->
   <footer class="border-t border-gray-200 dark:border-neutral-700 py-12 px-4 mt-8">
     <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
       <div class="flex items-center gap-3">
@@ -173,8 +166,7 @@
 
   <script src="js/data.js"></script>
   <script src="js/chat-widget.js"></script>
-  <script>
-    rawabitInitNav();
+  <script>    rawabitInitNav();
 
     (function () {
       var grid = document.getElementById('profiles-grid');

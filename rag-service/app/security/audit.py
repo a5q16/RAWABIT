@@ -18,20 +18,18 @@ from typing import Any
 
 logger = logging.getLogger("rawabit.security.audit")
 
-
 @dataclass
 class AuditEntry:
     event_id: str
     timestamp: str
-    event_type: str  # "suggest_profile", "chat_query", "data_modify"
+    event_type: str
     client_ip: str
     request_id: str
     user_agent: str
     payload_summary: str
     payload_hash: str
-    severity: str  # "info", "warn", "critical"
+    severity: str
     metadata: dict[str, Any]
-
 
 class AuditLogger:
     """
@@ -128,6 +126,4 @@ class AuditLogger:
             entries = [e for e in entries if e["event_type"] == event_type]
         return entries[-limit:]
 
-
-# Global singleton
 audit = AuditLogger()

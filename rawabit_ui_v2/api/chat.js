@@ -1,6 +1,3 @@
-// Vercel Serverless Function: POST /api/chat
-// Rawabit AI Sovereign Assistant with Real-Time Supabase RAG Pipeline & SSE Streaming
-
 export const config = {
   runtime: 'edge',
 };
@@ -29,9 +26,6 @@ STRICT RULES:
 6. Respond in the exact language of the user's prompt (Arabic, French, or English).
 7. Maintain a formal, prestigious, and academic sovereign tone at all times.`;
 
-/**
- * Complete 58 Algerian Wilayas mapping dictionary
- */
 const WILAYA_MAP = [
   { id: 1, code: '01', fr: 'Adrar', ar: 'أدرار', en: 'Adrar', aliases: ['adrar'] },
   { id: 2, code: '02', fr: 'Chlef', ar: 'الشلف', en: 'Chlef', aliases: ['chlef', 'ech-chlef', 'chlif'] },
@@ -93,14 +87,8 @@ const WILAYA_MAP = [
   { id: 58, code: '58', fr: 'El Meniaa', ar: 'المنيعة', en: 'El Meniaa', aliases: ['el meniaa', 'el menia', 'el golea'] },
 ];
 
-/**
- * Detect Wilaya ID from prompt text and explicit context
- * @param {string} text - User prompt text
- * @param {number|string|null} activeWilayaId - Explicitly passed active Wilaya ID
- * @returns {object|null} Wilaya metadata object
- */
 function resolveTargetWilaya(text, activeWilayaId) {
-  // 1. Direct explicit context from frontend
+
   if (activeWilayaId != null) {
     const num = Number(activeWilayaId);
     const found = WILAYA_MAP.find(w => w.id === num || Number(w.code) === num);
@@ -111,18 +99,15 @@ function resolveTargetWilaya(text, activeWilayaId) {
 
   const normalized = text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
-  // 2. Exact or Alias matching across all 58 Wilayas
   for (const w of WILAYA_MAP) {
-    // Arabic matching
+
     if (text.includes(w.ar)) return w;
     const arWithoutAl = w.ar.replace(/^ال/, '');
     if (arWithoutAl.length >= 3 && text.includes(arWithoutAl)) return w;
 
-    // French / English / Alias matching
     const frNorm = w.fr.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     const enNorm = w.en.toLowerCase();
-    
-    // Word boundary or inclusion check
+
     if (normalized.includes(frNorm) || normalized.includes(enNorm)) {
       return w;
     }
@@ -134,7 +119,6 @@ function resolveTargetWilaya(text, activeWilayaId) {
     }
   }
 
-  // 3. Numeric matching (e.g. "wilaya 30", "ولاية 30", "w30", "wilaya30")
   const match = text.match(/(?:wilaya|ولاية|w)\s*(\d{1,2})\b/i);
   if (match && match[1]) {
     const num = parseInt(match[1], 10);
@@ -145,12 +129,6 @@ function resolveTargetWilaya(text, activeWilayaId) {
   return null;
 }
 
-/**
- * Execute real-time Sovereign RAG query against Supabase PostgreSQL database
- * @param {string} query 
- * @param {number|string|null} activeWilayaId
- * @returns {Promise<{contextDossiers: string, targetWilaya: object|null}>} Formatted factual context
- */
 async function retrieveSovereignContext(query, activeWilayaId) {
   if (!query || typeof query !== 'string') {
     return { contextDossiers: '', targetWilaya: null };
@@ -185,7 +163,6 @@ async function retrieveSovereignContext(query, activeWilayaId) {
 
     let personList = [];
 
-    // ── STRATEGY 1: EXPLICIT OR DETECTED WILAYA QUERY ──
     if (targetWilaya) {
       const wilayaEndpoint = `${SUPABASE_URL}/rest/v1/person?wilaya_id=eq.${targetWilaya.id}&limit=12`;
       const [wilayaRes, searchRes] = await Promise.all([
@@ -198,7 +175,6 @@ async function retrieveSovereignContext(query, activeWilayaId) {
       const wilayaPersons = Array.isArray(wilayaRes) ? wilayaRes : [];
       const searchPersons = Array.isArray(searchRes) ? searchRes : [];
 
-      // Combine with Wilaya persons prioritized
       const personMap = new Map();
       wilayaPersons.forEach(p => personMap.set(p.id, p));
       searchPersons.forEach(p => {
@@ -207,13 +183,12 @@ async function retrieveSovereignContext(query, activeWilayaId) {
 
       personList = Array.from(personMap.values());
     } else {
-      // ── STRATEGY 2: TOKENIZED KEYWORD SEARCH ──
+
       if (tokenFilters.length > 0) {
         const searchRes = await fetch(`${SUPABASE_URL}/rest/v1/person?or=(${tokenFilters.join(',')})&limit=8`, { headers }).then(r => r.json()).catch(() => []);
         personList = Array.isArray(searchRes) ? searchRes : [];
       }
 
-      // ── STRATEGY 3: DEFAULT REPRESENTATIVE RECORDS IF EMPTY ──
       if (personList.length === 0) {
         const defaultRes = await fetch(`${SUPABASE_URL}/rest/v1/person?limit=6`, { headers }).then(r => r.json()).catch(() => []);
         personList = Array.isArray(defaultRes) ? defaultRes : [];
@@ -224,7 +199,6 @@ async function retrieveSovereignContext(query, activeWilayaId) {
       return { contextDossiers: '', targetWilaya };
     }
 
-    // ── STEP 2: CONCURRENT RELATIONAL ENRICHMENT ──
     const ids = personList.map(p => `"${p.id}"`).join(',');
     const [srcsRes, acadsRes, profsRes, unisRes, compsRes] = await Promise.all([
       fetch(`${SUPABASE_URL}/rest/v1/sources?person_id=in.(${ids})`, { headers }).then(r => r.json()).catch(() => []),
@@ -240,7 +214,6 @@ async function retrieveSovereignContext(query, activeWilayaId) {
     const uniMap = new Map((Array.isArray(unisRes) ? unisRes : []).map(u => [u.id, u]));
     const compMap = new Map((Array.isArray(compsRes) ? compsRes : []).map(c => [c.id, c]));
 
-    // ── STEP 3: FORMAT RICH FACTUAL DOSSIERS ──
     const contextDossiers = personList.map((p, idx) => {
       const pSrcs = srcs.filter(s => s.person_id === p.id);
       const pAcads = acads.filter(a => a.person_id === p.id);
@@ -248,10 +221,10 @@ async function retrieveSovereignContext(query, activeWilayaId) {
 
       const fullName = `${p.first_name || ''} ${p.last_name || ''}`.trim() || 'Verified Expert';
       const arabicName = (p.first_name_ar || p.last_name_ar) ? `${p.first_name_ar || ''} ${p.last_name_ar || ''}`.trim() : '';
-      
+
       const wilayaEntry = WILAYA_MAP.find(w => w.id === Number(p.wilaya_id));
-      const wilayaStr = wilayaEntry 
-        ? `Wilaya ${wilayaEntry.code} - ${wilayaEntry.en} / ${wilayaEntry.fr} (${wilayaEntry.ar})` 
+      const wilayaStr = wilayaEntry
+        ? `Wilaya ${wilayaEntry.code} - ${wilayaEntry.en} / ${wilayaEntry.fr} (${wilayaEntry.ar})`
         : `Wilaya ${p.wilaya_id || 16}`;
 
       const academicStr = pAcads.map(a => {
@@ -316,7 +289,6 @@ export default async function handler(req) {
     const body = await req.json();
     const query = body.query || (body.messages && body.messages[body.messages.length - 1]?.content) || 'مرحبا';
 
-    // Enforce 2000 character security limit
     if (typeof query === 'string' && query.length > 2000) {
       return new Response(JSON.stringify({ error: 'Query too long. Maximum allowed length is 2000 characters.' }), {
         status: 400,
@@ -324,12 +296,10 @@ export default async function handler(req) {
       });
     }
 
-    // Extract active Wilaya ID from request body if provided
-    const activeWilayaId = body.activeWilayaId 
+    const activeWilayaId = body.activeWilayaId
       || (body.context?.wilayaCode != null ? body.context.wilayaCode : null)
       || (body.context?.wilaya != null ? body.context.wilaya : null);
 
-    // ── TRUE RAG: Real-time query to Supabase with Wilaya mapping & Relational Enrichment ──
     const { contextDossiers, targetWilaya } = await retrieveSovereignContext(query, activeWilayaId);
     const clientPassedContext = body.context ? (typeof body.context === 'object' ? JSON.stringify(body.context, null, 2) : body.context) : '';
 
@@ -354,7 +324,6 @@ The user's current UI language is ${userLang}. You MUST reply in the language th
 
     const fullSystemPrompt = RAWABIT_BASE_SYSTEM_PROMPT + langDirective + combinedContext;
 
-    // Build message array
     const messages = [
       { role: 'system', content: fullSystemPrompt }
     ];
@@ -366,7 +335,6 @@ The user's current UI language is ${userLang}. You MUST reply in the language th
       messages.push({ role: 'user', content: query });
     }
 
-    // Strict temperature: 0.1 for high factual accuracy
     const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -383,7 +351,7 @@ The user's current UI language is ${userLang}. You MUST reply in the language th
     });
 
     if (!groqResponse.ok) {
-      // Fallback model with identical strict temperature
+
       const fallbackResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {

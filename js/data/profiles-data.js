@@ -1,10 +1,3 @@
-/**
- * Rawabit v2 — Supabase PostgreSQL REST API Client (Relational Data Engine)
- * 100% Real API Integration · Pure Relational Joins · Zero Mock Data · Production Vercel Ready
- * Tables Queried: person, sources, academic_career, professional_career, university, specialty, company, wilaya
- */
-
-// Supabase Configuration (Vite / Vercel standard with global window fallback and production default)
 export const SUPABASE_URL = (
   (typeof import.meta !== 'undefined' && import.meta.env && (import.meta.env.VITE_SUPABASE_URL || import.meta.env.SUPABASE_URL)) ||
   (typeof window !== 'undefined' && window.ENV && (window.ENV.VITE_SUPABASE_URL || window.ENV.SUPABASE_URL)) ||
@@ -19,9 +12,6 @@ export const SUPABASE_KEY = (
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp4cXJ4bHlvc3RxaHZzbHV6Zmx3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NzY0MzE4NSwiZXhwIjoyMTAzMjE5MTg1fQ.bQfsnm31h6rs1XSLCsi9s6CaFHWYjGqqb2qaaSTJfCs'
 );
 
-/**
- * Standard Supabase Headers Generator
- */
 function getSupabaseHeaders() {
   return {
     'apikey': SUPABASE_KEY,
@@ -31,13 +21,8 @@ function getSupabaseHeaders() {
   };
 }
 
-// In-memory cache for reference tables
 let referenceCache = null;
 
-/**
- * Fetch and cache institutional reference tables from Supabase
- * @returns {Promise<{uniMap: Map, specMap: Map, compMap: Map}>}
- */
 export async function loadReferenceTables() {
   if (referenceCache) return referenceCache;
   if (!SUPABASE_URL || !SUPABASE_KEY) {
@@ -63,10 +48,6 @@ export async function loadReferenceTables() {
   }
 }
 
-/**
- * Dynamically generates a high-end luxury SVG geometric monogram avatar.
- * Pure vector SVG · Zero external dependency · Zero fake stock photos
- */
 export function generateLuxuryAvatar(name = 'Talent', nameAr = '', category = 'ai') {
   const parts = String(name).trim().split(/\s+/);
   let initials = 'DZ';
@@ -107,25 +88,15 @@ export function generateLuxuryAvatar(name = 'Talent', nameAr = '', category = 'a
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
-/**
- * Maps raw database rows from Supabase 'person' table along with relational data
- * @param {Object} row - Raw row from 'person' table
- * @param {Array} pSrcs - Relational rows from 'sources' table
- * @param {Array} pAcads - Relational rows from 'academic_career' table
- * @param {Array} pProfs - Relational rows from 'professional_career' table
- * @param {Object} refs - Reference tables {uniMap, specMap, compMap}
- * @returns {Object} Canonical profile entity for UI components
- */
 export function mapPersonToProfile(row, pSrcs = [], pAcads = [], pProfs = [], refs = { uniMap: new Map(), specMap: new Map(), compMap: new Map() }) {
   if (!row) return null;
 
   const fullName = `${row.first_name || ''} ${row.last_name || ''}`.trim() || 'Verified Expert';
   const bio = row.bio || '';
-  
+
   const wilayaId = row.wilaya_id != null ? Number(row.wilaya_id) : 16;
   const wilayaCode = String(wilayaId).padStart(2, '0');
 
-  // 1. Build Academic Records dynamically from Supabase 'academic_career' joined with 'university' and 'specialty'
   const academicList = pAcads.map(a => {
     const u = refs.uniMap ? refs.uniMap.get(a.university_id) : null;
     const s = refs.specMap ? refs.specMap.get(a.specialty_id) : null;
@@ -140,7 +111,6 @@ export function mapPersonToProfile(row, pSrcs = [], pAcads = [], pProfs = [], re
     };
   });
 
-  // 2. Build Professional Records dynamically from Supabase 'professional_career' joined with 'company'
   const professionalList = pProfs.map(pr => {
     const c = refs.compMap ? refs.compMap.get(pr.company_id) : null;
     return {
@@ -152,7 +122,6 @@ export function mapPersonToProfile(row, pSrcs = [], pAcads = [], pProfs = [], re
     };
   });
 
-  // Primary title and organization determination
   let title = 'Verified Expert';
   let organization = 'National Competency Network';
 
@@ -167,7 +136,6 @@ export function mapPersonToProfile(row, pSrcs = [], pAcads = [], pProfs = [], re
     title = firstSentence.length > 80 ? firstSentence.slice(0, 77) + '...' : firstSentence;
   }
 
-  // Category determination based on specialty, career, or bio
   let category = row.category;
   if (!category) {
     const fullText = `${bio} ${title} ${academicList.map(a => a.field).join(' ')}`.toLowerCase();
@@ -186,12 +154,10 @@ export function mapPersonToProfile(row, pSrcs = [], pAcads = [], pProfs = [], re
     }
   }
 
-  // Pure SVG luxury monogram avatar — eliminates cheap fake human photos
   const avatar = (row.photo_url && !row.photo_url.includes('unsplash.com'))
     ? row.photo_url
     : generateLuxuryAvatar(fullName, row.name_ar || row.first_name_ar, category);
 
-  // ── 3-Tier Logical Verification Classification ──
   const hasAcademic = academicList.length > 0;
   const hasProfessional = professionalList.length > 0;
   const hasBio = bio && bio.length >= 20;
@@ -213,7 +179,6 @@ export function mapPersonToProfile(row, pSrcs = [], pAcads = [], pProfs = [], re
     tierLabelFr = 'Profil Enregistré';
   }
 
-  // 3. Build Multi-Channel Contacts strictly from Supabase 'sources' table rows + person email
   const contactObj = row.email ? { email: row.email } : {};
 
   pSrcs.forEach(s => {
@@ -226,9 +191,8 @@ export function mapPersonToProfile(row, pSrcs = [], pAcads = [], pProfs = [], re
     else if (sType === 'email') contactObj.email = s.source_url.replace(/^mailto:/i, '');
   });
 
-  // 4. Build Core Competency Skills dynamically from the expert's database records
   const skills = [];
-  
+
   if (academicList.length > 0 && academicList[0].field) {
     skills.push({
       name: academicList[0].field,
@@ -309,11 +273,6 @@ export function mapPersonToProfile(row, pSrcs = [], pAcads = [], pProfs = [], re
   };
 }
 
-/**
- * Concurrently enrich person rows with their relational data from Supabase
- * @param {Array<Object>} personRows - Rows from Supabase 'person' table
- * @returns {Promise<Array<Object>>} Fully enriched profile objects
- */
 async function enrichProfilesRelational(personRows) {
   if (!Array.isArray(personRows) || personRows.length === 0) return [];
 
@@ -358,11 +317,6 @@ async function enrichProfilesRelational(personRows) {
   }
 }
 
-/**
- * Asynchronously search all competency profiles across all 58 Wilayas in Supabase
- * @param {string} query - Full text or tokenized search string
- * @returns {Promise<Array>} List of mapped profile objects
- */
 export async function searchGlobalProfiles(query) {
   if (!query || !query.trim()) return [];
   const q = query.trim();
@@ -374,7 +328,7 @@ export async function searchGlobalProfiles(query) {
   try {
     const cleanQ = q.replace(/[%&?,*]/g, ' ').trim();
     const tokens = cleanQ.split(/\s+/).filter(Boolean);
-    
+
     const filters = [];
     tokens.forEach(tok => {
       const enc = encodeURIComponent(`*${tok}*`);
@@ -403,11 +357,6 @@ export async function searchGlobalProfiles(query) {
   }
 }
 
-/**
- * Asynchronously fetch verified competency profiles from Supabase 'person' table by wilaya_id
- * @param {string|number} wilayaId - 2-digit wilaya code / id (e.g. 16 or "16")
- * @returns {Promise<Array>} List of mapped profile objects
- */
 export async function getProfilesByWilaya(wilayaId) {
   const wId = Number(wilayaId);
 
@@ -436,11 +385,6 @@ export async function getProfilesByWilaya(wilayaId) {
   }
 }
 
-/**
- * Asynchronously fetch single person record by id from Supabase 'person' table
- * @param {string|number} id - Person unique ID
- * @returns {Promise<Object|null>} Mapped profile object or null
- */
 export async function getProfileById(id) {
   const pId = String(id);
 
@@ -473,10 +417,6 @@ export async function getProfileById(id) {
   }
 }
 
-/**
- * Asynchronously fetch real live platform aggregate statistics from Supabase 'person' table
- * @returns {Promise<Object>} Statistics payload: { totalPersons, coveredWilayas, categoriesCount, accuracyRate }
- */
 export async function getPlatformStats() {
   if (!SUPABASE_URL || !SUPABASE_KEY) {
     return {
@@ -516,14 +456,11 @@ export async function getPlatformStats() {
   }
 }
 
-/**
- * Standardized Competency Domain Categories Taxonomy
- */
 export function getAllCategories() {
   return [
-    { 
-      id: 'ai', 
-      label: 'AI & DeepTech', 
+    {
+      id: 'ai',
+      label: 'AI & DeepTech',
       labelAr: 'الذكاء الاصطناعي والتكنولوجيا العميقة',
       labelFr: 'Intelligence Artificielle & DeepTech',
       desc: 'Machine Learning, NLP, Computer Vision & Big Data Systems',
@@ -531,9 +468,9 @@ export function getAllCategories() {
       descFr: 'Machine Learning, TAL, Vision par Ordinateur & Systèmes Big Data',
       icon: 'ai'
     },
-    { 
-      id: 'energy', 
-      label: 'Renewable Energy & Sustainability', 
+    {
+      id: 'energy',
+      label: 'Renewable Energy & Sustainability',
       labelAr: 'الطاقات المتجددة وكفاءة الطاقة',
       labelFr: 'Énergies Renouvelables & Durabilité',
       desc: 'Solar Photovoltaics, Green Hydrogen, Smart Grids & Energy Transition',
@@ -541,9 +478,9 @@ export function getAllCategories() {
       descFr: 'Solaire Photovoltaïque, Hydrogène Vert, Réseaux Intelligents',
       icon: 'energy'
     },
-    { 
-      id: 'health', 
-      label: 'Health & Biotechnology', 
+    {
+      id: 'health',
+      label: 'Health & Biotechnology',
       labelAr: 'الطب الحيوي والتكنولوجيا الصحية',
       labelFr: 'Santé & Biotechnologie',
       desc: 'Genomics, Precision Medicine, Epidemiology & Clinical Bioengineering',
@@ -551,9 +488,9 @@ export function getAllCategories() {
       descFr: 'Génomique, Médecine de Précision, Épidémiologie & Bio-ingénierie',
       icon: 'health'
     },
-    { 
-      id: 'robotics', 
-      label: 'Robotics & Smart IoT Systems', 
+    {
+      id: 'robotics',
+      label: 'Robotics & Smart IoT Systems',
       labelAr: 'الأنظمة الذكية وإنترنت الأشياء',
       labelFr: 'Robotique & Systèmes IoT Intelligents',
       desc: 'Autonomous Systems, Embedded Firmware, Industrial Automation & Telemetry',
@@ -561,9 +498,9 @@ export function getAllCategories() {
       descFr: 'Systèmes Autonomes, Systèmes Embarqués & Automatisation Industrielle',
       icon: 'robotics'
     },
-    { 
-      id: 'software', 
-      label: 'Cloud & Cyber Infrastructure', 
+    {
+      id: 'software',
+      label: 'Cloud & Cyber Infrastructure',
       labelAr: 'الأمن السيبراني والبنى السحابية',
       labelFr: 'Cloud & Cybersécurité',
       desc: 'Sovereign Cyberdefense, Distributed Infrastructure & High-Scale Systems',
@@ -571,9 +508,9 @@ export function getAllCategories() {
       descFr: 'Cyberdéfense Souveraine, Infrastructures Distribuées & Systèmes Haute Échelle',
       icon: 'software'
     },
-    { 
-      id: 'agri', 
-      label: 'Agritech & Water Security', 
+    {
+      id: 'agri',
+      label: 'Agritech & Water Security',
       labelAr: 'الهندسة الزراعية والموارد المائية',
       labelFr: 'Agritech & Sécurité Hydrique',
       desc: 'Smart Irrigation, Desert Agronomy, Hydrogeology & Food Security',

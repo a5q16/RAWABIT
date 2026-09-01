@@ -1,16 +1,10 @@
-/**
- * Rawabit v2 — Comprehensive Trilingual Translations
- * Languages: Arabic (Primary), English, French
- */
-
 export const TRANSLATIONS = {
   ar: {
-    // Language Names
+
     'lang.ar': 'العربية',
     'lang.en': 'English',
     'lang.fr': 'Français',
 
-    // Navbar
     'nav.brandName': 'روابط',
     'nav.brandSubtitle': 'RAWABIT',
     'nav.home': 'الرئيسية',
@@ -20,7 +14,6 @@ export const TRANSLATIONS = {
     'nav.contact': 'اتصل بنا',
     'nav.langBtn': 'العربية',
 
-    // Learning Roadmap Modal
     'roadmap.badge': 'المسار التعليمي والمهني الذكي',
     'roadmap.modalTitle': 'خارطة الطريق التعليمية المخصصة',
     'roadmap.modalSubtitle': 'حدد جامعتك الحالية ومستواك الأكاديمي مع مجالك المستهدف لبناء مسار تدريبي وأكاديمي مخصص مدعوم بالذكاء الاصطناعي.',
@@ -35,13 +28,11 @@ export const TRANSLATIONS = {
     'roadmap.chipCyber': 'الأمن السيبراني',
     'roadmap.chipCloud': 'الحوسبة السحابية',
 
-    // Hero Section
     'hero.title': 'اكتشف الكفاءات الجزائرية',
     'hero.subtitle': 'اكتشف واستكشف وتواصل مع الكفاءات الجزائرية الموثقة عبر كل الولايات والتخصصات.',
     'hero.ctaSearch': 'ابدأ البحث الذكي',
     'hero.ctaMap': 'استكشف الخريطة',
 
-    // AI Search Section
     'search.title': 'إستغل البحث السريع المدعم بالذكاء الاصطناعي',
     'search.subtitle': 'محرك بحث دلالي متقدم يفهم التخصصات الدقيقة، الأبحاث المنشورة، وبراءات الاختراع لربطك بالخبرة المناسبة فوراً.',
     'search.placeholder': 'ابحث بالاسم، التخصص الدقيق (مثل: ذكاء اصطناعي، طاقة شمسية)، أو الولاية...',
@@ -60,7 +51,6 @@ export const TRANSLATIONS = {
     'search.scopeHeadingLocal': 'كفاءات وخبرات هذا القسم',
     'search.scopeHeadingGlobal': 'كفاءات السجل الوطني الموحد (كامل المنصة)',
 
-    // Map Intro Section & Sci-Fi HUD
     'map.title': 'أو ابحث عن الكفاءة المرادة حسب الولايات بواسطة الخريطة التفاعلية',
     'map.subtitle': 'قم باختيار الولاية المراد معرفة كفاءتها',
     'map.placeholder': 'جاري تحميل الخريطة التفاعلية للـ 58 ولاية...',
@@ -80,7 +70,6 @@ export const TRANSLATIONS = {
     'hud.cardUniversities': 'المراكز والجامعات',
     'hud.loadingTalents': 'جارٍ تحميل دليل الكفاءات المعتمدة...',
 
-    // Features Section
     'features.title': 'ما الذي يميز منصة روابط؟',
     'features.subtitle': 'منظومة رقمية وطنية متكاملة مصممة بأعلى معايير الحوكمة والتقنية لربط وتمكين الكفاءات الجزائرية.',
     'features.card1.title': 'توثيق رسمي وموثوقية رقمية',
@@ -90,7 +79,6 @@ export const TRANSLATIONS = {
     'features.card3.title': 'ذكاء اصطناعي استدلالي وبحث عميق',
     'features.card3.desc': 'خوارزميات ذكية تفهم السياق البحثي والمهارات الدقيقة لاقتراح أفضل الكفاءات للمشاريع الوطنية والاستشارات المتخصصة.',
 
-    // Statistics Section
     'stats.title': 'أثر وطني متنامٍ في مؤشرات الكفاءات',
     'stats.stat1.val': '58',
     'stats.stat1.suffix': '+',
@@ -105,7 +93,6 @@ export const TRANSLATIONS = {
     'stats.stat4.suffix': '%',
     'stats.stat4.label': 'دقة التوثيق والمطابقة',
 
-    // About Page
     'about.badge': 'المنصة الرقمية الوطنية',
     'about.title': 'عن منصة روابط',
     'about.subtitle': 'المنظومة الوطنية المعتمدة لتوثيق، تمكين، وربط الكفاءات والخبرات الجزائرية في الداخل والخارج.',
@@ -126,7 +113,6 @@ export const TRANSLATIONS = {
     'about.ctaDesc': 'سجل ملفك الأكاديمي والمهني لتكون جزءاً من قاعدة البيانات الوطنية للكفاءات الجزائرية.',
     'about.ctaBtn': 'تواصل لتوثيق ملفك',
 
-    // Why Page & Vision
     'why.badge': 'لماذا روابط والرؤية الوطنية',
     'why.title': 'لماذا روابط؟ والرؤية الاستراتيجية',
     'why.subtitle': 'استجابة شاملة للتحديات الوطنية الكبرى لتوحيد الخبرات وتوجيهها نحو النهضة التكنولوجية والاقتصادية.',
@@ -158,7 +144,6 @@ export const TRANSLATIONS = {
     'vision.goal4Title': 'سيادة البيانات الوطنية',
     'vision.goal4': 'ترسيخ السيادة الرقمية على البيانات وحماية الملكية الفكرية للأبحاث والابتكارات الوطنية.',
 
-    // Contact Page
     'contact.badge': 'تواصل مع روابط',
     'contact.title': 'تواصل مع فريق منصة روابط',
     'contact.subtitle': 'نحن هنا للإجابة على استفساراتكم، بحث الشراكات المؤسساتية، وتسهيل إجراءات توثيق الكفاءات.',
@@ -188,7 +173,6 @@ export const TRANSLATIONS = {
     'contact.verifyHintDesc': 'هل أنت باحث أو خبير؟ يمكنك التقديم للتوثيق المعتمد مباشرة عبر اختيار نوع الطلب "طلب توثيق كفاءة جديدة".',
     'contact.badgeTag': 'معتمد رسمياً · 58 ولاية',
 
-    // Domains & Wilaya View
     'domains.wilayaPrefix': 'ولاية',
     'domains.title': 'مجالات الكفاءات والخبرات',
     'domains.subtitle': 'اختر مجالاً تخصصياً لاستكشاف الكفاءات والباحثين الموثقين في الولاية',
@@ -199,7 +183,6 @@ export const TRANSLATIONS = {
     'domains.viewProfiles': 'استكشاف الكفاءات',
     'domains.filterAll': 'جميع المجالات',
 
-    // Profiles Grid View
     'profiles.back': 'العودة للخريطة',
     'profiles.badge': 'دليل الكفاءات المعتمدة',
     'profiles.titlePrefix': 'كفاءات ولاية',
@@ -213,7 +196,6 @@ export const TRANSLATIONS = {
     'profiles.noResults': 'لم يتم العثور على كفاءات تطابق بحثك',
     'profiles.resetFilters': 'إعادة تعيين البحث',
 
-    // 3-Tier Verification System
     'tier.gold': 'خبير معتمد',
     'tier.silver': 'كفاءة موثقة',
     'tier.bronze': 'ملف مسجل',
@@ -221,7 +203,6 @@ export const TRANSLATIONS = {
     'tier.silverBadge': 'توثيق أكاديمي/مهني',
     'tier.bronzeBadge': 'مسجل في السجل',
 
-    // Mind-Map Experience
     'mindmap.askAi': 'استشارة الذكاء الاصطناعي',
     'mindmap.linkedin': 'الملف الشخصي على لينكد إن',
     'mindmap.verifiedBadge': 'كفاءة موثقة رسمياً',
@@ -232,28 +213,24 @@ export const TRANSLATIONS = {
     'mindmap.tabCareer': 'المسار المهني والمشاريع',
     'mindmap.tabCredentials': 'الاعتمادات وبراءات الاختراع',
 
-    // Minimalist Footer
     'footer.link1': 'عن منصة روابط',
     'footer.link2': 'لماذا روابط والرؤية',
     'footer.link3': 'تواصل مع فريق روابط',
     'footer.copy': '© 2025 روابط — المنصة الرقمية للكفاءات الجزائرية',
 
-    // Proactive Lost User AI Assistant
     'proactive.heading': 'هل تبحث عن تخصص معين؟',
     'proactive.sub': 'مساعدنا الذكي جاهز لإرشادك مباشرة إلى الكفاءات المناسبة في هذه الولاية.',
     'proactive.btn': 'اسأل المساعد الذكي',
 
-    // General
     'loader.brand': 'روابط'
   },
 
   en: {
-    // Language Names
+
     'lang.ar': 'العربية',
     'lang.en': 'English',
     'lang.fr': 'Français',
 
-    // Navbar
     'nav.brandName': 'روابط',
     'nav.brandSubtitle': 'RAWABIT',
     'nav.home': 'Home',
@@ -263,7 +240,6 @@ export const TRANSLATIONS = {
     'nav.contact': 'Contact',
     'nav.langBtn': 'English',
 
-    // Learning Roadmap Modal
     'roadmap.badge': 'AI Learning & Career Pathways',
     'roadmap.modalTitle': 'Personalized Learning Roadmap',
     'roadmap.modalSubtitle': 'Specify your university, level, and target specialty to generate an AI-tailored academic and industry skill roadmap.',
@@ -278,13 +254,11 @@ export const TRANSLATIONS = {
     'roadmap.chipCyber': 'Cybersecurity',
     'roadmap.chipCloud': 'Cloud Architecture',
 
-    // Hero Section
     'hero.title': 'Discover Algerian Talents',
     'hero.subtitle': 'Discover, explore, and connect with verified Algerian professionals across every wilaya and discipline.',
     'hero.ctaSearch': 'Start Smart Search',
     'hero.ctaMap': 'Explore Map',
 
-    // AI Search Section
     'search.title': 'Leverage AI-Powered Fast Search',
     'search.subtitle': 'An advanced semantic intelligence engine understanding deep specializations, published papers, and patents to connect you instantly with the right expertise.',
     'search.placeholder': 'Search by name, exact specialty (e.g. AI, Solar Energy), or wilaya...',
@@ -303,7 +277,6 @@ export const TRANSLATIONS = {
     'search.scopeHeadingLocal': 'Talents in this Section',
     'search.scopeHeadingGlobal': 'National Talent Registry (All Site)',
 
-    // Map Intro Section & Sci-Fi HUD
     'map.title': 'Or explore desired competencies by wilaya via the interactive map',
     'map.subtitle': 'Select the wilaya you wish to explore',
     'map.placeholder': 'Loading interactive 58 wilayas map...',
@@ -324,7 +297,6 @@ export const TRANSLATIONS = {
     'hud.cardUniversities': 'Available Universities',
     'hud.loadingTalents': 'Loading Wilaya Talents Directory...',
 
-    // Features Section
     'features.title': 'What makes Rawabit unique?',
     'features.subtitle': 'A national digital ecosystem engineered to the highest standards to empower and connect Algerian competencies.',
     'features.card1.title': 'Official Verification & Trust Index',
@@ -334,7 +306,6 @@ export const TRANSLATIONS = {
     'features.card3.title': 'Semantic AI & Deep Neural Matching',
     'features.card3.desc': 'Smart algorithms that comprehend research context and niche skills to propose premier talent for strategic advisory and projects.',
 
-    // Statistics Section
     'stats.title': 'Growing National Impact Across Key Indicators',
     'stats.stat1.val': '58',
     'stats.stat1.suffix': '+',
@@ -349,7 +320,6 @@ export const TRANSLATIONS = {
     'stats.stat4.suffix': '%',
     'stats.stat4.label': 'Verification Accuracy Rate',
 
-    // About Page
     'about.badge': 'National Digital Platform',
     'about.title': 'About Rawabit Platform',
     'about.subtitle': 'The accredited national digital ecosystem designed to index, verify, and connect Algerian talent at home and in the diaspora.',
@@ -370,7 +340,6 @@ export const TRANSLATIONS = {
     'about.ctaDesc': 'Submit your profile to be verified and featured in the official national competencies registry.',
     'about.ctaBtn': 'Apply for Verification',
 
-    // Why Page & Vision
     'why.badge': 'Why Rawabit & National Vision',
     'why.title': 'Why Rawabit? & Our National Vision',
     'why.subtitle': 'A structured response to strategic challenges, aligning Algerian intelligence with nationwide technological and economic development.',
@@ -402,7 +371,6 @@ export const TRANSLATIONS = {
     'vision.goal4Title': 'National Data Security',
     'vision.goal4': 'Safeguard national research data and intellectual property in a secure digital ecosystem.',
 
-    // Contact Page
     'contact.badge': 'Contact Rawabit',
     'contact.title': 'Get in Touch with Rawabit Team',
     'contact.subtitle': 'We are here to assist with inquiries, institutional partnerships, and profile verification onboarding.',
@@ -432,7 +400,6 @@ export const TRANSLATIONS = {
     'contact.verifyHintDesc': 'Are you a researcher or expert? You can apply for accredited verification by choosing "Talent Profile Verification".',
     'contact.badgeTag': 'Officially Verified · 58 Wilayas',
 
-    // Domains & Wilaya View
     'domains.wilayaPrefix': 'Wilaya of',
     'domains.title': 'Competency & Expertise Domains',
     'domains.subtitle': 'Select a specialized domain to discover verified experts and researchers in this wilaya',
@@ -443,7 +410,6 @@ export const TRANSLATIONS = {
     'domains.viewProfiles': 'Explore Talents',
     'domains.filterAll': 'All Domains',
 
-    // Profiles Grid View
     'profiles.back': 'Back to Map',
     'profiles.badge': 'Verified Talent Directory',
     'profiles.titlePrefix': 'Competencies in',
@@ -457,7 +423,6 @@ export const TRANSLATIONS = {
     'profiles.noResults': 'No matching profiles found',
     'profiles.resetFilters': 'Reset Filters',
 
-    // 3-Tier Verification System
     'tier.gold': 'Verified Expert',
     'tier.silver': 'Confirmed Talent',
     'tier.bronze': 'Registered Profile',
@@ -465,7 +430,6 @@ export const TRANSLATIONS = {
     'tier.silverBadge': 'Academic/Career Verified',
     'tier.bronzeBadge': 'National Index Registered',
 
-    // Mind-Map Experience
     'mindmap.askAi': 'Consult AI Assistant',
     'mindmap.linkedin': 'LinkedIn Profile',
     'mindmap.verifiedBadge': 'Officially Verified Talent',
@@ -476,28 +440,24 @@ export const TRANSLATIONS = {
     'mindmap.tabCareer': 'Professional Career',
     'mindmap.tabCredentials': 'Credentials & Accreditations',
 
-    // Minimalist Footer
     'footer.link1': 'About Rawabit Platform',
     'footer.link2': 'Why Rawabit & Vision',
     'footer.link3': 'Contact Rawabit Team',
     'footer.copy': "© 2025 Rawabit — Algeria's Digital Competencies Platform",
 
-    // Proactive Lost User AI Assistant
     'proactive.heading': 'Looking for a specific expertise?',
     'proactive.sub': 'Our AI assistant is ready to guide you directly to matching competencies in this wilaya.',
     'proactive.btn': 'Ask AI Assistant',
 
-    // General
     'loader.brand': 'RAWABIT'
   },
 
   fr: {
-    // Language Names
+
     'lang.ar': 'العربية',
     'lang.en': 'English',
     'lang.fr': 'Français',
 
-    // Navbar
     'nav.brandName': 'روابط',
     'nav.brandSubtitle': 'RAWABIT',
     'nav.home': 'Accueil',
@@ -507,7 +467,6 @@ export const TRANSLATIONS = {
     'nav.contact': 'Contact',
     'nav.langBtn': 'Français',
 
-    // Learning Roadmap Modal
     'roadmap.badge': 'Parcours d’Apprentissage IA',
     'roadmap.modalTitle': 'Feuille de Route Personnalisée',
     'roadmap.modalSubtitle': 'Indiquez votre université, niveau et spécialité cible pour concevoir un parcours d’apprentissage sur mesure guidé par l’IA.',
@@ -522,13 +481,11 @@ export const TRANSLATIONS = {
     'roadmap.chipCyber': 'Cybersécurité',
     'roadmap.chipCloud': 'Architecture Cloud',
 
-    // Hero Section
     'hero.title': 'Découvrez les talents algériens',
     'hero.subtitle': 'Découvrez, explorez et connectez-vous avec des professionnels algériens vérifiés à travers chaque wilaya et discipline.',
     'hero.ctaSearch': 'Recherche Intelligente',
     'hero.ctaMap': 'Explorer la Carte',
 
-    // AI Search Section
     'search.title': 'Exploitez la recherche rapide assistée par l’IA',
     'search.subtitle': 'Un moteur sémantique avancé qui analyse les spécialités pointues, les publications scientifiques et les brevets pour vous connecter instantanément.',
     'search.placeholder': 'Rechercher par nom, spécialité précise (ex: IA, Énergie solaire) ou wilaya...',
@@ -547,7 +504,6 @@ export const TRANSLATIONS = {
     'search.scopeHeadingLocal': 'Compétences de cette Section',
     'search.scopeHeadingGlobal': 'Registre National (Tout le Site)',
 
-    // Map Intro Section & Sci-Fi HUD
     'map.title': 'Ou recherchez la compétence souhaitée par wilaya grâce à la carte interactive',
     'map.subtitle': 'Sélectionnez la wilaya dont vous souhaitez découvrir les compétences',
     'map.placeholder': 'Chargement de la carte interactive des 58 wilayas...',
@@ -568,7 +524,6 @@ export const TRANSLATIONS = {
     'hud.cardUniversities': 'Universités & Centres',
     'hud.loadingTalents': 'Chargement du répertoire des talents...',
 
-    // Features Section
     'features.title': 'Qu’est-ce qui rend Rawabit unique ?',
     'features.subtitle': 'Un écosystème numérique national conçu selon les plus hauts standards technologiques et professionnels.',
     'features.card1.title': 'Vérification Officielle & Indice de Confiance',
@@ -578,7 +533,6 @@ export const TRANSLATIONS = {
     'features.card3.title': 'IA Sémantique & Correspondance Profonde',
     'features.card3.desc': 'Algorithmes neuronaux comprenant le contexte scientifique et les compétences rares pour recommander les meilleurs experts.',
 
-    // Statistics Section
     'stats.title': 'Un Impact National Croissant sur les Indicateurs Clés',
     'stats.stat1.val': '58',
     'stats.stat1.suffix': '+',
@@ -593,7 +547,6 @@ export const TRANSLATIONS = {
     'stats.stat4.suffix': '%',
     'stats.stat4.label': 'Taux de Précision de Vérification',
 
-    // About Page
     'about.badge': 'Plateforme Numérique Nationale',
     'about.title': 'À propos de Rawabit',
     'about.subtitle': 'L’écosystème numérique national accrédité pour cartographier, vérifier et valoriser les compétences algériennes en Algérie et dans la diaspora.',
@@ -614,7 +567,6 @@ export const TRANSLATIONS = {
     'about.ctaDesc': 'Inscrivez votre profil pour rejoindre le registre officiel des compétences nationales.',
     'about.ctaBtn': 'Demander la vérification',
 
-    // Why Page & Vision
     'why.badge': 'Pourquoi Rawabit & Vision Nationale',
     'why.title': 'Pourquoi Rawabit ? & Notre Vision Nationale',
     'why.subtitle': 'Une réponse intégrée aux défis stratégiques pour mobiliser le potentiel intellectuel vers l’essor économique et technologique.',
@@ -646,7 +598,6 @@ export const TRANSLATIONS = {
     'vision.goal4Title': 'Sécurité des Données',
     'vision.goal4': 'Consolider la protection des données et de la propriété intellectuelle nationale.',
 
-    // Contact Page
     'contact.badge': 'Contacter Rawabit',
     'contact.title': 'Contacter l’Équipe Rawabit',
     'contact.subtitle': 'Nous sommes à votre écoute pour vos questions, demandes de partenariats institutionnels et démarches de certification.',
@@ -676,7 +627,6 @@ export const TRANSLATIONS = {
     'contact.verifyHintDesc': 'Vous êtes chercheur ou expert ? Demandez votre accréditation en choisissant "Vérification de profil compétence".',
     'contact.badgeTag': 'Officiellement Vérifié · 58 Wilayas',
 
-    // Domains & Wilaya View
     'domains.wilayaPrefix': 'Wilaya de',
     'domains.title': 'Domaines de Compétences & d’Expertise',
     'domains.subtitle': 'Sélectionnez un domaine pour découvrir les experts et chercheurs vérifiés de la wilaya',
@@ -687,7 +637,6 @@ export const TRANSLATIONS = {
     'domains.viewProfiles': 'Découvrir les Profils',
     'domains.filterAll': 'Tous les Domaines',
 
-    // Profiles Grid View
     'profiles.back': 'Retour à la carte',
     'profiles.badge': 'Répertoire des Compétences Agréées',
     'profiles.titlePrefix': 'Compétences de la Wilaya de',
@@ -701,7 +650,6 @@ export const TRANSLATIONS = {
     'profiles.noResults': 'Aucune compétence trouvée',
     'profiles.resetFilters': 'Réinitialiser la Recherche',
 
-    // 3-Tier Verification System
     'tier.gold': 'Expert Agréé',
     'tier.silver': 'Compétence Confirmée',
     'tier.bronze': 'Profil Enregistré',
@@ -709,7 +657,6 @@ export const TRANSLATIONS = {
     'tier.silverBadge': 'Parcours Vérifié',
     'tier.bronzeBadge': 'Inscrit au Registre National',
 
-    // Mind-Map Experience
     'mindmap.askAi': 'Consulter l’Assistant IA',
     'mindmap.linkedin': 'Profil LinkedIn',
     'mindmap.verifiedBadge': 'Compétence Officiellement Vérifiée',
@@ -720,18 +667,15 @@ export const TRANSLATIONS = {
     'mindmap.tabCareer': 'Parcours Professionnel & Projets',
     'mindmap.tabCredentials': 'Accréditations & Brevets',
 
-    // Minimalist Footer
     'footer.link1': 'À propos de Rawabit',
     'footer.link2': 'Pourquoi Rawabit & Vision',
     'footer.link3': 'Contacter l’Équipe Rawabit',
     'footer.copy': '© 2025 Rawabit — Plateforme Nationale des Compétences Algériennes',
 
-    // Proactive Lost User AI Assistant
     'proactive.heading': 'Vous recherchez une compétence précise ?',
     'proactive.sub': 'Notre assistant IA est à votre disposition pour vous orienter vers les compétences de cette wilaya.',
     'proactive.btn': 'Consulter l’Assistant IA',
 
-    // General
     'loader.brand': 'RAWABIT'
   }
 };

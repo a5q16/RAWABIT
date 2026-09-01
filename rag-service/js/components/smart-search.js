@@ -1,15 +1,3 @@
-/**
- * Rawabit v2 — AI-First Categorized Command Palette & Smart Search Engine
- * Features:
- * 1. Categorized Filter Tabs (Ask AI, Experts, Specialties, Wilayas)
- * 2. Scope Switcher Bar inside Dropdown ("This Section" vs "All Site")
- * 3. Floating Glassmorphism Dropdown with absolute z-index: 9999
- * 4. Pinned Top AI Action Prompt with Instant SSE Chat Drawer Integration
- * 5. Segmented Result Headers for Clean UX
- * 6. 100% Strict Dynamic Localization (RTL / LTR)
- * Strictly Vanilla JS · 60FPS Reactive
- */
-
 import { WILAYAS } from './map-paths.js';
 import { openWilayaIntermediateScreen } from './wilaya-modal.js';
 import { openAIChat } from './chat.js';
@@ -34,7 +22,6 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
-// Pre-warm profiles cache for fast instant matching across key hubs
 Promise.all([
   getProfilesByWilaya(16),
   getProfilesByWilaya(10),
@@ -48,12 +35,6 @@ Promise.all([
   cachedProfiles = merged;
 }).catch(() => {});
 
-/**
- * Initialize Categorized Command Palette on a given form and input
- * @param {HTMLFormElement} formEl 
- * @param {HTMLInputElement} inputEl 
- * @param {Object} options - Configuration options (wilayaCode, defaultScope, showScopeToggle, onScopeChange, onSearchInput)
- */
 export function initSmartSearch(formEl, inputEl, options = {}) {
   if (!formEl || !inputEl) return null;
 
@@ -65,17 +46,15 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
     onSearchInput = null
   } = options;
 
-  let currentScope = defaultScope; // 'local' | 'global'
+  let currentScope = defaultScope;
   let activeIndex = -1;
-  let activeTab = 'ai'; // 'ai', 'experts', 'specialties', 'wilayas'
+  let activeTab = 'ai';
 
-  // Remove existing dropdown if re-initializing on same form
   const existingDropdown = formEl.querySelector('.smart-search-dropdown');
   if (existingDropdown) {
     existingDropdown.remove();
   }
 
-  // Create floating glassmorphism dropdown container with high z-index
   const dropdown = document.createElement('div');
   dropdown.className = 'smart-search-dropdown';
   dropdown.id = `smart-search-dropdown-${Math.random().toString(36).substr(2, 6)}`;
@@ -210,7 +189,6 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
     const rawQuery = query.trim() || (lang === 'ar' ? 'الكفاءات الجزائرية' : (lang === 'fr' ? 'Compétences algériennes' : 'Algerian competencies'));
     const safeDisplayQuery = escapeHtml(rawQuery);
 
-    // 1. Filter matching Wilayas
     const matchingWilayas = WILAYAS.filter(w => {
       if (!q) return true;
       const codeMatch = w.code.includes(q) || String(Number(w.code)) === q;
@@ -221,10 +199,8 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
       return codeMatch || nameMatch || nameArMatch || nameEnMatch || nameFrMatch;
     }).slice(0, 4);
 
-    // 2. Filter matching Talents
     let combinedTalents = Array.isArray(asyncTalents) ? [...asyncTalents] : [];
-    
-    // Search in-memory cached profiles
+
     const localMatches = cachedProfiles.filter(p => {
       if (currentScope === 'local' && wilayaCode) {
         const pCode = String(p.wilayaCode || p.wilaya_id || '').padStart(2, '0');
@@ -247,7 +223,6 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
 
     const matchingTalents = combinedTalents.slice(0, 6);
 
-    // 3. Filter matching Specialties / Domains
     const matchingSpecialties = allCategories.filter(c => {
       if (!q) return true;
       const lMatch = (c.label && c.label.toLowerCase().includes(q)) || (c.labelAr && c.labelAr.includes(q)) || (c.labelFr && c.labelFr.toLowerCase().includes(q));
@@ -255,9 +230,8 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
       return lMatch || dMatch;
     }).slice(0, 4);
 
-    // Render Command Palette DOM with Scope Bar inside header
     dropdown.innerHTML = `
-      <!-- 0. SEARCH SCOPE TOGGLE BAR (INSIDE DROPDOWN) -->
+
       ${showScopeToggle || wilayaCode ? `
         <div class="smart-scope-bar">
           <div class="smart-scope-label">
@@ -287,7 +261,6 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
         </div>
       ` : ''}
 
-      <!-- CATEGORY TABS -->
       <div class="smart-palette-tabs">
         <button type="button" class="palette-tab-btn ${activeTab === 'ai' ? 'active' : ''}" data-tab="ai">
           <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
@@ -322,10 +295,8 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
         </button>
       </div>
 
-      <!-- RESULTS BODY -->
       <div class="smart-palette-results">
 
-        <!-- 1. ALWAYS PRESENT TOP AI ACTION PROMPT -->
         <div class="ai-suggest" id="ai-suggest-top-btn" style="cursor:pointer; font-weight:bold; color:#059669;">
           <div style="display: flex; align-items: center; gap: 10px;">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
@@ -336,7 +307,6 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
           <span style="background: rgba(5, 150, 105, 0.15); color: #059669; font-size: 0.76rem; font-weight: 800; padding: 3px 8px; border-radius: 9999px;">${i18n.aiActionBadge}</span>
         </div>
 
-        <!-- 2. SEGMENTED EXPERTS -->
         ${(activeTab === 'ai' || activeTab === 'experts') && matchingTalents.length > 0 ? `
           <div class="smart-search-group">
             <div class="smart-group-title">${i18n.talentsHeading}</div>
@@ -373,7 +343,6 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
           </div>
         ` : ''}
 
-        <!-- 3. SEGMENTED SPECIALTIES -->
         ${(activeTab === 'ai' || activeTab === 'specialties') && matchingSpecialties.length > 0 ? `
           <div class="smart-search-group">
             <div class="smart-group-title">${i18n.specialtiesHeading}</div>
@@ -398,7 +367,6 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
           </div>
         ` : ''}
 
-        <!-- 4. SEGMENTED WILAYAS -->
         ${(activeTab === 'ai' || activeTab === 'wilayas') && matchingWilayas.length > 0 ? `
           <div class="smart-search-group">
             <div class="smart-group-title">${i18n.wilayasHeading}</div>
@@ -426,7 +394,6 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
 
     dropdown.style.display = 'block';
 
-    // ── Wire Scope Switcher inside Dropdown ──
     dropdown.querySelectorAll('.smart-scope-tab-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -442,7 +409,6 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
       });
     });
 
-    // ── Wire Tab Click Handlers ──
     dropdown.querySelectorAll('.palette-tab-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -451,7 +417,6 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
       });
     });
 
-    // ── Wire AI Suggestion Click ──
     const aiBtn = dropdown.querySelector('#ai-suggest-top-btn');
     if (aiBtn) {
       aiBtn.addEventListener('click', () => {
@@ -461,7 +426,6 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
       });
     }
 
-    // ── Wire Wilaya Clicks ──
     dropdown.querySelectorAll('.smart-wilaya-item').forEach(item => {
       item.addEventListener('click', () => {
         const code = item.dataset.code;
@@ -474,7 +438,6 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
       });
     });
 
-    // ── Wire Talent Clicks ──
     dropdown.querySelectorAll('.smart-talent-item').forEach(item => {
       item.addEventListener('click', () => {
         const id = item.dataset.id;
@@ -486,7 +449,6 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
       });
     });
 
-    // ── Wire Specialty Clicks ──
     dropdown.querySelectorAll('.smart-specialty-item').forEach(item => {
       item.addEventListener('click', () => {
         const cat = item.dataset.cat;
@@ -495,8 +457,6 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
       });
     });
   }
-
-  // ── Input & Form Event Listeners ──
 
   inputEl.addEventListener('input', (e) => {
     const val = e.target.value;
@@ -530,7 +490,6 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
     openAIChat({ initialQuery: query, wilayaCode: wilayaCode || undefined, activeWilayaId: wilayaCode ? Number(wilayaCode) : undefined });
   });
 
-  // Keyboard navigation inside dropdown
   inputEl.addEventListener('keydown', (e) => {
     if (dropdown.style.display === 'none') return;
 
@@ -555,7 +514,6 @@ export function initSmartSearch(formEl, inputEl, options = {}) {
     }
   });
 
-  // Close dropdown on outside click
   document.addEventListener('click', (e) => {
     if (!formEl.contains(e.target)) {
       closeDropdown();

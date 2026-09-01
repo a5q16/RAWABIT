@@ -17,14 +17,12 @@ from fastapi.responses import ORJSONResponse
 
 logger = logging.getLogger("rawabit.security.exceptions")
 
-# Strings that must never appear in error responses
 _SENSITIVE = [
     "groq_api_key", "supabase_service_key", "sbp_",
     "gsk_", "eyJ", "password", "secret", "token",
     "Traceback", "File \"", "line ", "import ",
     "ConnectionRefused", "Errno", "OSError",
 ]
-
 
 def _sanitize_error_message(msg: str) -> str:
     """Remove any sensitive patterns from an error message."""
@@ -33,13 +31,12 @@ def _sanitize_error_message(msg: str) -> str:
         if pattern.lower() in sanitized.lower():
             sanitized = "Internal error — see server logs for details."
             break
-    # Also strip file paths
+
     import re
     sanitized = re.sub(r'[A-Z]:\\[^\s"\']+', '[PATH]', sanitized)
     sanitized = re.sub(r'/home/[^\s"\']+', '[PATH]', sanitized)
     sanitized = re.sub(r'/var/[^\s"\']+', '[PATH]', sanitized)
     return sanitized
-
 
 async def global_exception_handler(request: Request, exc: Exception) -> ORJSONResponse:
     """Catch-all handler for unhandled exceptions."""
@@ -51,7 +48,6 @@ async def global_exception_handler(request: Request, exc: Exception) -> ORJSONRe
         error_id, request.method, safe_path,
     )
 
-    # Log full traceback server-side only
     tb = traceback.format_exception(type(exc), exc, exc.__traceback__)
     logger.error("[%s] Full traceback:\n%s", error_id, "".join(tb))
 
@@ -65,7 +61,6 @@ async def global_exception_handler(request: Request, exc: Exception) -> ORJSONRe
         },
         headers={"X-Error-Id": error_id},
     )
-
 
 async def http_exception_handler(request: Request, exc) -> ORJSONResponse:
     """Handler for HTTPException that sanitizes the message."""
@@ -85,7 +80,6 @@ async def http_exception_handler(request: Request, exc) -> ORJSONResponse:
             "error_id": error_id,
         },
     )
-
 
 def register_exception_handlers(app: FastAPI):
     """Register all exception handlers on the FastAPI app."""

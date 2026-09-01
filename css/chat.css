@@ -1,10 +1,3 @@
-/**
- * Rawabit v2 — Glassmorphism AI Chat Interface (Clean 3-Tier Flexbox Architecture)
- * Header (flex-shrink: 0) + Messages (flex: 1; overflow-y: auto) + Omnibar (flex-shrink: 0)
- * Guaranteed Zero Overlap · WCAG AAA Contrast · High-Clarity Logo
- */
-
-/* ── 1. Full-Screen Backdrop Overlay ── */
 .ai-drawer-backdrop {
   position: fixed;
   inset: 0;
@@ -22,7 +15,6 @@
   pointer-events: auto;
 }
 
-/* ── 2. Full-Screen Workspace Panel (Strict Flex Column) ── */
 .ai-drawer-panel {
   position: fixed;
   inset: 0;
@@ -50,7 +42,6 @@
   transform: scale(1);
 }
 
-/* ── 3. Top Glass Header Bar (Flex Tier 1 - Fixed at Top) ── */
 .ai-glass-header {
   flex-shrink: 0;
   width: 100%;
@@ -145,7 +136,6 @@
   background: rgba(255, 255, 255, 0.08);
 }
 
-/* ── DEDICATED FIXED CLOSE BUTTON ── */
 .close-chat-btn {
   position: fixed !important;
   top: 24px;
@@ -191,10 +181,9 @@
   color: #CBD5E1;
 }
 
-/* ── 4. Main Scrollable Body (Flex Tier 2 - Flex Grow & Internal Scroll) ── */
 .ai-glass-scroll-body {
   flex: 1;
-  min-height: 0; /* CRITICAL: Enables proper flex-child scrolling */
+  min-height: 0;
   overflow-y: auto;
   padding: 24px 0 16px 0 !important;
   width: 100%;
@@ -223,7 +212,6 @@
   box-sizing: border-box;
 }
 
-/* ── 5. Clean Zero-State FAQ Grid ── */
 .ai-zero-state {
   margin: auto 0;
   display: flex;
@@ -264,7 +252,6 @@
   margin-bottom: 24px;
 }
 
-/* Context Badge in Zero State */
 .zero-context-pill {
   display: inline-flex;
   align-items: center;
@@ -286,7 +273,6 @@
   background: #10B981;
 }
 
-/* Clean Single-Line 2x2 FAQ Cards Grid */
 .zero-faq-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -340,7 +326,6 @@
   transform: translateX(3px);
 }
 
-/* ── 6. Message Stream Layout ── */
 .ai-chat-messages {
   display: flex;
   flex-direction: column;
@@ -436,7 +421,6 @@
   border-inline-start: 4px solid #10B981;
 }
 
-/* ── High-Contrast Accessibility & Typography for AI Bubbles ── */
 .chat-message, .ai-bubble, .ai-msg-bubble, .message-content, .markdown-body, .ai-msg-body {
   color: rgba(255, 255, 255, 0.95) !important;
   line-height: 1.75;
@@ -456,7 +440,6 @@
   margin-bottom: 0;
 }
 
-/* Ensure any headings or bold text inside the AI response are bright high-contrast white */
 .chat-message h1, .chat-message h2, .chat-message h3, .chat-message h4,
 .ai-bubble h1, .ai-bubble h2, .ai-bubble h3, .ai-bubble h4,
 .ai-msg-bubble h1, .ai-msg-bubble h2, .ai-msg-bubble h3,
@@ -550,7 +533,6 @@
   padding: 0;
 }
 
-/* ── Suggested Chips Container ── */
 .ai-chips-wrap {
   display: flex;
   gap: 8px;
@@ -578,7 +560,6 @@
   transform: translateY(-2px);
 }
 
-/* ── Typing Indicator ── */
 .ai-typing-indicator {
   display: flex;
   align-items: center;
@@ -602,7 +583,6 @@
   40% { transform: scale(1); opacity: 1; }
 }
 
-/* ── 7. Docked Omnibar Input (Flex Tier 3 - Natural Bottom Dock) ── */
 .ai-floating-omnibar {
   flex-shrink: 0;
   position: relative;
@@ -712,7 +692,6 @@
   transform: scale(0.98);
 }
 
-/* ── 8. Global Floating Action Button (FAB) ── */
 .global-ai-fab {
   position: fixed;
   bottom: 28px;
@@ -761,7 +740,6 @@
   letter-spacing: 0.2px;
 }
 
-/* ── 9. Responsive Adaptations ── */
 @media (max-width: 768px) {
   .zero-faq-grid {
     grid-template-columns: 1fr;

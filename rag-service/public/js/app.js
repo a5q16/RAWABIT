@@ -1,9 +1,3 @@
-/**
- * Rawabit v2 — Main Application Orchestrator
- * Clean Onboarding, Sticky Navbar, Minimalist Layout & Interactive SVG Map
- * Zero Pop-ups · Absolute Minimalism · Massive Whitespace
- */
-
 import { store } from './store.js';
 import { initI18n, t, applyTranslations } from './i18n.js';
 import { registerRoute, initRouter, navigate } from './router.js';
@@ -20,17 +14,12 @@ import { initSmartSearch } from './components/smart-search.js';
 import { createGlobalAIFab } from './components/chat.js';
 import { initRoadmapListeners } from './components/roadmap.js';
 
-/**
- * Render the Minimalist Homepage Layout
- */
 export function renderHome() {
   const main = document.getElementById('main-content');
   if (!main) return;
 
   main.innerHTML = `
-    <!-- ══════════════════════════════════════════════════════════════ -->
-    <!-- 1. HERO SECTION (Massive Whitespace, Zero UI Badges)           -->
-    <!-- ══════════════════════════════════════════════════════════════ -->
+
     <section class="hero" id="hero">
       <div class="hero-content">
         <h1 class="animate-fade-in" data-i18n="hero.title">${t('hero.title')}</h1>
@@ -56,19 +45,15 @@ export function renderHome() {
       </div>
     </section>
 
-    <!-- ══════════════════════════════════════════════════════════════ -->
-    <!-- 2. AI FAST SEARCH SECTION (No Badges, No Trending Pills)       -->
-    <!-- ══════════════════════════════════════════════════════════════ -->
     <section class="section-ai-search" id="ai-search">
       <div class="container">
         <div class="search-section-wrap">
-          
+
           <div class="section-header">
             <h2 data-i18n="search.title">${t('search.title')}</h2>
             <p data-i18n="search.subtitle">${t('search.subtitle')}</p>
           </div>
 
-          <!-- Wide Prominent AI Search Box -->
           <form class="ai-search-box" id="home-search-form" onsubmit="event.preventDefault();">
             <div class="ai-search-icon">
               <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
@@ -76,9 +61,9 @@ export function renderHome() {
               </svg>
             </div>
 
-            <input 
-              type="text" 
-              class="ai-search-input" 
+            <input
+              type="text"
+              class="ai-search-input"
               id="home-search-input"
               placeholder="${t('search.placeholder')}"
               data-i18n-placeholder="search.placeholder"
@@ -97,12 +82,9 @@ export function renderHome() {
       </div>
     </section>
 
-    <!-- ══════════════════════════════════════════════════════════════ -->
-    <!-- 3. MAP INTRO SECTION (Interactive Algeria SVG Map)             -->
-    <!-- ══════════════════════════════════════════════════════════════ -->
     <section class="section-map" id="map-section">
       <div class="container">
-        
+
         <div class="section-header">
           <h2 data-i18n="map.title">${t('map.title')}</h2>
           <p data-i18n="map.subtitle">${t('map.subtitle')}</p>
@@ -124,19 +106,16 @@ export function renderHome() {
       </div>
     </section>
 
-    <!-- ══════════════════════════════════════════════════════════════ -->
-    <!-- 4. FEATURES SECTION ("What makes Rawabit unique?")             -->
-    <!-- ══════════════════════════════════════════════════════════════ -->
     <section class="section-features" id="features">
       <div class="container">
-        
+
         <div class="section-header">
           <h2 data-i18n="features.title">${t('features.title')}</h2>
           <p data-i18n="features.subtitle">${t('features.subtitle')}</p>
         </div>
 
         <div class="features-grid">
-          
+
           <div class="feature-card">
             <div class="feature-icon-box">
               <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -175,18 +154,15 @@ export function renderHome() {
       </div>
     </section>
 
-    <!-- ══════════════════════════════════════════════════════════════ -->
-    <!-- 5. STATISTICS SECTION (Animated Counters on Viewport)          -->
-    <!-- ══════════════════════════════════════════════════════════════ -->
     <section class="section-stats" id="stats">
       <div class="container">
-        
+
         <div class="section-header">
           <h2 data-i18n="stats.title">${t('stats.title')}</h2>
         </div>
 
         <div class="stats-grid">
-          
+
           <div class="stat-card">
             <div class="stat-number-wrap">
               <span class="stat-suffix" data-i18n="stats.stat1.suffix">${t('stats.stat1.suffix')}</span>
@@ -224,19 +200,15 @@ export function renderHome() {
       </div>
     </section>
 
-    <!-- ══════════════════════════════════════════════════════════════ -->
-    <!-- 6. MASSIVELY SIMPLIFIED FOOTER (Strictly 3 Links, Centered)   -->
-    <!-- ══════════════════════════════════════════════════════════════ -->
     <footer class="footer-minimal">
       <div class="container">
         <div class="footer-minimal-inner">
-          
+
           <div class="footer-minimal-brand">
             <img class="footer-logo-img" src="./logo.png" alt="Rawabit Logo" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12); flex-shrink: 0;" />
             <span class="footer-logo-name" data-i18n="nav.brandName">${t('nav.brandName')}</span>
           </div>
 
-          <!-- Footer navigation links -->
           <nav class="footer-minimal-nav">
             <a class="footer-minimal-link" href="#/about" data-i18n="footer.link1">${t('footer.link1')}</a>
             <span class="footer-nav-sep">·</span>
@@ -254,17 +226,14 @@ export function renderHome() {
     </footer>
   `;
 
-  // Apply translations
   applyTranslations();
 
-// Bind Smart Search with dynamic AI floating suggestions
   const searchForm = main.querySelector('#home-search-form');
   const searchInput = main.querySelector('#home-search-input');
   if (searchForm && searchInput) {
     initSmartSearch(searchForm, searchInput);
   }
 
-  // ── Fetch Real Live Supabase Platform Aggregate Statistics ──
   getPlatformStats().then(stats => {
     if (stats && main) {
       const statWilayas = main.querySelector('[data-stat="wilayas"]');
@@ -285,50 +254,38 @@ export function renderHome() {
         statAccuracy.setAttribute('data-target', String(stats.accuracyRate));
       }
 
-      // Trigger animated count-up with live Supabase counts
       initStatsAnimation(main);
     }
   });
 
-  // Initialize stats animation fallback
   initStatsAnimation(main);
 
-  // ── Render Interactive Algeria SVG Map ──
   const mapContainer = main.querySelector('#map-container');
   if (mapContainer) {
     renderMap(mapContainer);
   }
 }
 
-/**
- * Initialize Platform & Handle First-Visit Onboarding
- */
 async function init() {
   await showLoader();
 
-  // Render sticky navbar
   const nav = createNav();
   if (!document.body.contains(nav)) {
     document.body.prepend(nav);
   }
 
-  // Render full-screen 3-card language switcher overlay
   const langOverlay = createLanguageOverlay();
   document.body.appendChild(langOverlay);
 
-  // Mount Global Floating AI Action Button (FAB)
   createGlobalAIFab();
 
-  // Initialize i18n
   initI18n();
 
-  // Check first-visit onboarding (True Full-Screen 3-Card Selection)
   if (shouldShowOnboarding()) {
     hideLoader();
     openLanguageSelector(true);
   }
 
-  // Register routes (standard page navigation, no in-page jumping)
   registerRoute('#/', renderHome);
   registerRoute('#/about', renderAbout);
   registerRoute('#/why', () => renderWhy('why'));
@@ -339,22 +296,17 @@ async function init() {
     await renderProfiles(params.code);
   });
 
-  // Boot router
   initRouter();
 
-  // Global scroll-lock fix: Always force body overflow and remove modal-open on route change
   window.addEventListener('hashchange', () => {
     document.body.style.overflow = '';
     document.body.classList.remove('modal-open');
   });
 
-  // Initialize Learning Roadmap click triggers
   initRoadmapListeners();
 
-  // Hide loader
   hideLoader();
 
-  // Re-render when language changes
   store.subscribe('lang', async () => {
     const rawHash = window.location.hash || '#/';
     const baseRoute = rawHash.split('?')[0];
@@ -376,7 +328,6 @@ async function init() {
   });
 }
 
-// ── Boot Application ──
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
 } else {

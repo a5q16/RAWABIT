@@ -1,7 +1,3 @@
-/**
- * Global Loader component
- */
-
 let _loaderEl = null;
 
 export function createLoader() {
@@ -29,7 +25,7 @@ export function showLoader() {
         createLoader();
     }
     _loaderEl.classList.remove('hidden');
-    
+
     return new Promise(resolve => {
         setTimeout(resolve, 300);
     });

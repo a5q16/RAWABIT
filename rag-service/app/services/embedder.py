@@ -24,7 +24,6 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger("rawabit.embedder")
 
-
 class Embedder:
     """Thread-safe, single-instance embedding service."""
 
@@ -32,13 +31,11 @@ class Embedder:
     _model = None
     _ready: bool = False
 
-    # ── Singleton ───────────────────────────────────────────────
     def __new__(cls) -> Embedder:
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    # ── Lifecycle ───────────────────────────────────────────────
     def warm(self, model_name: str = "intfloat/multilingual-e5-small") -> None:
         """
         Download (if needed) and load the embedding model into memory.
@@ -48,7 +45,6 @@ class Embedder:
             logger.info("Embedder already warm — skipping reload.")
             return
 
-        # Late import so the module loads fast; torch is heavy.
         from sentence_transformers import SentenceTransformer
 
         logger.info("Loading embedding model '%s' ...", model_name)
@@ -75,7 +71,6 @@ class Embedder:
             raise RuntimeError("Embedder has not been warmed up yet.")
         return self._model.get_sentence_embedding_dimension()
 
-    # ── Encoding ────────────────────────────────────────────────
     def encode_passages(self, texts: list[str]) -> list[list[float]]:
         """
         Encode document chunks for storage.
@@ -113,6 +108,4 @@ class Embedder:
         )
         return embedding.tolist()
 
-
-# Module-level convenience instance
 embedder = Embedder()

@@ -20,7 +20,6 @@ from app.services.embedder import embedder
 
 logger = logging.getLogger("rawabit.generator")
 
-# ── Smart fallback messages (engaging, prompt profile suggestion) ──
 _FALLBACK = {
     "ar": (
         "عذراً، لم نعثر بعد على كفاءات مسجلة وموثقة في هذا التخصص. "
@@ -40,7 +39,6 @@ _FALLBACK = {
     ),
 }
 
-# ── System prompts per language ─────────────────────────────────
 _SYSTEM_PROMPT = {
     "ar": (
         "قواعد صارمة — اتبعها بالضبط:\n"
@@ -92,14 +90,11 @@ _SYSTEM_PROMPT = {
     ),
 }
 
-
 async def _get_client():
     """Create a fresh async Supabase client (short-lived per request)."""
     s = get_settings()
     return await acreate_client(s.supabase_url, s.supabase_service_key)
 
-
-# ── Retrieval ───────────────────────────────────────────────────
 async def retrieve_context(
     query: str,
     threshold: float | None = None,
@@ -113,10 +108,8 @@ async def retrieve_context(
     threshold = threshold or s.sim_threshold
     match_count = match_count or s.match_count
 
-    # 1. Embed query
     vec = await asyncio.to_thread(embedder.encode_query, query)
 
-    # 2. Call match_chunks RPC
     client = await _get_client()
     res = await client.rpc(
         "match_chunks",
@@ -131,11 +124,8 @@ async def retrieve_context(
     logger.info("retrieve_context: %d results (threshold=%.2f)", len(rows), threshold)
     return rows
 
-
-# ── LLM streaming via Groq Cloud ────────────────────────────────
 _GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
 _GROQ_MODEL = "qwen/qwen3.8-27b"
-
 
 async def _stream_groq(
     messages: list[dict],
@@ -185,10 +175,7 @@ async def _stream_groq(
                 except (json.JSONDecodeError, KeyError, IndexError):
                     continue
 
-
-# ── Full RAG stream ─────────────────────────────────────────────
 _SANDBOX_TRIGGER = "[TRIGGER_SANDBOX]"
-
 
 async def stream_rag_response(
     query: str,
@@ -204,7 +191,6 @@ async def stream_rag_response(
     """
     s = get_settings()
 
-    # ── Phase 1: Retrieval ──────────────────────────────────────
     yield _sse("meta", {"status": "searching"})
 
     try:
@@ -214,7 +200,6 @@ async def stream_rag_response(
         yield _sse("error", {"message": str(exc), "code": "retrieval_error"})
         return
 
-    # ── Gate: no results → smart fallback ────────────────────────
     if not rows:
         fallback = _FALLBACK.get(lang, _FALLBACK["en"])
         yield _sse("meta", {"status": "generating"})
@@ -223,7 +208,6 @@ async def stream_rag_response(
         yield _sse("sources", [])
         return
 
-    # ── Phase 2: Build context ──────────────────────────────────
     context_parts = []
     sources = []
     for i, row in enumerate(rows, start=1):
@@ -244,7 +228,6 @@ async def stream_rag_response(
         {"role": "user", "content": query},
     ]
 
-    # ── Phase 3: Stream LLM (with sandbox trigger detection) ────
     yield _sse("meta", {"status": "generating"})
 
     try:
@@ -254,11 +237,10 @@ async def stream_rag_response(
         async for token in _stream_groq(messages):
             buffer += token
 
-            # Check if the trigger is being formed
             if _SANDBOX_TRIGGER.startswith(buffer):
-                # Still forming — don't yield yet, keep buffering
+
                 if buffer == _SANDBOX_TRIGGER:
-                    # Full trigger detected!
+
                     sandbox_triggered = True
                     logger.warning(
                         "SANDBOX TRIGGERED: context irrelevant for query=%r",
@@ -267,15 +249,13 @@ async def stream_rag_response(
                     break
                 continue
             elif buffer and not _SANDBOX_TRIGGER.startswith(buffer):
-                # Buffer doesn't match trigger — flush it and reset
+
                 yield _sse("token", buffer)
                 buffer = ""
 
-        # Flush any remaining buffer
         if not sandbox_triggered and buffer:
             yield _sse("token", buffer)
 
-        # If sandbox was triggered, abort and yield fallback
         if sandbox_triggered:
             yield _sse("meta", {"status": "sandbox_triggered"})
             fallback = _FALLBACK.get(lang, _FALLBACK["en"])
@@ -303,11 +283,8 @@ async def stream_rag_response(
         yield _sse("error", {"message": str(exc), "code": "llm_stream_error"})
         return
 
-    # ── Phase 4: Sources (always last) ──────────────────────────
     yield _sse("sources", sources)
 
-
-# ── SSE formatter (module-level, reused by routes_chat) ─────────
 def _sse(event: str, data: str | dict | list) -> str:
     payload = json.dumps(data, ensure_ascii=False) if isinstance(data, (dict, list)) else str(data)
     return f"event: {event}\ndata: {payload}\n\n"

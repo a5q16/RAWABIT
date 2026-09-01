@@ -18,14 +18,12 @@ from starlette.responses import JSONResponse
 
 logger = logging.getLogger("rawabit.security.ratelimit")
 
-
 @dataclass
 class _Bucket:
     tokens: float
     last_refill: float
     capacity: float
-    refill_rate: float  # tokens per second
-
+    refill_rate: float
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
     """

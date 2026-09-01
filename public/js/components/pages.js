@@ -1,24 +1,13 @@
-/**
- * Rawabit v2 — Dedicated Pages (About, Why & Vision, Contact)
- * Sovereign Saudi-Gov-Tech Layout · Absolute Minimalism · 100% Trilingual Dynamic I18n
- */
-
 import { t, applyTranslations } from '../i18n.js';
 import { store } from '../store.js';
 
-/**
- * ══════════════════════════════════════════════════════════════════
- * 1. ABOUT PAGE (عن منصة روابط / About / À propos)
- * ══════════════════════════════════════════════════════════════════
- */
 export function renderAbout() {
   const main = document.getElementById('main-content');
   if (!main) return;
 
   main.innerHTML = `
     <div class="page-container animate-fade-in">
-      
-      <!-- Page Hero Header -->
+
       <section class="page-hero">
         <div class="container">
           <div class="page-badge">
@@ -29,7 +18,6 @@ export function renderAbout() {
         </div>
       </section>
 
-      <!-- Mission Statement Section -->
       <section class="page-section">
         <div class="container">
           <div class="mission-card">
@@ -53,7 +41,6 @@ export function renderAbout() {
         </div>
       </section>
 
-      <!-- 3 Core Pillars -->
       <section class="page-section bg-milky-subtle">
         <div class="container">
           <div class="section-header">
@@ -62,7 +49,7 @@ export function renderAbout() {
           </div>
 
           <div class="pillars-grid">
-            
+
             <div class="pillar-card">
               <div class="pillar-icon">
                 <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -102,7 +89,6 @@ export function renderAbout() {
         </div>
       </section>
 
-      <!-- Verification Standard Banner -->
       <section class="page-section">
         <div class="container">
           <div class="verification-banner">
@@ -122,7 +108,6 @@ export function renderAbout() {
         </div>
       </section>
 
-      <!-- Minimalist Footer -->
       ${renderPageFooter()}
 
     </div>
@@ -132,19 +117,13 @@ export function renderAbout() {
   applyTranslations();
 }
 
-/**
- * ══════════════════════════════════════════════════════════════════
- * 2. WHY & VISION PAGE (لماذا روابط؟ والرؤية الوطنية 2030)
- * ══════════════════════════════════════════════════════════════════
- */
 export function renderWhy(activeTab = 'why') {
   const main = document.getElementById('main-content');
   if (!main) return;
 
   main.innerHTML = `
     <div class="page-container animate-fade-in">
-      
-      <!-- Page Hero Header -->
+
       <section class="page-hero">
         <div class="container">
           <div class="page-badge">
@@ -153,7 +132,6 @@ export function renderWhy(activeTab = 'why') {
           <h1 class="page-title" data-i18n="why.title">${t('why.title')}</h1>
           <p class="page-subtitle" data-i18n="why.subtitle">${t('why.subtitle')}</p>
 
-          <!-- Interactive Tab Switcher linking Why & Vision -->
           <div class="page-tab-switcher">
             <button class="page-tab-btn ${activeTab === 'why' ? 'active' : ''}" id="tab-btn-why" data-i18n="why.tabWhy">
               ${t('why.tabWhy')}
@@ -165,10 +143,8 @@ export function renderWhy(activeTab = 'why') {
         </div>
       </section>
 
-      <!-- Tab Content 1: WHY SECTION -->
       <div id="tab-content-why" class="${activeTab === 'why' ? 'tab-visible' : 'tab-hidden'}">
-        
-        <!-- 3 Core Challenges We Solve -->
+
         <section class="page-section">
           <div class="container">
             <div class="section-header">
@@ -177,7 +153,7 @@ export function renderWhy(activeTab = 'why') {
             </div>
 
             <div class="why-grid">
-              
+
               <div class="why-card">
                 <div class="why-number">01</div>
                 <h3 data-i18n="why.card1Title">${t('why.card1Title')}</h3>
@@ -203,7 +179,6 @@ export function renderWhy(activeTab = 'why') {
           </div>
         </section>
 
-        <!-- Vision Teaser linking to Vision Tab -->
         <section class="page-section bg-milky-subtle">
           <div class="container">
             <div class="vision-link-banner">
@@ -225,12 +200,11 @@ export function renderWhy(activeTab = 'why') {
 
       </div>
 
-      <!-- Tab Content 2: VISION SECTION -->
       <div id="tab-content-vision" class="${activeTab === 'vision' ? 'tab-visible' : 'tab-hidden'}">
-        
+
         <section class="page-section" id="vision">
           <div class="container">
-            
+
             <div class="vision-hero-box">
               <div class="vhb-mark">ر</div>
               <h2 data-i18n="vision.heading">${t('vision.heading')}</h2>
@@ -238,7 +212,7 @@ export function renderWhy(activeTab = 'why') {
             </div>
 
             <div class="vision-goals-grid">
-              
+
               <div class="vision-goal-item">
                 <div class="vg-icon-box">
                   <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
@@ -298,13 +272,11 @@ export function renderWhy(activeTab = 'why') {
 
       </div>
 
-      <!-- Minimalist Footer -->
       ${renderPageFooter()}
 
     </div>
   `;
 
-  // Tab switching logic
   const tabWhy = main.querySelector('#tab-btn-why');
   const tabVision = main.querySelector('#tab-btn-vision');
   const contentWhy = main.querySelector('#tab-content-why');
@@ -339,19 +311,13 @@ export function renderWhy(activeTab = 'why') {
   applyTranslations();
 }
 
-/**
- * ══════════════════════════════════════════════════════════════════
- * 3. CONTACT PAGE (تواصل مع فريق روابط / Contact / Contactez-nous)
- * ══════════════════════════════════════════════════════════════════
- */
 export function renderContact() {
   const main = document.getElementById('main-content');
   if (!main) return;
 
   main.innerHTML = `
     <div class="page-container animate-fade-in">
-      
-      <!-- Page Hero Header -->
+
       <section class="page-hero">
         <div class="container">
           <div class="page-badge">
@@ -362,12 +328,10 @@ export function renderContact() {
         </div>
       </section>
 
-      <!-- Contact Main Content & Form Grid -->
       <section class="page-section">
         <div class="container">
           <div class="contact-grid-layout">
-            
-            <!-- Left/Main: Interactive Contact Form -->
+
             <div class="contact-form-card">
               <div class="form-header">
                 <h2 data-i18n="contact.formTitle">${t('contact.formTitle')}</h2>
@@ -382,14 +346,14 @@ export function renderContact() {
               </div>
 
               <form id="contact-form" class="contact-form" onsubmit="event.preventDefault();">
-                
+
                 <div class="form-row-2">
                   <div class="form-group">
                     <label for="contact-name" data-i18n="contact.name">${t('contact.name')}</label>
-                    <input 
-                      type="text" 
-                      id="contact-name" 
-                      required 
+                    <input
+                      type="text"
+                      id="contact-name"
+                      required
                       placeholder="${t('contact.namePlaceholder')}"
                       data-i18n-placeholder="contact.namePlaceholder"
                     />
@@ -397,10 +361,10 @@ export function renderContact() {
 
                   <div class="form-group">
                     <label for="contact-email" data-i18n="contact.email">${t('contact.email')}</label>
-                    <input 
-                      type="email" 
-                      id="contact-email" 
-                      required 
+                    <input
+                      type="email"
+                      id="contact-email"
+                      required
                       placeholder="${t('contact.emailPlaceholder')}"
                       data-i18n-placeholder="contact.emailPlaceholder"
                     />
@@ -419,10 +383,10 @@ export function renderContact() {
 
                 <div class="form-group">
                   <label for="contact-message" data-i18n="contact.message">${t('contact.message')}</label>
-                  <textarea 
-                    id="contact-message" 
-                    rows="5" 
-                    required 
+                  <textarea
+                    id="contact-message"
+                    rows="5"
+                    required
                     placeholder="${t('contact.messagePlaceholder')}"
                     data-i18n-placeholder="contact.messagePlaceholder"
                   ></textarea>
@@ -439,12 +403,11 @@ export function renderContact() {
               </form>
             </div>
 
-            <!-- Right: Direct Channels & Hubs -->
             <div class="contact-info-panel">
-              
+
               <div class="info-widget-card">
                 <h3 data-i18n="contact.infoTitle">${t('contact.infoTitle')}</h3>
-                
+
                 <div class="info-contact-item">
                   <div class="info-ci-icon">
                     <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
@@ -486,7 +449,6 @@ export function renderContact() {
 
               </div>
 
-              <!-- Quick Verification Box -->
               <div class="info-widget-card verification-hint-card">
                 <h4 data-i18n="contact.verifyHintTitle">${t('contact.verifyHintTitle')}</h4>
                 <p data-i18n="contact.verifyHintDesc">${t('contact.verifyHintDesc')}</p>
@@ -499,13 +461,11 @@ export function renderContact() {
         </div>
       </section>
 
-      <!-- Minimalist Footer -->
       ${renderPageFooter()}
 
     </div>
   `;
 
-  // Form submission interaction
   const form = main.querySelector('#contact-form');
   const toast = main.querySelector('#contact-success-toast');
   const btn = main.querySelector('#btn-submit-contact');
@@ -526,9 +486,6 @@ export function renderContact() {
   applyTranslations();
 }
 
-/**
- * Reusable Minimalist Footer for Inner Pages
- */
 function renderPageFooter() {
   return `
     <footer class="footer-minimal">

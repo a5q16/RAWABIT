@@ -1,10 +1,3 @@
-/* ==========================================================================
-   WILAYA CENTERED VIEW, COMPETENCY DOMAINS & THE MIND-MAP EXPERIENCE
-   Saudi-Gov-Tech Design Philosophy: Strict symmetry, Tajawal luxury typography,
-   massive whitespace, soft diffuse drop-shadows, and smooth micro-interactions.
-   ========================================================================== */
-
-/* ── 1. STRICTLY CENTERED WILAYA HERO (ABSOLUTE SYMMETRY, ZERO CLUTTER) ── */
 .wilaya-hero-section {
   padding-top: calc(var(--nav-height) + var(--space-lg));
   padding-bottom: var(--space-2xl);
@@ -56,7 +49,6 @@
   transform: rotate(180deg);
 }
 
-/* Symmetrical Centered Hero Content */
 .wilaya-centered-hero {
   display: flex;
   flex-direction: column;
@@ -69,7 +61,6 @@
   z-index: var(--z-search-omnibar, 90);
 }
 
-/* Pure Bold Luxury Typography (NO CHEAP PILLS) */
 .wilaya-title-pure {
   font-size: clamp(2.6rem, 5.5vw, 4.2rem);
   font-weight: 900;
@@ -88,7 +79,6 @@
   line-height: 1.6;
 }
 
-/* ── GIANT CENTERED AI SEARCH OMNIBAR (RESTRICTED 680px MAX WIDTH) ── */
 .giant-ai-search-wrap {
   width: 100%;
   max-width: 680px;
@@ -193,8 +183,6 @@
   }
 }
 
-
-/* ── 2. STEP 1: COMPETENCY DOMAINS GRID ── */
 .wilaya-content-section {
   padding: var(--space-2xl) var(--space-lg) var(--space-4xl);
   position: relative;
@@ -236,7 +224,6 @@
   z-index: 1;
 }
 
-/* Domain Card Design */
 .domain-card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -336,8 +323,6 @@
   transform: translateX(-4px);
 }
 
-
-/* ── 3. STEP 2: PROFILES GRID VIEW ── */
 .profiles-view-wrapper {
   width: 100%;
   position: relative;
@@ -415,7 +400,6 @@
   z-index: 1;
 }
 
-/* Individual Profile Card */
 .profile-card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -471,7 +455,6 @@
   justify-content: center;
 }
 
-/* ── 3-Tier Luxury Verification System (Gold, Silver, Bronze) ── */
 .tier-badge {
   display: inline-flex;
   align-items: center;
@@ -629,7 +612,6 @@
   transform: translateX(-4px);
 }
 
-/* Profiles Loading Spinner State */
 .profiles-loading-state {
   display: flex;
   flex-direction: column;
@@ -661,7 +643,6 @@
   }
 }
 
-/* Empty State */
 .empty-profiles-state {
   grid-column: 1 / -1;
   text-align: center;
@@ -703,12 +684,6 @@
   background: var(--color-accent);
   color: #FFFFFF;
 }
-
-
-/* ==========================================================================
-   4. PROACTIVE "LOST USER" AI ASSISTANT (FLOATING TEXT ON FULL-SCREEN BLUR)
-   Zero popup boxes, zero cards, zero modals. Pure ambient typography.
-   ========================================================================== */
 
 .proactive-ai-overlay {
   position: fixed;
@@ -788,11 +763,6 @@
   box-shadow: 0 12px 36px rgba(0, 135, 90, 0.45);
 }
 
-
-/* ==========================================================================
-   5. THE "MIND-MAP" EXPANSION & COLLAPSE
-   ========================================================================== */
-
 .mindmap-overlay {
   position: fixed;
   inset: 0;
@@ -816,7 +786,6 @@
   pointer-events: auto;
 }
 
-/* ── STEP 1: "THE PULL" (0.4s cubic-bezier(0.25, 1, 0.5, 1)) ── */
 .mindmap-overlay.is-collapsing .mindmap-node,
 .mindmap-stage.is-collapsing .mindmap-node {
   transform: translate3d(var(--pull-x, 0px), var(--pull-y, 0px), 0) scale(0.25) !important;
@@ -839,14 +808,12 @@
   transition: opacity 0.25s ease !important;
 }
 
-/* ── STEP 2: "THE BREATH OUT" (0.3s ease-out) ── */
 .mindmap-center-card.breath-out {
   transform: scale(0.9) !important;
   opacity: 0 !important;
   transition: transform 0.3s ease-out, opacity 0.3s ease-out !important;
 }
 
-/* ── STEP 3: RESTORE GRID (Fade out blur overlay) ── */
 .mindmap-overlay.is-fading-out {
   opacity: 0 !important;
   backdrop-filter: blur(0px) !important;
@@ -921,7 +888,6 @@
   transform: scale(1.08);
 }
 
-/* Mind-Map Stage */
 .mindmap-stage {
   position: relative;
   width: 100%;
@@ -968,7 +934,6 @@
   animation: fadeIn 0.3s ease forwards;
 }
 
-/* Center Main Profile Card */
 @keyframes popCenterCard {
   from {
     opacity: 0;
@@ -1162,10 +1127,6 @@
   box-shadow: 0 10px 28px rgba(0, 135, 90, 0.4);
 }
 
-/* ==========================================================================
-   PREMIUM SOURCING TREE (NODE BRANCHING ANIMATION)
-   ========================================================================== */
-
 .sourcing-block {
   display: flex;
   flex-direction: column;
@@ -1223,7 +1184,6 @@
   overflow: visible;
 }
 
-/* The main vertical line dropping from the button */
 #sourcing-tree-container::before {
   content: '';
   position: absolute;
@@ -1235,7 +1195,6 @@
   transform: translateX(-50%);
 }
 
-/* The horizontal branching line */
 .tree-branch-wrapper {
   position: relative;
   display: flex;
@@ -1256,12 +1215,10 @@
   transform: translateX(-50%);
 }
 
-/* If only 1 source, hide the horizontal branch bar */
 .tree-branch-wrapper.single-source::before {
   display: none;
 }
 
-/* The vertical drops to the cards */
 .source-card {
   position: relative;
   display: inline-flex;
@@ -1305,7 +1262,6 @@
   display: none;
 }
 
-/* 4 Satellite Cards (Radial Nodes) */
 @keyframes popSatellite {
   from {
     opacity: 0;
@@ -1504,7 +1460,6 @@
   line-height: 1.3;
 }
 
-/* Responsive Adaptations */
 @media (max-width: 1100px) {
   .mindmap-stage {
     display: flex;
@@ -1538,13 +1493,8 @@
   }
 }
 
-/* ==========================================================================
-   MOBILE RESPONSIVENESS FIXES (Strict @media (max-width: 768px))
-   Grid & Hero Overhaul · Single Column Layouts · Zero Horizontal Overflow
-   ========================================================================== */
-
 @media (max-width: 768px) {
-  /* ── 1. Wilaya Hero Section ── */
+
   .wilaya-hero-section {
     padding-top: calc(var(--nav-height) + var(--space-md));
     padding-bottom: var(--space-lg);
@@ -1568,7 +1518,6 @@
     padding: 0 var(--space-xs);
   }
 
-  /* Reduce Giant AI Search Bar max-width to 90% */
   .giant-ai-search-wrap {
     width: 100%;
     max-width: 90% !important;
@@ -1599,7 +1548,6 @@
     font-size: 0.82rem;
   }
 
-  /* ── 2. Domains Grid (Single Column 1fr + Reduced Internal Padding) ── */
   .wilaya-content-section {
     padding: var(--space-md) var(--space-sm) var(--space-3xl);
   }
@@ -1655,7 +1603,6 @@
     font-size: 0.82rem;
   }
 
-  /* ── 3. Profiles Grid (Single Column 1fr + No Card Overflow) ── */
   .profiles-cards-grid {
     grid-template-columns: 1fr !important;
     gap: var(--space-md);
@@ -1730,7 +1677,6 @@
     padding: 3px 8px;
   }
 
-  /* ── 4. Active Domain Header (Clean Stack on Small Screens) ── */
   .profiles-context-header {
     flex-direction: column;
     align-items: flex-start;
@@ -1761,7 +1707,6 @@
     padding: 3px 10px;
   }
 
-  /* ── 5. Mind-Map Mobile Fallback (Stacked Center + Satellites Grid) ── */
   .mindmap-overlay {
     padding: 72px 14px 40px !important;
     align-items: flex-start !important;
@@ -1797,7 +1742,6 @@
     transform: none !important;
   }
 
-  /* Hide SVG connecting lines on mobile to eliminate visual clutter */
   .mindmap-svg-canvas,
   #mindmap-svg-lines,
   #svg-paths-group,
@@ -1806,7 +1750,6 @@
     display: none !important;
   }
 
-  /* Center Profile Card Override */
   .mindmap-center-card {
     position: relative !important;
     top: auto !important;
@@ -1822,7 +1765,6 @@
     box-sizing: border-box !important;
   }
 
-  /* Force 4 Satellite Cards to Stack Elegantly Underneath Main Card */
   .mindmap-node {
     position: relative !important;
     top: auto !important;
@@ -1847,7 +1789,6 @@
   }
 }
 
-/* Tablet 2x2 Grid Variant for Mind-Map Satellites */
 @media (min-width: 580px) and (max-width: 768px) {
   .mindmap-stage {
     display: grid !important;
@@ -1865,11 +1806,6 @@
     max-width: 100% !important;
   }
 }
-
-/* ==========================================================================
-   4. PROACTIVE "LOST USER" AI ASSISTANT (FLOATING TEXT ON FULL-SCREEN BLUR)
-   Zero popup boxes, zero cards, zero modals. Pure ambient typography.
-   ========================================================================== */
 
 .proactive-ai-overlay {
   position: fixed;

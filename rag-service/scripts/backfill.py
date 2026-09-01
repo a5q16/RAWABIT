@@ -31,27 +31,21 @@ import time
 from collections import defaultdict
 from pathlib import Path
 
-# ── Windows consoles default to cp1252 and crash on Arabic output ───────────
 for _stream in (sys.stdout, sys.stderr):
     try:
         _stream.reconfigure(encoding="utf-8", errors="replace")
-    except Exception:  # noqa: BLE001 - best effort
+    except Exception:
         pass
 
-# ── Make the project root importable when run as a standalone script ────────
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from supabase import acreate_client  # noqa: E402
+from supabase import acreate_client
 
-from app.core.config import get_settings  # noqa: E402
-from app.services.embedder import embedder  # noqa: E402
+from app.core.config import get_settings
+from app.services.embedder import embedder
 
 settings = get_settings()
 
-
-# ═══════════════════════════════════════════════════════════════════════════
-# Data fetching
-# ═══════════════════════════════════════════════════════════════════════════
 async def fetch_all(client) -> tuple[list[dict], dict[str, list], dict[str, list], dict[str, list]]:
     """Fetch persons plus every relation we render into the chunk text."""
 
@@ -92,15 +86,11 @@ async def fetch_all(client) -> tuple[list[dict], dict[str, list], dict[str, list
         for row in source_rows:
             sources_by_person[row["person_id"]].append(row)
         print(f"[fetch]   -> {len(source_rows)} source records")
-    except Exception as exc:  # noqa: BLE001 - sources are optional enrichment
+    except Exception as exc:
         print(f"[fetch]   !! sources unavailable ({exc}) — continuing without them")
 
     return persons, academic_by_person, professional_by_person, sources_by_person
 
-
-# ═══════════════════════════════════════════════════════════════════════════
-# Chunk rendering — deterministic bilingual "profile card"
-# ═══════════════════════════════════════════════════════════════════════════
 def _fmt_date(value, end_value) -> str:
     def head(v):
         if v is None or v == "":
@@ -109,7 +99,6 @@ def _fmt_date(value, end_value) -> str:
     start = head(value)
     end = "present" if not end_value else head(end_value)
     return f"{start}-{end}" if start else end
-
 
 def _fmt_academic(row: dict) -> str | None:
     degree = row.get("degree")
@@ -135,7 +124,6 @@ def _fmt_academic(row: dict) -> str | None:
         parts.append(f"Thesis: {thesis}")
     return ". ".join(parts)
 
-
 def _fmt_professional(row: dict) -> str | None:
     role = row.get("role")
     company = (row.get("company") or {})
@@ -151,7 +139,6 @@ def _fmt_professional(row: dict) -> str | None:
     if desc:
         line += f": {desc}"
     return line
-
 
 def build_chunk(person: dict, academic: list, professional: list, sources: list) -> tuple[str, dict]:
     """Render the profile card text + metadata bag for one person."""
@@ -202,10 +189,6 @@ def build_chunk(person: dict, academic: list, professional: list, sources: list)
 
     return "\n".join(lines), metadata
 
-
-# ═══════════════════════════════════════════════════════════════════════════
-# Main pipeline
-# ═══════════════════════════════════════════════════════════════════════════
 async def main() -> int:
     parser = argparse.ArgumentParser(description="Vectorize Rawabit competencies into ai_chunks.")
     parser.add_argument("--batch-size", type=int, default=32, help="Persons per embedding batch.")
@@ -259,9 +242,9 @@ async def main() -> int:
             "source_id": str(pid),
             "chunk_text": chunk_text,
             "chunk_index": 0,
-            "embedding": None,          # filled after encoding
+            "embedding": None,
             "metadata": meta,
-            "_text": chunk_text,        # temp holder, stripped before insert
+            "_text": chunk_text,
         })
 
         if len(batch_rows) < args.batch_size and index < len(persons):
@@ -270,7 +253,7 @@ async def main() -> int:
         texts = [row.pop("_text") for row in batch_rows]
         try:
             vectors = await asyncio.to_thread(embedder.encode_passages, texts)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             print(f"[error] Encoding failed for batch of {len(batch_rows)}: {exc}")
             failed += len(batch_rows)
             batch_rows = []
@@ -294,7 +277,7 @@ async def main() -> int:
                 )
                 inserted += len(batch_rows)
                 print(f"[write] Upserted {inserted}/{len(persons) - skipped} chunks ...")
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 print(f"[error] Insert failed for batch of {len(batch_rows)}: {exc}")
                 failed += len(batch_rows)
 
@@ -306,7 +289,6 @@ async def main() -> int:
           f"time={elapsed:.1f}s")
     print("=" * 70)
     return 1 if failed else 0
-
 
 if __name__ == "__main__":
     try:

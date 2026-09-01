@@ -1,9 +1,3 @@
-/**
- * Rawabit v2 — Personalized Learning Roadmap Component
- * Glassmorphism Onboarding Modal · LocalStorage Synchronization · Instant AI Chat Integration
- * Pure Vanilla JS · Zero External Frameworks
- */
-
 import { t } from '../i18n.js';
 import { store, pushOverlay, popOverlay, isOverlayActive } from '../store.js';
 import { openAIChat } from './chat.js';
@@ -13,10 +7,6 @@ const STORAGE_KEY = 'userRoadmapData';
 let activeRoadmapModal = null;
 let activeKeyHandler = null;
 
-/**
- * Retrieves the saved roadmap profile from localStorage
- * @returns {{ university: string, field: string } | null}
- */
 export function getSavedRoadmapData() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -31,11 +21,6 @@ export function getSavedRoadmapData() {
   return null;
 }
 
-/**
- * Saves roadmap data to localStorage
- * @param {string} university 
- * @param {string} field 
- */
 export function saveRoadmapData(university, field) {
   try {
     const payload = {
@@ -49,28 +34,16 @@ export function saveRoadmapData(university, field) {
   }
 }
 
-/**
- * Generates the standardized prompt and triggers the AI Chat drawer
- * @param {string} university 
- * @param {string} field 
- */
 export function triggerRoadmapGeneration(university, field) {
   const u = university.trim();
   const f = field.trim();
   if (!u || !f) return;
 
-  // Construct prompt
   const prompt = `Generate a 3-step learning roadmap for a student at ${u} targeting ${f}. Base the recommendations on the Algerian academic system and practical industry skills. Use Markdown timelines.`;
 
-  // Open the AI Chat drawer and automatically stream the response
   openAIChat({ initialQuery: prompt });
 }
 
-/**
- * Main Roadmap entrypoint flow
- * If data exists in localStorage -> directly trigger AI chat
- * If data is missing -> show the Glassmorphism Onboarding Modal
- */
 export function startRoadmapFlow() {
   const savedData = getSavedRoadmapData();
 
@@ -81,9 +54,6 @@ export function startRoadmapFlow() {
   }
 }
 
-/**
- * Open the Glassmorphism Onboarding Modal
- */
 export function openRoadmapModal() {
   closeRoadmapModal(false);
 
@@ -103,8 +73,7 @@ export function openRoadmapModal() {
     <div class="roadmap-modal-backdrop" id="roadmap-modal-backdrop"></div>
 
     <div class="roadmap-modal-dialog animate-scale-in" role="dialog" aria-modal="true" aria-labelledby="roadmap-title">
-      
-      <!-- Close Button -->
+
       <button class="roadmap-modal-close-btn" id="roadmap-modal-close" aria-label="Close">
         <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
           <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -112,7 +81,6 @@ export function openRoadmapModal() {
         </svg>
       </button>
 
-      <!-- Header with Glowing Emblem -->
       <div class="roadmap-header">
         <div class="roadmap-icon-badge">
           <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -129,16 +97,14 @@ export function openRoadmapModal() {
         <h2 class="roadmap-title" id="roadmap-title" data-i18n="roadmap.modalTitle">
           ${t('roadmap.modalTitle')}
         </h2>
-        
+
         <p class="roadmap-subtitle" data-i18n="roadmap.modalSubtitle">
           ${t('roadmap.modalSubtitle')}
         </p>
       </div>
 
-      <!-- Interactive 2-Step Form -->
       <form class="roadmap-form" id="roadmap-onboarding-form" onsubmit="event.preventDefault();">
-        
-        <!-- Field 1: Current University / Level -->
+
         <div class="roadmap-form-group">
           <label class="roadmap-label" for="roadmap-university">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
@@ -147,11 +113,11 @@ export function openRoadmapModal() {
             </svg>
             <span data-i18n="roadmap.inputUniversityLabel">${t('roadmap.inputUniversityLabel')}</span>
           </label>
-          
-          <input 
-            type="text" 
-            class="roadmap-input" 
-            id="roadmap-university" 
+
+          <input
+            type="text"
+            class="roadmap-input"
+            id="roadmap-university"
             required
             autocomplete="off"
             value="${escapeHtml(savedData.university)}"
@@ -159,7 +125,6 @@ export function openRoadmapModal() {
             data-i18n-placeholder="roadmap.inputUniversityPlaceholder"
           />
 
-          <!-- Quick Suggestion Chips -->
           <div class="roadmap-chips-row">
             <button type="button" class="roadmap-chip" data-fill-target="roadmap-university" data-fill-val="جامعة باب الزوار (USTHB) - سنة ثانية L2">
               ${t('roadmap.chipUSTHB')}
@@ -170,7 +135,6 @@ export function openRoadmapModal() {
           </div>
         </div>
 
-        <!-- Field 2: Target Field / Role -->
         <div class="roadmap-form-group">
           <label class="roadmap-label" for="roadmap-field">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
@@ -179,11 +143,11 @@ export function openRoadmapModal() {
             </svg>
             <span data-i18n="roadmap.inputFieldLabel">${t('roadmap.inputFieldLabel')}</span>
           </label>
-          
-          <input 
-            type="text" 
-            class="roadmap-input" 
-            id="roadmap-field" 
+
+          <input
+            type="text"
+            class="roadmap-input"
+            id="roadmap-field"
             required
             autocomplete="off"
             value="${escapeHtml(savedData.field)}"
@@ -191,7 +155,6 @@ export function openRoadmapModal() {
             data-i18n-placeholder="roadmap.inputFieldPlaceholder"
           />
 
-          <!-- Quick Suggestion Chips -->
           <div class="roadmap-chips-row">
             <button type="button" class="roadmap-chip" data-fill-target="roadmap-field" data-fill-val="الذكاء الاصطناعي وهندسة البيانات (AI & Data Science)">
               ${t('roadmap.chipAI')}
@@ -205,7 +168,6 @@ export function openRoadmapModal() {
           </div>
         </div>
 
-        <!-- Submit Button -->
         <button type="submit" class="btn-primary roadmap-submit-btn" id="btn-generate-roadmap">
           <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
             <path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/>
@@ -220,7 +182,6 @@ export function openRoadmapModal() {
 
   document.body.appendChild(overlay);
 
-  // Wire Form Submission
   const form = overlay.querySelector('#roadmap-onboarding-form');
   const uInput = overlay.querySelector('#roadmap-university');
   const fInput = overlay.querySelector('#roadmap-field');
@@ -237,20 +198,16 @@ export function openRoadmapModal() {
         return;
       }
 
-      // Save to localStorage
       saveRoadmapData(uVal, fVal);
 
-      // Close modal smoothly
       closeRoadmapModal(true);
 
-      // Trigger AI Chat generation
       setTimeout(() => {
         triggerRoadmapGeneration(uVal, fVal);
       }, 250);
     });
   }
 
-  // Wire Quick Suggestion Chips
   overlay.querySelectorAll('.roadmap-chip').forEach(chip => {
     chip.addEventListener('click', (e) => {
       e.preventDefault();
@@ -264,7 +221,6 @@ export function openRoadmapModal() {
     });
   });
 
-  // Close handlers
   const closeBtn = overlay.querySelector('#roadmap-modal-close');
   const backdrop = overlay.querySelector('#roadmap-modal-backdrop');
 
@@ -283,7 +239,6 @@ export function openRoadmapModal() {
   };
   document.addEventListener('keydown', activeKeyHandler);
 
-  // Auto focus first input
   setTimeout(() => {
     if (uInput && !uInput.value) {
       uInput.focus();
@@ -293,10 +248,6 @@ export function openRoadmapModal() {
   }, 200);
 }
 
-/**
- * Close the Roadmap modal
- * @param {boolean} animate 
- */
 export function closeRoadmapModal(animate = true) {
   if (activeKeyHandler) {
     document.removeEventListener('keydown', activeKeyHandler);
@@ -324,9 +275,6 @@ export function closeRoadmapModal(animate = true) {
   }
 }
 
-/**
- * Attaches global event listener for all Roadmap trigger elements
- */
 export function initRoadmapListeners() {
   document.addEventListener('click', (e) => {
     const trigger = e.target.closest('#trigger-roadmap, #trigger-roadmap-mobile, #trigger-roadmap-footer, #trigger-roadmap-footer-inner, .trigger-roadmap');
@@ -337,7 +285,6 @@ export function initRoadmapListeners() {
   });
 }
 
-// Auto-initialize when loaded as module script
 if (typeof document !== 'undefined') {
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initRoadmapListeners);

@@ -1,10 +1,5 @@
-/* ==========================================================================
-   BASE — RESET, TYPOGRAPHY & UTILITIES
-   ========================================================================== */
-
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;600;700;800;900&display=swap');
 
-/* Universal Box Sizing & Reset */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -34,7 +29,6 @@ body.modal-open {
   touch-action: none !important;
 }
 
-/* ── Typography Scale & Weights ── */
 h1, h2, h3, h4, h5, h6 {
   color: var(--color-text);
   font-family: var(--font-primary);
@@ -97,7 +91,6 @@ img, svg {
   max-width: 100%;
 }
 
-/* ── Custom Scrollbar ── */
 ::-webkit-scrollbar {
   width: 7px;
   height: 7px;
@@ -116,13 +109,11 @@ img, svg {
   background: var(--color-accent);
 }
 
-/* ── Text Selection ── */
 ::selection {
   background: var(--color-accent-light);
   color: var(--color-accent);
 }
 
-/* ── Direction Support ── */
 [dir='rtl'] {
   text-align: right;
   direction: rtl;
@@ -133,7 +124,6 @@ img, svg {
   direction: ltr;
 }
 
-/* ── Global Utilities ── */
 .container {
   width: 100%;
   max-width: var(--container-max-width);

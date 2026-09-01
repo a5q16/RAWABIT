@@ -1,20 +1,3 @@
-/**
- * Rawabit v2 — Algeria Interactive Map with Symmetrical Viewport HUD
- * 1. Base Map: 1:1 Google Maps Panning, Crisp 1px Borders, Solid White Line Tethered Tooltip
- * 2. Click 1 Choreography:
- *    - T=0.0s: Smooth Camera Zoom & Center on Wilaya (No blur yet), body.classList.add('modal-open')
- *    - T=0.4s: Wilaya path flashes with emerald pulse
- *    - T=0.5s: Fade in true translucent glass blur backdrop (rgba(20, 45, 35, 0.2) + blur(25px))
- *    - T=0.7s: 4 Symmetrical WHITE glowing lines draw from (50%, 50%) to cards
- *    - T=1.0s: Fade in 4 Symmetrical Viewport Cards (Top-Left: 25%/10%, Top-Right: 25%/10%, Bottom-Left: 15%/10%, Bottom-Right: 15%/10%)
- * 3. Click 2 "Breathe Out" Exit & Native Loader Elevation:
- *    - T=0.0s: Fade out cards, lines, top text, and Wilaya clone (opacity: 0)
- *    - T=0.0s: Set HUD background to #ffffff and backdrop-filter: none
- *    - T=0.0s: Elevate native loader (#loader) with z-index: 999999 and show
- *    - T=0.8s: Execute routing to renderProfiles(wilayaCode)
- * 4. Reversal: Click background -> Smooth fade out & camera zooms out to national view
- */
-
 import { MAP_VIEWBOX, WILAYAS } from './map-paths.js';
 import { getProfilesByWilaya } from '../data/profiles-data.js';
 import { createLoader } from './loader.js';
@@ -25,7 +8,6 @@ import { navigate } from '../router.js';
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const BASE_VB = { x: -9.17, y: -37.59, w: 21.66, h: 19.13 };
 
-// Authentic Algerian Universities & Academic Centers by Wilaya Code
 const WILAYA_ACADEMIC_DATA = {
   '01': { unis: ['Univ Adrar (Ahmed Draia)'], specs: ['Energy & Solar', 'Agronomy', 'Geosciences'] },
   '02': { unis: ['Univ Chlef (Hassiba Benbouali)'], specs: ['Civil Engineering', 'Agronomy', 'Computer Science'] },
@@ -81,7 +63,6 @@ export function renderMap(container) {
   if (!container) return;
   container.innerHTML = '';
 
-  // State
   let vb = { ...BASE_VB };
   let animFrameId = null;
   let isMouseDown = false;
@@ -91,7 +72,6 @@ export function renderMap(container) {
   let isHovering = false;
   let isHUDActive = false;
 
-  // ── 1. Create Main SVG Canvas ──
   const svg = document.createElementNS(SVG_NS, 'svg');
   svg.classList.add('map-svg');
   svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
@@ -103,7 +83,6 @@ export function renderMap(container) {
     svg.setAttribute('viewBox', `${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
   }
 
-  // ── 2. Create Elegant Solid White Line Hover Tooltip Layer ──
   const tetherLayer = document.createElementNS(SVG_NS, 'svg');
   tetherLayer.setAttribute('id', 'tether-layer');
   tetherLayer.setAttribute('style', 'position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; overflow: visible; opacity: 0; transition: opacity 0.2s ease;');
@@ -116,7 +95,6 @@ export function renderMap(container) {
   const tetherLine = tetherLayer.querySelector('#tether-line');
   const tetherDot = tetherLayer.querySelector('#tether-dot');
 
-  // Floating Tether Tooltip Div
   const tooltip = document.createElement('div');
   tooltip.setAttribute('id', 'wilaya-tooltip');
   tooltip.className = 'map-tether-tooltip';
@@ -157,7 +135,6 @@ export function renderMap(container) {
     }
   }
 
-  // ── 3. Render All Wilaya Paths (Crisp 1px Borders & Hover) ──
   WILAYAS.forEach(wilaya => {
     const g = document.createElementNS(SVG_NS, 'g');
     g.classList.add('wilaya-group');
@@ -171,7 +148,6 @@ export function renderMap(container) {
     g.appendChild(path);
     svg.appendChild(g);
 
-    // Hover with solid white line
     path.addEventListener('mouseenter', (e) => {
       if (isMapDragging || isHUDActive) return;
       const lang = store.state.lang;
@@ -190,7 +166,6 @@ export function renderMap(container) {
       tetherLayer.style.opacity = '0';
     });
 
-    // Path Click Handler (Trigger Choreographed Timeline)
     path.addEventListener('click', (e) => {
       e.stopPropagation();
       if (isMapDragging || isHUDActive) return;
@@ -200,14 +175,12 @@ export function renderMap(container) {
 
   container.appendChild(svg);
 
-  // Mousemove for hover tooltip update
   container.addEventListener('mousemove', (e) => {
     if (isHovering && !isMapDragging && !isHUDActive) {
       updateTooltipPosition(e.clientX, e.clientY);
     }
   });
 
-  // ── 4. Bulletproof Click vs Drag Panning Logic ──
   svg.addEventListener('mousedown', (e) => {
     if (e.button !== 0 || isHUDActive) return;
     isMouseDown = true;
@@ -229,7 +202,6 @@ export function renderMap(container) {
         tetherLayer.style.opacity = '0';
       }
 
-      // 1:1 ViewBox Panning
       const dx = e.clientX - lastMouseX;
       const dy = e.clientY - lastMouseY;
       lastMouseX = e.clientX;
@@ -251,7 +223,6 @@ export function renderMap(container) {
     }, 60);
   });
 
-  // ── 5. Smooth Wheel Zoom (Centered at Cursor) ──
   svg.addEventListener('wheel', (e) => {
     e.preventDefault();
     if (isHUDActive) return;
@@ -272,7 +243,6 @@ export function renderMap(container) {
     applyViewBox();
   }, { passive: false });
 
-  // Camera Smooth Interpolation (requestAnimationFrame)
   function animateViewBox(targetVb, durationMs = 500, onComplete = null) {
     if (animFrameId) cancelAnimationFrame(animFrameId);
     const startVb = { ...vb };
@@ -281,7 +251,7 @@ export function renderMap(container) {
     function step(now) {
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / durationMs, 1.0);
-      const ease = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+      const ease = 1 - Math.pow(1 - progress, 3);
 
       vb.x = startVb.x + (targetVb.x - startVb.x) * ease;
       vb.y = startVb.y + (targetVb.y - startVb.y) * ease;
@@ -301,7 +271,6 @@ export function renderMap(container) {
     animFrameId = requestAnimationFrame(step);
   }
 
-  // ── 6. Floating Wilaya Search Bar ──
   const searchBarWrap = document.createElement('div');
   searchBarWrap.className = 'map-floating-search-bar';
   searchBarWrap.innerHTML = `
@@ -312,9 +281,9 @@ export function renderMap(container) {
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
       </div>
-      <input 
-        type="text" 
-        class="map-search-input" 
+      <input
+        type="text"
+        class="map-search-input"
         id="map-wilaya-search-input"
         placeholder="${t('map.searchPlaceholder')}"
         autocomplete="off"
@@ -392,7 +361,6 @@ export function renderMap(container) {
     });
   }
 
-  // ── 7. Map Controls ──
   const controls = document.createElement('div');
   controls.className = 'map-controls';
   controls.innerHTML = `
@@ -431,19 +399,13 @@ export function renderMap(container) {
     animateViewBox(BASE_VB, 500);
   });
 
-  // ══════════════════════════════════════════════════════════════
-  // 8. THE CHOREOGRAPHED "HUD" ANIMATION (CLICK 1 & CLICK 2)
-  // ══════════════════════════════════════════════════════════════
-
   function startHUDChoreography(wilaya, pathEl) {
     isHUDActive = true;
     tooltip.style.opacity = '0';
     tetherLayer.style.opacity = '0';
 
-    // Lock Background Scroll on Open
     document.body.classList.add('modal-open');
 
-    // ── T = 0.0s: Camera smoothly zooms & centers on Wilaya (NO blur yet) ──
     const bbox = pathEl.getBBox();
     const pad = Math.max(bbox.width, bbox.height) * 0.95;
     const targetW = Math.max(bbox.width + pad * 2, 4.0);
@@ -453,19 +415,17 @@ export function renderMap(container) {
 
     animateViewBox({ x: targetX, y: targetY, w: targetW, h: targetH }, 500);
 
-    // ── T = 0.4s: The Wilaya path flashes / glows with emerald pulse ──
     setTimeout(() => {
       pathEl.classList.add('wilaya-flash-pulse');
     }, 400);
 
-    // ── T = 0.5s: Fade in full-screen translucent frosted blur behind Wilaya ──
     setTimeout(() => {
       mountHUDGlassStage(wilaya, pathEl);
     }, 500);
   }
 
   function mountHUDGlassStage(wilaya, pathEl) {
-    // Clean up any stale HUD nodes
+
     const staleOverlay = document.getElementById('hud-master-overlay');
     if (staleOverlay) staleOverlay.remove();
 
@@ -473,35 +433,30 @@ export function renderMap(container) {
     const displayName = lang === 'ar' ? (wilaya.nameAr || wilaya.name) : (lang === 'en' ? (wilaya.nameEn || wilaya.name) : (wilaya.nameFr || wilaya.name));
     const secName = (lang !== 'ar' && wilaya.nameAr) ? wilaya.nameAr : (wilaya.nameEn || wilaya.name);
 
-    // Top Typography bilingual labels
     const topTitle = lang === 'ar' ? 'اضغط على الولاية للدخول' : (lang === 'fr' ? 'Cliquez sur la wilaya pour entrer' : 'Click the Wilaya to Enter');
     const topSubtitle = lang === 'ar' ? 'أو اضغط في أي مكان للعودة' : (lang === 'fr' ? 'Ou cliquez n\'importe où pour revenir' : 'Or click anywhere to return');
 
-    // Academic & Specialty Data
     const acad = WILAYA_ACADEMIC_DATA[wilaya.code] || {
       unis: [`University of ${wilaya.name}`, 'National Polytechnic Institute'],
       specs: ['Artificial Intelligence', 'Energy Systems', 'Software Engineering', 'Biotechnology']
     };
 
-    // Calculate ViewBox for the Centered Cloned Wilaya
     const bbox = pathEl.getBBox();
     const pad = Math.max(bbox.width, bbox.height) * 0.25;
     const cloneVb = `${bbox.x - pad} ${bbox.y - pad} ${bbox.width + pad * 2} ${bbox.height + pad * 2}`;
 
-    // Master container for the HUD (True Glass Blur: rgba(20, 45, 35, 0.2) + blur(25px))
     const hudMaster = document.createElement('div');
     hudMaster.id = 'hud-master-overlay';
     hudMaster.className = 'hud-master-overlay';
     hudMaster.style.cssText = 'position: fixed; inset: 0; z-index: var(--z-hud-stage, 50000); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); background: rgba(20, 45, 35, 0.2); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.35s ease; cursor: pointer; overflow: hidden;';
 
     hudMaster.innerHTML = `
-      <!-- Pure Top Typography (Exact High-Contrast Spec) -->
+
       <div class="hud-top-text" style="position: absolute; top: 8vh; width: 100%; text-align: center; z-index: 1005; pointer-events: none;">
         <h2 style="color: #ffffff; font-size: 2.2rem; font-weight: 800; text-shadow: 0 4px 20px rgba(0,0,0,0.8); margin: 0 0 8px;">${topTitle}</h2>
         <p style="color: #ffffff; font-size: 1.1rem; font-weight: 500; text-shadow: 0 2px 10px rgba(0,0,0,0.8); margin: 0;">${topSubtitle}</p>
       </div>
 
-      <!-- Symmetrical 4-Line Full-Screen SVG Tether Canvas -->
       <svg id="hud-tether-canvas" style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 15; overflow: visible;">
         <line id="hud-tether-1" x1="50%" y1="50%" x2="25%" y2="30%" stroke="#ffffff" stroke-width="1.5" style="filter: drop-shadow(0 0 4px rgba(255,255,255,0.8)); opacity: 0; transition: opacity 0.4s ease 0.2s;"/>
         <line id="hud-tether-2" x1="50%" y1="50%" x2="75%" y2="30%" stroke="#ffffff" stroke-width="1.5" style="filter: drop-shadow(0 0 4px rgba(255,255,255,0.8)); opacity: 0; transition: opacity 0.4s ease 0.2s;"/>
@@ -509,7 +464,6 @@ export function renderMap(container) {
         <line id="hud-tether-4" x1="50%" y1="50%" x2="75%" y2="75%" stroke="#ffffff" stroke-width="1.5" style="filter: drop-shadow(0 0 4px rgba(255,255,255,0.8)); opacity: 0; transition: opacity 0.4s ease 0.2s;"/>
       </svg>
 
-      <!-- Center Cloned Glowing Wilaya Container -->
       <div class="hud-center-clone" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 280px; height: 280px; display: flex; align-items: center; justify-content: center; z-index: 18; pointer-events: auto; cursor: pointer;">
         <svg id="hud-clone-svg" viewBox="${cloneVb}" style="width: 100%; height: 100%; overflow: visible;">
           <defs>
@@ -522,24 +476,20 @@ export function renderMap(container) {
         </svg>
       </div>
 
-      <!-- 4 Viewport-Relative Symmetrical Fixed Glassmorphic Cards Layer -->
       <div class="hud-cards-stage" id="hud-cards-stage" style="position: absolute; inset: 0; pointer-events: none; z-index: 20;">
-        
-        <!-- Card 1: Wilaya Name (Top-Left: top 25%, left 10%) -->
+
         <div class="hud-card hud-card-1" id="hud-card-1" style="position: absolute; top: 25%; left: 10%; width: 280px; opacity: 0; transform: scale(0.92); pointer-events: auto;">
           <div class="hud-card-badge">DZ-${wilaya.code}</div>
           <h3 class="hud-card-title">${displayName}</h3>
           <div class="hud-card-subtitle">${secName}</div>
         </div>
 
-        <!-- Card 2: Verified Talents (Top-Right: top 25%, right 10%) -->
         <div class="hud-card hud-card-2" id="hud-card-2" style="position: absolute; top: 25%; right: 10%; width: 280px; opacity: 0; transform: scale(0.92); pointer-events: auto;">
           <div class="hud-card-label">${t('map.verifiedTalentsInWilaya')}</div>
           <div class="hud-card-number" id="hud-talent-count">...</div>
           <div class="hud-card-tier">★ 100% ${t('tier.goldBadge')}</div>
         </div>
 
-        <!-- Card 3: Available Specialties (Bottom-Left: bottom 15%, left 10%) -->
         <div class="hud-card hud-card-3" id="hud-card-3" style="position: absolute; bottom: 15%; left: 10%; width: 280px; opacity: 0; transform: scale(0.92); pointer-events: auto;">
           <div class="hud-card-label">${t('hud.cardSpecialties')}</div>
           <div class="hud-tags-wrap">
@@ -547,7 +497,6 @@ export function renderMap(container) {
           </div>
         </div>
 
-        <!-- Card 4: Available Universities (Bottom-Right: bottom 15%, right 10%) -->
         <div class="hud-card hud-card-4" id="hud-card-4" style="position: absolute; bottom: 15%; right: 10%; width: 280px; opacity: 0; transform: scale(0.92); pointer-events: auto;">
           <div class="hud-card-label">${t('hud.cardUniversities')}</div>
           <div class="hud-unis-wrap">
@@ -560,19 +509,16 @@ export function renderMap(container) {
 
     document.body.appendChild(hudMaster);
 
-    // Deep clone the clicked Wilaya path
     const cloneWrap = hudMaster.querySelector('#hud-clone-wrap');
     const clonedPath = pathEl.cloneNode(true);
     clonedPath.style.cssText = 'fill: #059669; stroke: #34D399; stroke-width: 2px; vector-effect: non-scaling-stroke; filter: url(#hud-glow-filter); transform-origin: center; transition: all 0.3s ease; pointer-events: auto; cursor: pointer;';
     clonedPath.setAttribute('id', `hud-clone-path-${wilaya.code}`);
     cloneWrap.appendChild(clonedPath);
 
-    // Fade in translucent frosted blur backdrop
     requestAnimationFrame(() => {
       hudMaster.style.opacity = '1';
     });
 
-    // Fetch and hydrate real Supabase count
     getProfilesByWilaya(wilaya.code).then(res => {
       const countEl = hudMaster.querySelector('#hud-talent-count');
       if (countEl) countEl.textContent = Array.isArray(res) ? `${res.length}` : '30+';
@@ -581,18 +527,15 @@ export function renderMap(container) {
       if (countEl) countEl.textContent = '30+';
     });
 
-    // ── T = 0.7s (200ms after blur mount): Fade in 4 Symmetrical White lines ──
     setTimeout(() => {
       const lines = hudMaster.querySelectorAll('#hud-tether-canvas line');
       lines.forEach(l => l.style.opacity = '0.8');
     }, 200);
 
-    // ── T = 1.0s (500ms after blur mount): Fade in the 4 HUD Cards ──
     setTimeout(() => {
       reveal4HUDCards(hudMaster);
     }, 500);
 
-    // ── Wire Click 2: "Breathe Out" Exit & Native Loader Elevation ──
     function executeClick2BreatheOut(e) {
       e.stopPropagation();
       executeBreatheOutTransition(hudMaster, wilaya);
@@ -601,7 +544,6 @@ export function renderMap(container) {
     clonedPath.addEventListener('click', executeClick2BreatheOut);
     hudMaster.querySelectorAll('.hud-card').forEach(c => c.addEventListener('click', executeClick2BreatheOut));
 
-    // ── Wire Reversal: Clicking blurred backdrop or pressing Escape ──
     hudMaster.addEventListener('click', (e) => {
       if (e.target === hudMaster || e.target.id === 'hud-tether-canvas' || e.target.id === 'hud-cards-stage') {
         reverseHUDToNational(hudMaster);
@@ -617,7 +559,6 @@ export function renderMap(container) {
     document.addEventListener('keydown', escHandler);
   }
 
-  // Reveal 4 HUD Cards with spring animation
   function reveal4HUDCards(hudMaster) {
     const cards = hudMaster.querySelectorAll('.hud-card');
     cards.forEach((card, idx) => {
@@ -629,14 +570,12 @@ export function renderMap(container) {
     });
   }
 
-  // ── Click 2: "Breathe Out" Exit & Native Loader Elevation ──
   function executeBreatheOutTransition(hudMaster, wilaya) {
     const cards = hudMaster.querySelectorAll('.hud-card');
     const tetherCanvas = hudMaster.querySelector('#hud-tether-canvas');
     const topText = hudMaster.querySelector('.hud-top-text');
     const cloneCenter = hudMaster.querySelector('.hud-center-clone');
 
-    // 1. Fade out cards, lines, top typography, and glowing Wilaya clone
     cards.forEach(c => {
       c.style.transition = 'all 0.25s ease';
       c.style.transform = 'scale(0.95)';
@@ -646,49 +585,41 @@ export function renderMap(container) {
     if (topText) topText.style.opacity = '0';
     if (cloneCenter) cloneCenter.style.opacity = '0';
 
-    // 2. Set background white and drop blur
     hudMaster.style.background = '#ffffff';
     hudMaster.style.backdropFilter = 'none';
     hudMaster.style.webkitBackdropFilter = 'none';
 
-    // 3. EXPLICITLY elevate and trigger the platform's native loader
     let nativeLoader = document.getElementById('loader') || document.querySelector('.loader-screen');
     if (!nativeLoader) {
       nativeLoader = createLoader();
     }
     if (nativeLoader) {
-      nativeLoader.style.zIndex = '999999'; // Force it above the HUD
+      nativeLoader.style.zIndex = '999999';
       nativeLoader.style.display = 'flex';
       nativeLoader.classList.remove('hidden');
     }
 
-    // 4. Wait 0.8s, then execute routing and destroy HUD & hide loader
     setTimeout(() => {
       const wilayaCode = wilaya.code;
       store.setState({ selectedWilaya: wilaya });
 
-      // 1. Trigger the routing
       window.location.hash = `#/wilaya/${wilayaCode}`;
 
-      // 2. DESTROY the HUD overlay so it stops blocking the screen
       const hudOverlay = document.getElementById('hud-master-overlay') || document.getElementById('hud-overlay');
       if (hudOverlay) hudOverlay.remove();
       if (hudMaster) hudMaster.remove();
       isHUDActive = false;
 
-      // 3. HIDE the native loader and reset its inline styles
       if (nativeLoader) {
         nativeLoader.classList.add('hidden');
         nativeLoader.style.display = 'none';
         nativeLoader.style.zIndex = '';
       }
 
-      // 4. UNLOCK the body scroll
       document.body.classList.remove('modal-open');
     }, 800);
   }
 
-  // Reversal: Smoothly close HUD and zoom back out to national view
   function reverseHUDToNational(hudMaster) {
     hudMaster.style.opacity = '0';
     setTimeout(() => {
@@ -700,7 +631,6 @@ export function renderMap(container) {
     animateViewBox(BASE_VB, 550);
   }
 
-  // Reactive language change
   store.subscribe('lang', () => {
     svg.setAttribute('aria-label', t('map.title'));
   });

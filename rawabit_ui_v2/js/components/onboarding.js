@@ -1,7 +1,3 @@
-/**
- * Rawabit v2 — Onboarding Helper Module
- */
-
 import { openLanguageSelector } from './overlay.js';
 
 const ONBOARDING_KEY = 'rawabit_has_onboarded_v2';

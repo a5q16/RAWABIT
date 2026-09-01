@@ -29,7 +29,6 @@ from app.security.sanitizer import SanitizerMiddleware
 from app.security.exceptions import register_exception_handlers
 from app.security.sandbox import sandbox
 
-# ── Logging ─────────────────────────────────────────────────────
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)-7s | %(name)s | %(message)s",
@@ -37,13 +36,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger("rawabit.main")
 
-
-# ── Lifespan ────────────────────────────────────────────────────
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     settings = get_settings()
 
-    # ── Startup ──
     logger.info("=" * 60)
     logger.info("  Rawabit RAG Microservice — Starting up")
     logger.info("=" * 60)
@@ -54,20 +50,16 @@ async def lifespan(app: FastAPI):
     logger.info("CORS Origins : %s", settings.allowed_origins)
     logger.info("-" * 60)
 
-    # Warm-load the embedding model (blocking but runs once).
     embedder.warm(settings.embedding_model)
 
     logger.info("=" * 60)
     logger.info("  Startup complete — ready to serve requests")
     logger.info("=" * 60)
 
-    yield  # ← application runs here
+    yield
 
-    # ── Shutdown ──
     logger.info("Rawabit RAG Microservice — Shutting down.")
 
-
-# ── App Factory ─────────────────────────────────────────────────
 app = FastAPI(
     title="Rawabit RAG Microservice",
     description="Retrieval-Augmented Generation service for the Algerian Competencies Platform.",
@@ -78,12 +70,8 @@ app = FastAPI(
     redoc_url="/redoc" if get_settings().debug else None,
 )
 
-# ── Security Middleware Stack (order matters: outermost = first) ──
-
-# 1. Sanitizer — intercepts ALL responses, redacts leaked secrets
 app.add_middleware(SanitizerMiddleware)
 
-# 2. Rate Limiter — token-bucket per IP, protects Groq + FastAPI
 settings = get_settings()
 app.add_middleware(
     RateLimitMiddleware,
@@ -91,7 +79,6 @@ app.add_middleware(
     burst=settings.rate_limit_burst,
 )
 
-# 3. CORS — strict origins from config (not wildcard)
 allowed = [o.strip() for o in settings.allowed_origins.split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
@@ -101,16 +88,12 @@ app.add_middleware(
     allow_headers=["Content-Type", "Authorization"],
 )
 
-# 4. Global exception handlers — zero-leak error responses
 register_exception_handlers(app)
 
-
-# ── Sandbox Routes (approval gate) ──────────────────────────────
 @app.get("/api/sandbox", tags=["security"])
 async def list_pending_actions():
     """List all pending actions awaiting approval."""
     return {"pending": sandbox.get_pending()}
-
 
 @app.post("/api/sandbox/{action_id}/approve", tags=["security"])
 async def approve_action(action_id: str, reviewed_by: str = "admin"):
@@ -120,7 +103,6 @@ async def approve_action(action_id: str, reviewed_by: str = "admin"):
         return ORJSONResponse(status_code=404, content={"error": "action_not_found"})
     return {"status": "approved", "action_id": action_id, "reviewed_by": reviewed_by}
 
-
 @app.post("/api/sandbox/{action_id}/reject", tags=["security"])
 async def reject_action(action_id: str, reviewed_by: str = "admin"):
     """Reject a pending action (admin only)."""
@@ -129,10 +111,7 @@ async def reject_action(action_id: str, reviewed_by: str = "admin"):
         return ORJSONResponse(status_code=404, content={"error": "action_not_found"})
     return {"status": "rejected", "action_id": action_id, "reviewed_by": reviewed_by}
 
-
-# ── Routes ──────────────────────────────────────────────────────
 app.include_router(chat_router)
-
 
 @app.get("/health", tags=["system"])
 async def health():
@@ -159,8 +138,6 @@ async def health():
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
 
-
-# ── Entrypoint (for `python -m app.main`) ──────────────────────
 if __name__ == "__main__":
     import uvicorn
 

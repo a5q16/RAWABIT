@@ -1,9 +1,3 @@
-/**
- * Rawabit v2 — Sticky Luxurious Navbar
- * Features brand mark, page redirection navigation links,
- * and clean Language Switcher trigger with current active language badge.
- */
-
 import { t } from '../i18n.js';
 import { store } from '../store.js';
 import { openLanguageSelector } from './overlay.js';
@@ -24,8 +18,7 @@ export function createNav() {
 
   nav.innerHTML = `
     <div class="nav-inner">
-      
-      <!-- Brand Logo -->
+
       <a class="nav-logo" href="#/" id="nav-logo-link">
         <img class="nav-logo-img" src="./logo.png" alt="Rawabit Logo" style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12); flex-shrink: 0;" />
         <div class="nav-logo-text">
@@ -34,7 +27,6 @@ export function createNav() {
         </div>
       </a>
 
-      <!-- Navigation Links -->
       <div class="nav-links" id="nav-links">
         <a class="nav-link active" href="#/" data-i18n="nav.home" data-route="#/">${t('nav.home')}</a>
         <a class="nav-link" href="#/about" data-i18n="nav.about" data-route="#/about">${t('nav.about')}</a>
@@ -43,7 +35,6 @@ export function createNav() {
         <a class="nav-link" href="#/contact" data-i18n="nav.contact" data-route="#/contact">${t('nav.contact')}</a>
       </div>
 
-      <!-- Action & Language Switcher -->
       <div class="nav-actions">
         <button class="nav-lang-btn" id="nav-lang-btn" title="Change Language">
           <svg class="nav-lang-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -54,7 +45,6 @@ export function createNav() {
           <span class="nav-lang-label" id="nav-lang-label">${langMap[store.state.lang] || 'العربية'}</span>
         </button>
 
-        <!-- Mobile Menu Toggle Button -->
         <button class="nav-menu-btn" id="nav-menu-toggle" aria-label="Toggle Menu">
           <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none">
             <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -64,7 +54,6 @@ export function createNav() {
         </button>
       </div>
 
-      <!-- Mobile Dropdown Menu -->
       <div class="nav-mobile-menu" id="nav-mobile-menu">
         <a class="nav-mobile-link active" href="#/" data-i18n="nav.home" data-route="#/">${t('nav.home')}</a>
         <a class="nav-mobile-link" href="#/about" data-i18n="nav.about" data-route="#/about">${t('nav.about')}</a>
@@ -76,7 +65,6 @@ export function createNav() {
     </div>
   `;
 
-  // Update active links based on hash
   function updateActiveNav() {
     const rawHash = window.location.hash || '#/';
     const baseRoute = rawHash.split('?')[0];
@@ -92,7 +80,6 @@ export function createNav() {
   window.addEventListener('hashchange', updateActiveNav);
   updateActiveNav();
 
-  // ── Language Button Trigger ──
   const langBtn = nav.querySelector('#nav-lang-btn');
   if (langBtn) {
     langBtn.addEventListener('click', () => {
@@ -100,7 +87,6 @@ export function createNav() {
     });
   }
 
-  // ── Mobile Menu Toggle ──
   const menuBtn = nav.querySelector('#nav-menu-toggle');
   const mobileMenu = nav.querySelector('#nav-mobile-menu');
   if (menuBtn && mobileMenu) {
@@ -108,7 +94,6 @@ export function createNav() {
       mobileMenu.classList.toggle('open');
     });
 
-    // Close mobile menu on clicking any link
     nav.querySelectorAll('.nav-mobile-link').forEach(link => {
       link.addEventListener('click', () => {
         mobileMenu.classList.remove('open');
@@ -116,12 +101,10 @@ export function createNav() {
     });
   }
 
-  // ── Sticky Navbar Scroll Listener ──
   window.addEventListener('scroll', () => {
     nav.classList.toggle('scrolled', window.scrollY > 15);
   }, { passive: true });
 
-  // ── Reactive Language Updates ──
   store.subscribe('lang', (newLang) => {
     const langLabel = nav.querySelector('#nav-lang-label');
     if (langLabel) {

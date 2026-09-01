@@ -1,9 +1,3 @@
-/* ==========================================================================
-   LAYOUT — SAUDI-GOV-TECH DESIGN SYSTEM
-   Strictly Light Theme · Absolute Minimalism · Massive Whitespace · Zero Pop-ups
-   ========================================================================== */
-
-/* ── STICKY LUXURIOUS NAVBAR ── */
 .top-navbar, header, .navbar-container, #main-nav, .nav {
   position: fixed;
   top: 0;
@@ -206,7 +200,6 @@
   color: var(--color-accent);
 }
 
-/* ── HERO SECTION (Massive Whitespace, Absolute Minimalism) ── */
 .hero {
   padding-top: calc(var(--nav-height) + var(--space-4xl));
   padding-bottom: var(--space-3xl);
@@ -291,7 +284,6 @@
   box-shadow: var(--shadow-md);
 }
 
-/* ── AI SEARCH SECTION ── */
 .section-ai-search {
   padding: var(--space-3xl) var(--space-lg);
   position: relative;
@@ -325,7 +317,6 @@
   line-height: 1.7;
 }
 
-/* Luxurious Wide AI Search Box */
 .ai-search-box {
   position: relative;
   z-index: var(--z-search-omnibar, 90);
@@ -397,7 +388,6 @@
   transform: translateY(-1px);
 }
 
-/* ── MAP INTRO SECTION ── */
 .section-map {
   padding: var(--space-3xl) var(--space-lg);
   position: relative;
@@ -405,7 +395,6 @@
   background: linear-gradient(180deg, rgba(250, 250, 250, 1) 0%, rgba(243, 244, 246, 0.5) 100%);
 }
 
-/* ── FEATURES SECTION ("WHAT MAKES RAWABIT UNIQUE?") ── */
 .section-features {
   padding: var(--space-3xl) var(--space-lg);
 }
@@ -462,7 +451,6 @@
   line-height: 1.75;
 }
 
-/* ── STATISTICS SECTION ── */
 .section-stats {
   padding: var(--space-3xl) var(--space-lg);
   background: linear-gradient(180deg, rgba(230, 244, 237, 0.25) 0%, rgba(250, 250, 250, 1) 100%);
@@ -520,7 +508,6 @@
   color: var(--color-text-secondary);
 }
 
-/* ── MASSIVELY SIMPLIFIED FOOTER (Strictly 3 Links, Centered) ── */
 .footer-minimal {
   margin-top: var(--space-3xl);
   background: var(--color-surface);
@@ -598,7 +585,6 @@
   margin-top: 8px;
 }
 
-/* ── RESPONSIVE ADAPTATIONS ── */
 @media (max-width: 1024px) {
   .features-grid {
     grid-template-columns: 1fr;
@@ -661,10 +647,6 @@
   }
 }
 
-/* ==========================================================================
-   INNER PAGES — (About, Why & Vision, Contact)
-   ========================================================================== */
-
 .page-container {
   padding-top: var(--nav-height);
   min-height: 100vh;
@@ -716,7 +698,6 @@
   background-color: var(--color-bg-secondary);
 }
 
-/* Tab Switcher (Why & Vision) */
 .page-tab-switcher {
   display: inline-flex;
   background: rgba(30, 41, 59, 0.05);
@@ -754,7 +735,6 @@
   display: block;
 }
 
-/* Mission Card */
 .mission-card {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -831,7 +811,6 @@
   background: var(--color-border);
 }
 
-/* Pillars Grid */
 .pillars-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -878,7 +857,6 @@
   line-height: 1.6;
 }
 
-/* Verification Banner */
 .verification-banner {
   background: linear-gradient(135deg, var(--color-accent), var(--color-accent-hover));
   border-radius: var(--radius-xl);
@@ -931,7 +909,6 @@
   transform: translateY(-2px);
 }
 
-/* Why Grid */
 .why-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -983,7 +960,6 @@
   font-weight: 700;
 }
 
-/* Vision Link Banner */
 .vision-link-banner {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -1016,7 +992,6 @@
   color: var(--color-text-secondary);
 }
 
-/* Vision Section */
 .vision-hero-box {
   text-align: center;
   max-width: 720px;
@@ -1092,7 +1067,6 @@
   line-height: 1.55;
 }
 
-/* Contact Page Layout */
 .contact-grid-layout {
   display: grid;
   grid-template-columns: 1.5fr 1fr;
@@ -1290,7 +1264,6 @@ a.info-ci-val:hover {
   border: 1px solid var(--color-border);
 }
 
-/* ── RESPONSIVE RULES FOR INNER PAGES ── */
 @media (max-width: 1024px) {
   .pillars-grid,
   .why-grid {
@@ -1347,9 +1320,6 @@ a.info-ci-val:hover {
   }
 }
 
-/* ==========================================================================
-   GLOBAL FLOATING AI ACTION BUTTON (FAB)
-   ========================================================================== */
 .global-ai-fab {
   position: fixed;
   bottom: 28px;
@@ -1400,7 +1370,6 @@ a.info-ci-val:hover {
   }
 }
 
-/* Contextual Awareness: Fade out when chat drawer is open */
 .global-ai-fab.drawer-open {
   opacity: 0 !important;
   pointer-events: none !important;

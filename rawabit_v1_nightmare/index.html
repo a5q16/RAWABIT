@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rawabit v1 (Nightmare Edition - Presentation Demo)</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <div class="mock-data-banner">
+    ⚠️ [DEBUG MODE]: Loaded 3 records from MOCK_DATA.json (Supabase Database Not Connected!)
+  </div>
+
+  <header class="navbar">
+    <div class="nav-brand">
+      <h2>RAWABIT <span>(v1.0.0-broken)</span></h2>
+    </div>
+
+    <div class="search-container">
+      <input type="text" id="search-input" placeholder="Search experts or wilayas..." autocomplete="off">
+
+      <div id="search-dropdown" class="search-dropdown">
+        <div class="dropdown-item">🔬 Dr. Salim Benali - AI Researcher (Wilaya 16)</div>
+        <div class="dropdown-item">⚡ Prof. Amina Mansouri - Solar Energy (Wilaya 30)</div>
+        <div class="dropdown-item">🤖 Karim Zidani - Robotics Engineer (Wilaya 31)</div>
+      </div>
+    </div>
+
+    <div class="nav-links">
+      <a href="#">Home</a>
+      <a href="#">About</a>
+      <a href="#">Contact</a>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <div class="hero-section">
+      <h1>Discover Algerian Competencies</h1>
+      <p>Search verified researchers and industry leaders across all 58 Wilayas.</p>
+    </div>
+
+    <section class="cards-section">
+      <h3>Verified Experts</h3>
+
+      <div class="cards-grid">
+        <div class="expert-card">
+          <div class="card-avatar">SB</div>
+          <h4>Dr. Salim Benali</h4>
+          <p class="card-title">Senior Machine Learning Scientist</p>
+          <span class="badge">Wilaya 16 - Algiers</span>
+          <p class="card-desc">Leading NLP and LLM alignment projects for national sovereign computing initiatives.</p>
+        </div>
+
+        <div class="expert-card">
+          <div class="card-avatar">AM</div>
+          <h4>Prof. Amina Mansouri</h4>
+          <p class="card-title">Renewable Energy Specialist</p>
+          <span class="badge">Wilaya 30 - Ouargla</span>
+          <p class="card-desc">Conducting high-efficiency photovoltaic cell research in arid climate conditions.</p>
+        </div>
+
+        <div class="expert-card">
+          <div class="card-avatar">KZ</div>
+          <h4>Karim Zidani</h4>
+          <p class="card-title">Industrial Robotics Lead</p>
+          <span class="badge">Wilaya 31 - Oran</span>
+          <p class="card-desc">Automating manufacturing telemetry and SCADA integration pipelines.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="bottom-notch-btn" id="open-chat-notch">
+    <span>💬 AI Assistant (Click to test)</span>
+  </div>
+
+  <div class="fullscreen-chat-overlay" id="chat-overlay">
+    <div class="chat-box">
+      <div class="chat-header">
+        <h3>🤖 Rawabit AI Assistant (Unsecured Prototype)</h3>
+
+      </div>
+
+      <div class="chat-messages" id="chat-messages">
+        <div class="msg bot-msg">
+          Hello! I am the Rawabit AI assistant. Ask me anything about how our database works or how to edit expert records!
+        </div>
+      </div>
+
+      <form class="chat-input-form" id="chat-form">
+        <input type="text" id="chat-input" placeholder="Type a prompt (e.g. How do I edit expert records?)..." autocomplete="off">
+        <button type="submit">Send</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

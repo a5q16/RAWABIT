@@ -13,7 +13,6 @@ from fastapi.staticfiles import StaticFiles
 
 app = FastAPI(title="Rawabit Platform API", version="2.0.0")
 
-# CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -24,7 +23,6 @@ app.add_middleware(
 
 BASE_DIR = Path(__file__).resolve().parent
 
-# Comprehensive static lookup directories
 STATIC_DIRS = [
     BASE_DIR,
     BASE_DIR / "public",
@@ -80,7 +78,7 @@ async def chat_stream(request: Request):
     groq_api_key = os.environ.get("GROQ_API_KEY") or os.environ.get("VITE_GROQ_API_KEY")
     if not groq_api_key:
         raise HTTPException(
-            status_code=500, 
+            status_code=500,
             detail="GROQ_API_KEY is not configured in server environment variables."
         )
 

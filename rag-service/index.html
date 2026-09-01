@@ -8,12 +8,10 @@
   <link rel="icon" type="image/png" href="./logo.png" />
   <link rel="apple-touch-icon" href="./logo.png" />
 
-  <!-- Tajawal Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet" />
 
-  <!-- Design System CSS -->
   <link rel="stylesheet" href="./css/tokens.css" />
   <link rel="stylesheet" href="./css/base.css" />
   <link rel="stylesheet" href="./css/layout.css" />
@@ -23,18 +21,14 @@
   <link rel="stylesheet" href="./css/profiles.css" />
   <link rel="stylesheet" href="./css/chat.css" />
 
-  <!-- Supabase & AI Backend Runtime Environment Configuration -->
-  <script>
-    window.ENV = window.ENV || {
+  <script>    window.ENV = window.ENV || {
       VITE_SUPABASE_URL: 'https://jxqrxlyostqhvsluzflw.supabase.co',
       VITE_SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp4cXJ4bHlvc3RxaHZzbHV6Zmx3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NzY0MzE4NSwiZXhwIjoyMTAzMjE5MTg1fQ.bQfsnm31h6rs1XSLCsi9s6CaFHWYjGqqb2qaaSTJfCs',
       VITE_AI_API_URL: '/api/chat'
     };
   </script>
 
-  <!-- Prevent FOUC: set lang/dir early from localStorage or browser detection -->
-  <script>
-    (function() {
+  <script>    (function() {
       try {
         var lang = localStorage.getItem('rawabit-lang');
         if (!lang) {
@@ -59,10 +53,9 @@
 </head>
 <body>
 
-  <!-- Top Sticky Navigation Bar -->
   <nav class="nav" id="main-nav">
     <div class="nav-inner">
-      <!-- Brand Logo -->
+
       <a class="nav-logo" href="#/" id="nav-logo-link">
         <img class="nav-logo-img" src="./logo.png" alt="Rawabit Logo" style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12); flex-shrink: 0;" />
         <div class="nav-logo-text">
@@ -71,7 +64,6 @@
         </div>
       </a>
 
-      <!-- Navigation Links -->
       <div class="nav-links" id="nav-links">
         <a class="nav-link active" href="#/" data-i18n="nav.home" data-route="#/">الرئيسية</a>
         <a class="nav-link" href="#/about" data-i18n="nav.about" data-route="#/about">عن روابط</a>
@@ -80,7 +72,6 @@
         <a class="nav-link" href="#/contact" data-i18n="nav.contact" data-route="#/contact">اتصل بنا</a>
       </div>
 
-      <!-- Action & Language Switcher -->
       <div class="nav-actions">
         <button class="nav-lang-btn" id="nav-lang-btn" title="Change Language">
           <svg class="nav-lang-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -91,7 +82,6 @@
           <span class="nav-lang-label" id="nav-lang-label">العربية</span>
         </button>
 
-        <!-- Mobile Menu Toggle Button -->
         <button class="nav-menu-btn" id="nav-menu-toggle" aria-label="Toggle Menu">
           <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none">
             <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -101,7 +91,6 @@
         </button>
       </div>
 
-      <!-- Mobile Dropdown Menu -->
       <div class="nav-mobile-menu" id="nav-mobile-menu">
         <a class="nav-mobile-link active" href="#/" data-i18n="nav.home" data-route="#/">الرئيسية</a>
         <a class="nav-mobile-link" href="#/about" data-i18n="nav.about" data-route="#/about">عن روابط</a>
@@ -112,19 +101,15 @@
     </div>
   </nav>
 
-  <!-- Root Application Mount Container -->
   <div id="app">
     <main id="main-content"></main>
   </div>
 
-  <!-- Markdown Parser & DOMPurify Sanitizer for Secure AI Responses -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-  <!-- Personalized Learning Roadmap Component -->
   <script type="module" src="./js/components/roadmap.js"></script>
 
-  <!-- Application Entry Point -->
   <script type="module" src="./js/app.js"></script>
 
 </body>

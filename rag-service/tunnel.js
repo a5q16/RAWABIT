@@ -23,7 +23,6 @@ const localtunnel = require('localtunnel');
     process.exit(1);
   });
 
-  // Keep process alive
   process.on('SIGINT', () => {
     console.log('\nClosing tunnel...');
     tunnel.close();

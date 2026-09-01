@@ -18,13 +18,11 @@ from typing import Any
 
 logger = logging.getLogger("rawabit.security.sandbox")
 
-
 class ActionStatus(str, Enum):
     PENDING = "pending"
     APPROVED = "approved"
     REJECTED = "rejected"
     EXPIRED = "expired"
-
 
 @dataclass
 class PendingAction:
@@ -39,7 +37,6 @@ class PendingAction:
     reviewed_by: str | None = None
     reviewed_at: str | None = None
     dry_run_result: dict[str, Any] | None = None
-
 
 class SandboxGate:
     """
@@ -141,7 +138,6 @@ class SandboxGate:
         now = datetime.now(timezone.utc)
         expires = now + timedelta(minutes=self.ttl_minutes)
 
-        # Run dry-run first
         dry_run = self.dry_run(action_type, payload, client_ip, request_id)
 
         action = PendingAction(
@@ -201,6 +197,4 @@ class SandboxGate:
             if a.status == ActionStatus.PENDING
         ]
 
-
-# Global singleton
 sandbox = SandboxGate()

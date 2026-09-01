@@ -1,8 +1,3 @@
-/**
- * Rawabit v2 — Glassmorphism AI Chat Interface
- * Clean Professional Styling · Centered 850px Canvas · Dynamic Actionable FAQ Zero-State
- */
-
 import { t } from '../i18n.js';
 import { store, pushOverlay, popOverlay, isOverlayActive } from '../store.js';
 
@@ -16,9 +11,6 @@ let isStreaming = false;
 const USER_AVATAR_SVG = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
 const LOGO_SRC = './logo.png';
 
-/**
- * Resolves the AI API URL across environments
- */
 function getAiApiUrl() {
   return (
     (typeof window !== 'undefined' && window.ENV && (window.ENV.VITE_AI_API_URL || window.ENV.AI_API_URL)) ||
@@ -27,9 +19,6 @@ function getAiApiUrl() {
   );
 }
 
-/**
- * Safely format Markdown to sanitized HTML
- */
 function formatMarkdown(text) {
   if (!text) return '';
   try {
@@ -56,24 +45,19 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
-/**
- * Creates the single Full-Screen Glassmorphic Chat DOM
- */
 function createChatDrawerDOM() {
   if (drawerElement && backdropElement) return;
 
-  // 1. Backdrop
   backdropElement = document.createElement('div');
   backdropElement.className = 'ai-drawer-backdrop';
   backdropElement.id = 'ai-drawer-backdrop';
 
-  // 2. Full-Screen Workspace Panel
   drawerElement = document.createElement('div');
   drawerElement.className = 'ai-drawer-panel';
   drawerElement.id = 'ai-drawer-panel';
 
   drawerElement.innerHTML = `
-    <!-- Top Glass Header Bar -->
+
     <header class="ai-glass-header">
       <div class="ai-glass-header-inner">
         <div class="ai-header-brand">
@@ -89,7 +73,7 @@ function createChatDrawerDOM() {
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
             <span id="ai-new-chat-label">محادثة جديدة</span>
           </button>
-          
+
           <button type="button" class="ai-glass-btn ai-close-btn close-chat-btn" id="close-ai-chat" aria-label="Close Chat">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             <span class="key-pill">ESC</span>
@@ -98,35 +82,29 @@ function createChatDrawerDOM() {
       </div>
     </header>
 
-    <!-- Main Centered Scroll Body -->
     <div class="ai-glass-scroll-body" id="ai-glass-scroll-body">
       <div class="ai-centered-column">
-        
-        <!-- Dynamic Zero-State FAQ Grid (Shown when empty) -->
+
         <div class="ai-zero-state" id="ai-zero-state">
           <img class="zero-brand-logo" src="${LOGO_SRC}" alt="Rawabit Logo" />
           <h1 class="zero-title" id="zero-hero-title">مساعد روابط الذكي</h1>
           <p class="zero-subtitle" id="zero-hero-subtitle">اسألني عن الكفاءات الجزائرية، المراكز الجامعية والبحثية، أو أي باحث متخصص. أنا هنا للمساعدة.</p>
-          
-          <!-- Context Pill (if profile is active) -->
+
           <div class="zero-context-pill" id="zero-context-pill" style="display: none;">
             <span class="zero-context-dot"></span>
             <span id="zero-context-text">استعلام مخصص</span>
           </div>
 
-          <!-- 2x2 Clickable FAQ Cards Grid -->
           <div class="zero-faq-grid" id="zero-faq-grid">
-            <!-- Dynamically populated -->
+
           </div>
         </div>
 
-        <!-- Messages Stream Area -->
         <div class="ai-chat-messages" id="ai-chat-messages" style="display: none;"></div>
 
       </div>
     </div>
 
-    <!-- Floating Raycast-Style Omnibar Input -->
     <div class="ai-floating-omnibar">
       <div class="ai-omnibar-card">
         <form class="ai-omnibar-form" id="ai-chat-form" onsubmit="event.preventDefault();">
@@ -144,7 +122,7 @@ function createChatDrawerDOM() {
               <span class="hint-pill" id="hint-shift-pill">Shift + Enter للسطر الجديد</span>
               <span class="hint-pill" id="ai-char-counter">0 / 2000</span>
             </div>
-            
+
             <button type="submit" class="ai-send-btn" id="ai-send-btn" aria-label="Send">
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="22" y1="2" x2="11" y2="13"></line>
@@ -161,12 +139,10 @@ function createChatDrawerDOM() {
   document.body.appendChild(backdropElement);
   document.body.appendChild(drawerElement);
 
-  // Close triggers
   const closeBtns = drawerElement.querySelectorAll('#close-ai-chat, .close-chat-btn, #ai-drawer-close-btn');
   closeBtns.forEach(btn => btn.addEventListener('click', closeAIChat));
   backdropElement.addEventListener('click', closeAIChat);
 
-  // Reset / New Chat trigger
   const newChatBtn = drawerElement.querySelector('#ai-new-chat-btn');
   if (newChatBtn) {
     newChatBtn.addEventListener('click', () => {
@@ -183,7 +159,6 @@ function createChatDrawerDOM() {
     }
   });
 
-  // Textarea handling (auto-resize & shortcuts)
   const input = drawerElement.querySelector('#ai-chat-input');
   const form = drawerElement.querySelector('#ai-chat-form');
   const charCounter = drawerElement.querySelector('#ai-char-counter');
@@ -225,9 +200,6 @@ function createChatDrawerDOM() {
   }
 }
 
-/**
- * Reset chat session and return smoothly to zero-state FAQ
- */
 function resetChatSession() {
   activeMessages = [];
   const messagesContainer = drawerElement.querySelector('#ai-chat-messages');
@@ -248,10 +220,6 @@ function resetChatSession() {
   renderDynamicZeroState(currentContext, store.state.lang);
 }
 
-/**
- * Open the Full-Screen AI Workspace
- * @param {Object} context - Optional metadata (profile, search query, or wilaya guidance)
- */
 export function openAIChat(context = null) {
   createChatDrawerDOM();
   currentContext = context;
@@ -261,9 +229,8 @@ export function openAIChat(context = null) {
   drawerElement.setAttribute('dir', isRtl ? 'rtl' : 'ltr');
   updateWorkspaceTranslations(lang);
 
-  // Strict Context Isolation
-  const newSessionKey = context?.profile?.id 
-    ? `profile-${context.profile.id}` 
+  const newSessionKey = context?.profile?.id
+    ? `profile-${context.profile.id}`
     : (context?.wilayaCode ? `wilaya-${context.wilayaCode}` : 'global-session');
 
   if (newSessionKey !== currentSessionKey) {
@@ -277,11 +244,9 @@ export function openAIChat(context = null) {
   backdropElement.classList.add('active');
   drawerElement.classList.add('active');
 
-  // Fade out FAB
   const fab = document.querySelector('#global-ai-fab');
   if (fab) fab.classList.add('drawer-open');
 
-  // Auto-send initialQuery if provided
   if (context && context.initialQuery) {
     const q = context.initialQuery.trim();
     if (q) {
@@ -295,9 +260,6 @@ export function openAIChat(context = null) {
   setTimeout(() => input?.focus(), 300);
 }
 
-/**
- * Close the Full-Screen AI Workspace
- */
 export function closeAIChat() {
   if (!drawerElement || !backdropElement) return;
 
@@ -305,7 +267,6 @@ export function closeAIChat() {
   backdropElement.classList.remove('active');
   popOverlay();
 
-  // CRITICAL: Always restore body scroll
   if (typeof document !== 'undefined' && document.body) {
     document.body.style.overflow = '';
     document.body.classList.remove('modal-open');
@@ -315,9 +276,6 @@ export function closeAIChat() {
   if (fab) fab.classList.remove('drawer-open');
 }
 
-/**
- * Render dynamic Zero-State FAQ Grid according to active context and language
- */
 function renderDynamicZeroState(context, lang = 'ar') {
   const grid = drawerElement.querySelector('#zero-faq-grid');
   const heroTitle = drawerElement.querySelector('#zero-hero-title');
@@ -408,7 +366,6 @@ function renderDynamicZeroState(context, lang = 'ar') {
     </div>
   `).join('');
 
-  // Wire FAQ card clicks
   grid.querySelectorAll('.zero-faq-card').forEach(card => {
     card.addEventListener('click', () => {
       const p = card.getAttribute('data-prompt');
@@ -419,9 +376,6 @@ function renderDynamicZeroState(context, lang = 'ar') {
   });
 }
 
-/**
- * Format and update Workspace Translations
- */
 function updateWorkspaceTranslations(lang) {
   const topBrandTitle = drawerElement.querySelector('#ai-top-brand-title');
   const topBrandSub = drawerElement.querySelector('#ai-top-brand-sub');
@@ -462,9 +416,6 @@ function updateWorkspaceTranslations(lang) {
   }
 }
 
-/**
- * Append user message bubble to chat
- */
 function appendUserMessage(text) {
   const container = drawerElement.querySelector('#ai-chat-messages');
   if (!container) return;
@@ -481,13 +432,9 @@ function appendUserMessage(text) {
   scrollToBottom();
 }
 
-/**
- * Handle sending a user message, transitioning view, invoking SSE stream, and rendering response
- */
 async function handleUserMessage(queryText) {
   if (isStreaming) return;
 
-  // 1. Transition: Hide Zero-State FAQ, Show Message Stream & New Chat Button
   const zeroState = drawerElement.querySelector('#ai-zero-state');
   const messagesContainer = drawerElement.querySelector('#ai-chat-messages');
   const newChatBtn = drawerElement.querySelector('#ai-new-chat-btn');
@@ -502,7 +449,6 @@ async function handleUserMessage(queryText) {
   const lang = store.state.lang || localStorage.getItem('rawabit_lang') || 'ar';
   const languageName = lang === 'ar' ? 'Arabic' : (lang === 'fr' ? 'French' : 'English');
 
-  // 2. Create stream bubble
   const streamMsgDiv = document.createElement('div');
   streamMsgDiv.className = 'ai-msg ai-msg-assistant animate-fade-in';
   streamMsgDiv.innerHTML = `
@@ -525,7 +471,6 @@ async function handleUserMessage(queryText) {
   let accumulatedText = '';
   let hasReceivedTokens = false;
 
-  // Extract active Wilaya ID from URL hash or active context
   let activeWilayaId = null;
   const hash = (typeof window !== 'undefined' && window.location.hash) ? window.location.hash : '';
   if (hash.startsWith('#/wilaya/')) {
@@ -547,7 +492,6 @@ async function handleUserMessage(queryText) {
     activeWilayaId = Number(currentContext.profile.wilaya_id);
   }
 
-  // Build isolated context payload
   const payload = {
     query: queryText,
     lang: lang,
@@ -634,8 +578,8 @@ async function handleUserMessage(queryText) {
     if (!hasReceivedTokens && accumulatedText) {
       bubble.innerHTML = formatMarkdown(accumulatedText);
     } else if (!hasReceivedTokens) {
-      bubble.innerHTML = lang === 'ar' 
-        ? 'تمت معالجة الاستفسار بنجاح.' 
+      bubble.innerHTML = lang === 'ar'
+        ? 'تمت معالجة الاستفسار بنجاح.'
         : 'Query processed successfully.';
     }
 
@@ -655,9 +599,6 @@ async function handleUserMessage(queryText) {
   }
 }
 
-/**
- * Smoothly scroll the messages container to bottom
- */
 function scrollToBottom() {
   const scrollBody = drawerElement?.querySelector('#ai-glass-scroll-body');
   if (scrollBody) {
@@ -667,9 +608,6 @@ function scrollToBottom() {
 
 let globalFabInstance = null;
 
-/**
- * Creates and mounts the Global Floating AI Button (FAB)
- */
 export function createGlobalAIFab() {
   if (globalFabInstance && document.body.contains(globalFabInstance)) return globalFabInstance;
 

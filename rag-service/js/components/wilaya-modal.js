@@ -1,13 +1,3 @@
-/**
- * Rawabit v2 — Cinematic Wilaya Intermediate Screen ("Antigravity" Experience)
- * Features:
- * 1. Full-Screen Backdrop Blur (backdrop-filter: blur(20px))
- * 2. Cloned Geographic SVG Path with Antigravity Floating & Pulsing Gold/Emerald Shadow
- * 3. Live Verified Talent Statistics & Domain Badges from Supabase
- * 4. "Enter Wilaya" & "Back to Map" Cinematic Controls
- * Strictly Vanilla JS · 60FPS Hardware Accelerated
- */
-
 import { WILAYAS } from './map-paths.js';
 import { getProfilesByWilaya } from '../data/profiles-data.js';
 import { store, pushOverlay, popOverlay } from '../store.js';
@@ -17,10 +7,6 @@ import { navigate } from '../router.js';
 let activeModalOverlay = null;
 let activeKeyHandler = null;
 
-/**
- * Open the Cinematic Wilaya Intermediate Screen
- * @param {Object|string} wilayaOrCode - Wilaya object from WILAYAS or wilaya code string (e.g. "16", "30")
- */
 export async function openWilayaIntermediateScreen(wilayaOrCode) {
   closeWilayaIntermediateScreen(false);
 
@@ -36,13 +22,12 @@ export async function openWilayaIntermediateScreen(wilayaOrCode) {
   }
 
   const lang = store.state.lang;
-  const displayName = lang === 'ar' 
-    ? (wilaya.nameAr || wilaya.name) 
+  const displayName = lang === 'ar'
+    ? (wilaya.nameAr || wilaya.name)
     : (lang === 'en' ? (wilaya.nameEn || wilaya.name) : (wilaya.nameFr || wilaya.name));
-  
+
   const secondaryName = (lang !== 'ar' && wilaya.nameAr) ? wilaya.nameAr : (wilaya.nameEn || wilaya.name);
 
-  // 1. Create Modal Container
   const overlay = document.createElement('div');
   overlay.className = 'wilaya-modal-overlay animate-fade-in';
   overlay.id = 'wilaya-modal-overlay';
@@ -50,10 +35,9 @@ export async function openWilayaIntermediateScreen(wilayaOrCode) {
 
   overlay.innerHTML = `
     <div class="wilaya-modal-backdrop" id="wilaya-modal-backdrop"></div>
-    
+
     <div class="wilaya-modal-dialog animate-scale-in" role="dialog" aria-modal="true" aria-label="${displayName}">
-      
-      <!-- Top Close Button -->
+
       <button class="wilaya-modal-close-btn" id="wilaya-modal-close" aria-label="${t('map.backToMap')}">
         <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
           <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -62,13 +46,12 @@ export async function openWilayaIntermediateScreen(wilayaOrCode) {
       </button>
 
       <div class="wilaya-modal-grid">
-        
-        <!-- Left: Cloned Antigravity Floating SVG Shape -->
+
         <div class="wilaya-shape-column">
           <div class="wilaya-shape-glow"></div>
           <div class="wilaya-shape-container antigravity-floating">
-            <svg 
-              class="wilaya-cloned-svg" 
+            <svg
+              class="wilaya-cloned-svg"
               id="wilaya-cloned-svg-${wilaya.code}"
               xmlns="http://www.w3.org/2000/svg"
             >
@@ -83,13 +66,13 @@ export async function openWilayaIntermediateScreen(wilayaOrCode) {
                   <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#F59E0B" flood-opacity="0.35"/>
                 </filter>
               </defs>
-              <path 
-                class="antigravity-path" 
+              <path
+                class="antigravity-path"
                 id="modal-path-${wilaya.code}"
-                d="${wilaya.d}" 
+                d="${wilaya.d}"
                 fill="url(#shape-gold-grad-${wilaya.code})"
-                stroke="#FFFFFF" 
-                stroke-width="0.08" 
+                stroke="#FFFFFF"
+                stroke-width="0.08"
                 filter="url(#shape-glow-filter-${wilaya.code})"
               />
             </svg>
@@ -100,9 +83,8 @@ export async function openWilayaIntermediateScreen(wilayaOrCode) {
           </div>
         </div>
 
-        <!-- Right: Live Statistics & Contextual Information -->
         <div class="wilaya-info-column">
-          
+
           <div class="wilaya-header-meta">
             <span class="wilaya-badge-pill">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
@@ -116,9 +98,8 @@ export async function openWilayaIntermediateScreen(wilayaOrCode) {
           <h2 class="wilaya-main-title">${displayName}</h2>
           <p class="wilaya-subtitle" data-i18n="map.modalSubtitle">${t('map.modalSubtitle')}</p>
 
-          <!-- Key Live Database Statistics Cards -->
           <div class="wilaya-stats-cards">
-            
+
             <div class="wilaya-stat-box">
               <div class="stat-box-icon">
                 <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
@@ -150,7 +131,6 @@ export async function openWilayaIntermediateScreen(wilayaOrCode) {
 
           </div>
 
-          <!-- Active Competency Domains in this Wilaya -->
           <div class="wilaya-domains-preview">
             <h4 class="domains-preview-heading" data-i18n="map.topDomainsInWilaya">${t('map.topDomainsInWilaya')}</h4>
             <div class="domains-pills-row" id="modal-domains-row">
@@ -160,9 +140,8 @@ export async function openWilayaIntermediateScreen(wilayaOrCode) {
             </div>
           </div>
 
-          <!-- Action Controls -->
           <div class="wilaya-modal-actions">
-            
+
             <button class="btn-primary btn-enter-wilaya" id="btn-enter-wilaya">
               <span data-i18n="map.enterWilaya">${t('map.enterWilaya')}</span>
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -186,13 +165,10 @@ export async function openWilayaIntermediateScreen(wilayaOrCode) {
 
   document.body.appendChild(overlay);
 
-  // 2. Compute dynamic SVG ViewBox for the cloned path
   adjustSvgViewBox(overlay, wilaya.code);
 
-  // 3. Fetch live Supabase profile statistics for this Wilaya
   hydrateWilayaData(overlay, wilaya.code, lang);
 
-  // 4. Wire click & keyboard events
   const btnEnter = overlay.querySelector('#btn-enter-wilaya');
   btnEnter.addEventListener('click', () => {
     btnEnter.classList.add('is-loading');
@@ -228,9 +204,6 @@ export async function openWilayaIntermediateScreen(wilayaOrCode) {
   document.addEventListener('keydown', activeKeyHandler);
 }
 
-/**
- * Automatically adjusts the cloned SVG ViewBox so that any Wilaya path fits snugly
- */
 function adjustSvgViewBox(overlay, code) {
   const svg = overlay.querySelector(`#wilaya-cloned-svg-${code}`);
   const path = overlay.querySelector(`#modal-path-${code}`);
@@ -247,17 +220,13 @@ function adjustSvgViewBox(overlay, code) {
         return;
       }
     } catch (e) {
-      // Fallback
+
     }
   }
 
-  // Fallback generic ViewBox
   svg.setAttribute('viewBox', '-9.17 -37.59 21.66 19.13');
 }
 
-/**
- * Hydrate live talent statistics and domains for the Wilaya modal
- */
 async function hydrateWilayaData(overlay, wilayaCode, lang) {
   const countEl = overlay.querySelector('#modal-talent-count');
   const domainsRow = overlay.querySelector('#modal-domains-row');
@@ -269,7 +238,6 @@ async function hydrateWilayaData(overlay, wilayaCode, lang) {
 
     countEl.innerHTML = `<span class="stat-count-animated">${count}</span>`;
 
-    // Extract unique active categories
     const categoriesMap = {
       ai: { en: 'AI & Intelligence', ar: 'الذكاء الاصطناعي والبيانات', fr: 'IA & Données' },
       energy: { en: 'Energy & Petroleum', ar: 'الطاقة والمحروقات', fr: 'Énergie & Pétrole' },
@@ -294,9 +262,6 @@ async function hydrateWilayaData(overlay, wilayaCode, lang) {
   }
 }
 
-/**
- * Close the Wilaya Intermediate Screen smoothly
- */
 export function closeWilayaIntermediateScreen(animate = true) {
   if (activeKeyHandler) {
     document.removeEventListener('keydown', activeKeyHandler);

@@ -1,11 +1,3 @@
-/**
- * Rawabit v2 — The Mind-Map Expansion Experience
- * Radial satellite card expansion, animated SVG connector drawing,
- * blurred backdrop, centered main card with AI actions, and
- * Cinematic Inward Pull & Breath Out Collapse Closing Animation.
- * Strictly Vanilla JS · 60FPS Hardware Accelerated
- */
-
 import { t } from '../i18n.js';
 import { store, pushOverlay, popOverlay } from '../store.js';
 import { openAIChat } from './chat.js';
@@ -15,9 +7,6 @@ let activeOverlay = null;
 let activeResizeHandler = null;
 let activeEscHandler = null;
 
-/**
- * Extract Verified Sourcing & Contact Channels from Profile Data
- */
 export function getProfileSources(profile) {
   const sources = [];
   const linkedin = profile.contact?.linkedin || profile.linkedin_url || profile.linkedin;
@@ -83,11 +72,6 @@ export function getProfileSources(profile) {
   return sources;
 }
 
-/**
- * Open the Mind-Map experience for a specific profile
- * @param {Object} profile - Full competency profile data
- * @param {HTMLElement} originCard - The original clicked card element in the grid
- */
 export function openMindMap(profile, originCard = null) {
   closeMindMap(false);
 
@@ -101,7 +85,6 @@ export function openMindMap(profile, originCard = null) {
   const isRtl = lang === 'ar';
   const sources = getProfileSources(profile);
 
-  // ── 1. Create Overlay DOM ──
   const overlay = document.createElement('div');
   overlay.className = 'mindmap-overlay';
   overlay.id = 'mindmap-overlay';
@@ -114,12 +97,12 @@ export function openMindMap(profile, originCard = null) {
   const displayBio = (lang === 'ar' && profile.bioAr) ? profile.bioAr : (lang === 'fr' && profile.bioFr ? profile.bioFr : profile.bio);
 
   const tierClass = profile.tier || 'silver';
-  const tierText = (lang === 'ar' && profile.tierLabelAr) 
-    ? profile.tierLabelAr 
+  const tierText = (lang === 'ar' && profile.tierLabelAr)
+    ? profile.tierLabelAr
     : (lang === 'fr' && profile.tierLabelFr ? profile.tierLabelFr : (profile.tierLabel || t(`tier.${tierClass}`)));
 
   overlay.innerHTML = `
-    <!-- Top Bar Controls -->
+
     <div class="mindmap-header-bar" id="mindmap-header-bar">
       <div class="mindmap-title-badge">
         <span class="pulse-dot"></span>
@@ -134,10 +117,8 @@ export function openMindMap(profile, originCard = null) {
       </button>
     </div>
 
-    <!-- Mind-Map Stage Container -->
     <div class="mindmap-stage" id="mindmap-stage">
-      
-      <!-- SVG Connectors Layer -->
+
       <svg class="mindmap-svg-canvas" id="mindmap-svg" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="line-grad-1" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -148,7 +129,6 @@ export function openMindMap(profile, originCard = null) {
         <g id="svg-paths-group"></g>
       </svg>
 
-      <!-- ── SATELLITE CARD 1: Academic & Research (Top-Left) ── -->
       <div class="mindmap-node node-academic" id="node-academic" data-node="1">
         <div class="node-icon-box">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -169,7 +149,6 @@ export function openMindMap(profile, originCard = null) {
         </div>
       </div>
 
-      <!-- ── SATELLITE CARD 2: Core Competencies (Top-Right) ── -->
       <div class="mindmap-node node-skills" id="node-skills" data-node="2">
         <div class="node-icon-box">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -200,7 +179,6 @@ export function openMindMap(profile, originCard = null) {
         </div>
       </div>
 
-      <!-- ── SATELLITE CARD 3: Professional Career (Bottom-Left) ── -->
       <div class="mindmap-node node-career" id="node-career" data-node="3">
         <div class="node-icon-box">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -223,7 +201,6 @@ export function openMindMap(profile, originCard = null) {
         </div>
       </div>
 
-      <!-- ── SATELLITE CARD 4: Credentials & Accreditations (Bottom-Right) ── -->
       <div class="mindmap-node node-credentials" id="node-credentials" data-node="4">
         <div class="node-icon-box">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -243,13 +220,12 @@ export function openMindMap(profile, originCard = null) {
         </div>
       </div>
 
-      <!-- ── CENTER MAIN PROFILE CARD ── -->
       <div class="mindmap-center-card" id="mindmap-center-card">
         <div class="center-avatar-wrap">
-          <img 
-            class="center-avatar" 
-            src="${profile.avatar}" 
-            alt="${profile.name}" 
+          <img
+            class="center-avatar"
+            src="${profile.avatar}"
+            alt="${profile.name}"
           />
           <div class="center-verified-badge tier-indicator-${tierClass}" title="${tierText}">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="white">
@@ -266,7 +242,7 @@ export function openMindMap(profile, originCard = null) {
         <div class="center-info">
           <h2 class="center-name">${displayName}</h2>
           <p class="center-title">${displayTitle}</p>
-          
+
           <div class="center-meta-tags">
             <span class="meta-tag meta-org">
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M3 7v14M21 7v14M6 7V3h12v4M9 11h2M13 11h2M9 15h2M13 15h2"/></svg>
@@ -281,7 +257,6 @@ export function openMindMap(profile, originCard = null) {
           <p class="center-bio">${displayBio}</p>
         </div>
 
-        <!-- CENTER CARD ACTIONS (Ask AI & Sourcing Tree) -->
         <div class="center-actions-wrap">
           <button class="btn-ask-ai" id="btn-ask-ai">
             <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
@@ -320,7 +295,6 @@ export function openMindMap(profile, originCard = null) {
     </div>
   `;
 
-  // ── 2. Mount Overlay & Animate In ──
   document.body.appendChild(overlay);
   const rAF = (typeof window !== 'undefined' && window.requestAnimationFrame) ? window.requestAnimationFrame : (cb) => setTimeout(cb, 16);
   rAF(() => {
@@ -328,20 +302,18 @@ export function openMindMap(profile, originCard = null) {
     drawConnectorLines();
   });
 
-  // ── 3. Wire AI Action Button ──
   const btnAskAi = overlay.querySelector('#btn-ask-ai');
   if (btnAskAi) {
     btnAskAi.addEventListener('click', () => {
-      openAIChat({ 
-        type: 'profile', 
-        profile, 
-        displayName, 
-        displayTitle 
+      openAIChat({
+        type: 'profile',
+        profile,
+        displayName,
+        displayTitle
       });
     });
   }
 
-  // ── Wire Sourcing & Contact Tree Toggle ──
   const btnSourcing = overlay.querySelector('#btn-sourcing');
   const treeContainer = overlay.querySelector('#sourcing-tree-container');
   if (btnSourcing && treeContainer) {
@@ -352,20 +324,17 @@ export function openMindMap(profile, originCard = null) {
     });
   }
 
-  // ── 4. Dismissal Listeners ──
   const closeBtn = overlay.querySelector('#mindmap-close-btn');
   if (closeBtn) {
     closeBtn.addEventListener('click', () => closeMindMap(true));
   }
 
-  // Dismiss on clicking empty blurred background
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay || e.target.id === 'mindmap-stage') {
       closeMindMap(true);
     }
   });
 
-  // Dismiss on Escape key
   if (activeEscHandler) {
     document.removeEventListener('keydown', activeEscHandler);
     activeEscHandler = null;
@@ -378,7 +347,6 @@ export function openMindMap(profile, originCard = null) {
   };
   document.addEventListener('keydown', activeEscHandler);
 
-  // Resize handler for responsive line redraw
   activeResizeHandler = () => {
     if (activeOverlay && activeOverlay.classList.contains('active')) {
       drawConnectorLines();
@@ -387,9 +355,6 @@ export function openMindMap(profile, originCard = null) {
   window.addEventListener('resize', activeResizeHandler, { passive: true });
 }
 
-/**
- * Mathematically draw SVG connector lines between the center card and 4 satellites
- */
 function drawConnectorLines() {
   if (!activeOverlay) return;
 
@@ -406,7 +371,6 @@ function drawConnectorLines() {
     return;
   }
 
-  // Calculate center of main card relative to stage
   const cX = (centerRect.left + centerRect.width / 2) - stageRect.left;
   const cY = (centerRect.top + centerRect.height / 2) - stageRect.top;
 
@@ -446,9 +410,9 @@ function drawConnectorLines() {
     const d = `M ${cX} ${cY} C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${nX} ${nY}`;
 
     pathsHtml += `
-      <path 
-        d="${d}" 
-        class="mindmap-connector-line" 
+      <path
+        d="${d}"
+        class="mindmap-connector-line"
         style="animation-delay: ${delay};"
       />
       <circle cx="${nX}" cy="${nY}" r="4.5" class="mindmap-connector-dot" style="animation-delay: calc(${delay} + 400ms);" />
@@ -458,13 +422,6 @@ function drawConnectorLines() {
   pathsGroup.innerHTML = pathsHtml;
 }
 
-/**
- * Cinematic 3-Step Mind-Map Close Sequence ("The Pull" & "The Breath Out")
- * STEP 1: .is-collapsing triggers 4 satellites & SVG lines to retract into center card (0.4s).
- * STEP 2: .breath-out triggers main center card to scale down to 0.9 and fade (0.3s).
- * STEP 3: Fade out blurred background overlay, remove elements, and restore grid.
- * @param {boolean} animate - Whether to run the collapse animation sequence
- */
 export function closeMindMap(animate = true) {
   if (!activeOverlay) return;
 
@@ -496,11 +453,9 @@ export function closeMindMap(animate = true) {
   const centerCard = overlay.querySelector('#mindmap-center-card');
   const satellites = overlay.querySelectorAll('.mindmap-node');
 
-  // Prevent multiple closing triggers
   if (overlay.classList.contains('is-collapsing') || overlay.classList.contains('is-closing')) return;
   overlay.classList.add('is-closing');
 
-  // ── STEP 1: "THE PULL" (Satellites & SVG lines retracting into center) ──
   if (centerCard) {
     const centerRect = centerCard.getBoundingClientRect();
     const cX = centerRect.left + centerRect.width / 2;
@@ -511,7 +466,6 @@ export function closeMindMap(animate = true) {
       const nX = nRect.left + nRect.width / 2;
       const nY = nRect.top + nRect.height / 2;
 
-      // Exact vector towards center of main card
       const deltaX = cX - nX;
       const deltaY = cY - nY;
       node.style.setProperty('--pull-x', `${deltaX}px`);
@@ -519,22 +473,17 @@ export function closeMindMap(animate = true) {
     });
   }
 
-  // Trigger CSS class for Step 1
   overlay.classList.add('is-collapsing');
   if (stage) stage.classList.add('is-collapsing');
 
-  // ── STEP 2: "THE BREATH OUT" (Wait 400ms for satellites to be fully swallowed) ──
   setTimeout(() => {
     if (!activeOverlay || !centerCard) return;
 
-    // Apply .breath-out class to main centered profile card
     centerCard.classList.add('breath-out');
 
-    // ── STEP 3: RESTORE GRID (Wait 300ms after Step 2 begins) ──
     setTimeout(() => {
       if (!activeOverlay) return;
 
-      // Fade out the blurred background
       activeOverlay.classList.add('is-fading-out');
 
       setTimeout(() => {
@@ -555,7 +504,6 @@ export function closeMindMap(animate = true) {
   }, 400);
 }
 
-// Reactive language change re-render for active MindMap
 store.subscribe('lang', () => {
   if (activeOverlay && store.state.selectedProfile) {
     openMindMap(store.state.selectedProfile, null);

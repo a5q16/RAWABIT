@@ -31,12 +31,9 @@ logger = logging.getLogger("rawabit.api.chat")
 
 router = APIRouter(prefix="/api", tags=["chat"])
 
-
-# ── Request Schema ──────────────────────────────────────────────
 class ChatRequest(BaseModel):
     query: str = Field(..., min_length=1, max_length=2000, description="User query")
     lang: str = Field(default="fr", pattern="^(ar|fr|en)$", description="Response language: ar, fr, en")
-
 
 class SuggestProfileRequest(BaseModel):
     name: str = Field(..., min_length=2, max_length=200, description="Full name (primary language)")
@@ -61,8 +58,6 @@ class SuggestProfileRequest(BaseModel):
     reason_fr: str | None = Field(default=None, max_length=2000)
     reason_en: str | None = Field(default=None, max_length=2000)
 
-
-# ── Chat Endpoint ───────────────────────────────────────────────
 @router.post("/chat")
 async def chat(req: ChatRequest, request: Request):
     """
@@ -79,7 +74,6 @@ async def chat(req: ChatRequest, request: Request):
     client_ip = request.headers.get("x-forwarded-for", request.client.host if request.client else "unknown")
     user_agent = request.headers.get("user-agent", "unknown")
 
-    # Audit log the chat query
     audit.log_chat(client_ip, request_id, user_agent, req.query, req.lang)
     logger.info("[%s] chat request lang=%s query=%r", request_id, req.lang, req.query[:80])
 
@@ -106,8 +100,6 @@ async def chat(req: ChatRequest, request: Request):
         },
     )
 
-
-# ── Profile Suggestion Endpoint (Sandbox Gate) ──────────────────
 @router.post("/suggest")
 async def suggest_profile(req: SuggestProfileRequest, request: Request):
     """
@@ -120,10 +112,8 @@ async def suggest_profile(req: SuggestProfileRequest, request: Request):
 
     suggestion = req.model_dump()
 
-    # 1. Audit log the suggestion
     audit.log_suggestion(client_ip, request_id, user_agent, suggestion)
 
-    # 2. Submit through sandbox (creates pending action with dry-run)
     try:
         action = sandbox.submit(
             action_type="suggest_profile",
